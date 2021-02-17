@@ -17,8 +17,11 @@ def createTetraMesh(params):
     import shutil
     import subprocess
 
+    import lapy as lp
+    from lapy import TriaIO as lpio
+    from lapy import TetIO as lptio
+
     from shapetools.triaUtils import createSTL
-    from shapetools.triaUtils import readVTK, writeVTK
 
     # message
 
@@ -39,9 +42,9 @@ def createTetraMesh(params):
 
     # export mesh as STL
 
-    v, t = readVTK(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
+    triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
 
-    createSTL(os.path.join(params.OUTDIR, "tetra-tmp", params.HEMI + "." + params.internal.HSFLABEL_06 + ".stl"), v=v, t=t)
+    createSTL(os.path.join(params.OUTDIR, "tetra-tmp", params.HEMI + "." + params.internal.HSFLABEL_06 + ".stl"), v=triaMesh.v, t=triaMesh.t)
 
     # create geofile (test.geo)
 
@@ -68,9 +71,9 @@ def createTetraMesh(params):
 
     # convert vtk2 to vtk1
 
-    v, t = readVTK(os.path.join(params.OUTDIR, "tetra-tmp", params.HEMI + ".tet." + params.internal.HSFLABEL_06 + ".vtk2.vtk"))
+    tetMesh = lptio.import_vtk(os.path.join(params.OUTDIR, "tetra-tmp", params.HEMI + ".tet." + params.internal.HSFLABEL_06 + ".vtk2.vtk"))
 
-    writeVTK(os.path.join(params.OUTDIR, params.HEMI + ".tet." + params.internal.HSFLABEL_06 + ".vtk"), v, t)
+    lptio.export_vtk(tetMesh, os.path.join(params.OUTDIR, params.HEMI + ".tet." + params.internal.HSFLABEL_06 + ".vtk"))
 
     # clean up
 

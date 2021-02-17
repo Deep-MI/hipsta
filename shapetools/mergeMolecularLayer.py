@@ -130,7 +130,6 @@ def mergeML(params, inputfile=None, outputfile=None, offset=None, suffix=None):
     vxNZ=vxNZ[np.argsort(vxNZ[:,1],kind='mergesort'),:]
     vxNZ=vxNZ[np.argsort(vxNZ[:,2],kind='mergesort'),:]
 
-
     # get all ML voxels
     vxML=list(np.where((vx==245)|(vx==246)|(vx==214)))
     vxML.append(vx[np.where((vx==245)|(vx==246)|(vx==214))])

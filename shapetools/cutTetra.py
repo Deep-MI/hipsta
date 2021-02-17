@@ -114,11 +114,15 @@ def importData(tetraFile, tetraIdxFile):
 
     import numpy as np
 
-    from shapetools.triaUtils import readVTK, readPSOL
+    from lapy import TetIO as lptio
+    from lapy import FuncIO as lpfio
 
-    v4, t4 = readVTK(tetraFile)
+    tetMesh = lptio.import_vtk(tetraFile)
+    v4 = tetMesh.v
+    t4 = tetMesh.t
 
-    l4 = readPSOL(tetraIdxFile)
+    l4 = lpfio.import_vfunc(tetraIdxFile)
+    l4 = np.array(l4)
 
     return v4, t4, l4
 
@@ -136,49 +140,48 @@ def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, 
 
     import lapy as lp
 
-    from shapetools.triaUtils import readVTK, writeVTK, readPSOL, writePSOL
-    from shapetools.triaUtils import tetra_get_boundary_tria, tria_rm_free_vertices
+    from lapy import TriaIO as lpio
+    from lapy import TetIO as lptio
+    from lapy import FuncIO as lpfio
 
     # write out cut mesh and overlay
 
-    writeVTK(tetraCutOutFile, v4c, t4c)
+    tetMesh = lp.TetMesh(v=v4c, t=t4c)
 
-    writePSOL(tetraCutOutFileFunc, i4c)
+    lptio.export_vtk(tetMesh, tetraCutOutFile)
+
+    lpfio.export_vfunc(tetraCutOutFileFunc, i4c)
 
     # create boundary mesh and output
 
-    t4cBnd = tetra_get_boundary_tria(v4c,t4c)
-
-    triaMesh4cBnd = lp.TriaMesh(v4c, t4cBnd)
+    triaMesh4cBnd = tetMesh.boundary_tria()
 
     triaMesh4cBnd.orient_()
 
-    t4cBnd = triaMesh4cBnd.t
-
-    writeVTK(os.path.join(tetraCutOutDir, hemi + '.bnd.cut.tetra.vtk'), v4c, t4cBnd)
-
-    # remove free vertices from boundary mesh and output
-
-    v4cBndRm, t4cBndRm, v4cBndKeep, v4cBndDel = tria_rm_free_vertices(v4c, t4cBnd)
-
-    writeVTK(os.path.join(tetraCutOutDir, hemi + '.rm.bnd.cut.tetra.vtk'), v4cBndRm, t4cBndRm)
+    lpio.export_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.bnd.cut.tetra.vtk'))
 
     # remove all trias that share a vertex at the cut planes, because we want
     # to have an open boundary mesh; also remove free vertices
 
-    t4cBndOpen = t4cBnd[np.sum(i4c[t4cBnd]==1, axis=1)>=1, :]
+    t4cBndOpen = triaMesh4cBnd.t[np.sum(i4c[triaMesh4cBnd.t]==1, axis=1)>=1, :]
 
-    triaMesh4cBndOpen = lp.TriaMesh(v4c, t4cBndOpen)
+    triaMesh4cBndOpen = lp.TriaMesh(v=v4c, t=t4cBndOpen)
 
     triaMesh4cBndOpen.orient_()
 
-    t4cBndOpen = triaMesh4cBndOpen.t
+    lpio.export_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.open.bnd.cut.tetra.vtk'))
 
-    writeVTK(os.path.join(tetraCutOutDir, hemi + '.open.bnd.cut.tetra.vtk'), v4c, t4cBndOpen)
+    # remove free vertices from boundary mesh and output
 
-    v4cBndOpenRm, t4cBndOpenRm, v4cBndOpenKeep, v4cBndOpenDel = tria_rm_free_vertices(v4c, t4cBndOpen)
+    triaMesh4cBnd.rm_free_vertices_()
 
-    writeVTK(os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.tetra.vtk'), v4cBndOpenRm, t4cBndOpenRm)
+    lpio.export_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.rm.bnd.cut.tetra.vtk'))
+
+    # remove free vertices from open mesh and output ...
+
+    triaMesh4cBndOpen.rm_free_vertices_()
+
+    lpio.export_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.tetra.vtk'))
 
     # write out mapping between open bnd and v4c
 
@@ -194,12 +197,17 @@ def preprocessData(v4, t4, l4):
 
     import numpy as np
 
-    from shapetools.triaUtils import computeABtetra
-    from shapetools.triaUtils import poissonSolver
+    import lapy as lp
 
-    A, M = computeABtetra(v4,t4)
+    tetMesh = lp.TetMesh(v=v4, t=t4)
 
-    P = poissonSolver(A,M,dtup=(np.where(l4!=0)[0],l4[np.where(l4!=0)[0]]))
+    tetMeshSolver = lp.Solver(tetMesh)
+
+    A = tetMeshSolver.stiffness
+
+    M = tetMeshSolver.mass
+
+    P = tetMeshSolver.poisson(dtup=(np.where(l4!=0)[0],l4[np.where(l4!=0)[0]]))
 
     return A, M, P
 
@@ -378,7 +386,7 @@ def tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
 # ------------------------------------------------------------------------------
 # cutTetra()
 
-def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=None, tetraCutOutFileFunc=None, tetraCutOutDir=None, labelHead=232, labelTail=226, labelBndHead=2320, labelBndTail=2260):
+def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=None, tetraCutOutFileFunc=None, tetraCutOutDir=None, labelHead=232, labelTail=226, labelBndHead=2320, labelBndTail=2260, labelBndCA4=2420):
     """
     This is a function to cut tetrahedral meshes
 
@@ -423,16 +431,11 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
 
         tetraCutOutDir = os.path.join(params.OUTDIR, "tetra-cut")
 
-        if params.LUT == "fs711":
-            labelHead=232
-            labelTail=226
-            labelBndHead=2320
-            labelBndTail=2260
-        elif params.LUT == "ashs":
-            labelHead=255
-            labelTail=254
-            labelBndHead=2550
-            labelBndTail=2540
+        labelHead = params.LUTDICT['jointhead']
+        labelTail = params.LUTDICT['jointtail']
+        labelBndHead = params.LUTDICT['bndhead']
+        labelBndTail = params.LUTDICT['bndtail']
+        labelBndCA4 = params.LUTDICT['bndca4']
 
         hemi = params.HEMI
 
@@ -443,7 +446,7 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
     v4, t4, l4idx = importData(tetraFile, tetraIdxFile)
 
     l4idx[np.where(l4idx<labelBndTail)[0]] = 0
-    l4idx[np.where(l4idx==2420)[0]] = 0
+    l4idx[np.where(l4idx==labelBndCA4)[0]] = 0
     l4idx[np.where(l4idx==labelBndHead)[0]] = -1
     l4idx[np.where(l4idx==labelBndTail)[0]] = 1
 

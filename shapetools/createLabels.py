@@ -15,17 +15,18 @@ def createLabels(params):
 
     import os
     import sys
+    import logging
     import shutil
     import subprocess
 
     # message
 
     print()
-    print("-------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------")
     print()
     print("Process HSF label image")
     print()
-    print("-------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------")
     print()
 
     # process HSF label image
@@ -38,27 +39,18 @@ def createLabels(params):
     for i in params.HSFLIST:
 
         print()
-        print("---------------------------------------------------------------")
-        print("Working on label "+i)
+        print("-------------------------------------------------------------------------")
+        print("Working on label " + str(i))
         print()
-
-        # determine which anatomical label corresponds to the given index
-
-        # check for errors
-        if not i in params.LUTDICT.values():
-
-            print("ERROR: Label "+i+" not found within look-up table, exiting.")
-            print()
-            sys.exit(1)
 
         # create a mask after erosion and dilation
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
             + "--i " +  params.FILENAME + " " \
-            + "--match " + i + " " \
+            + "--match " + str(i) + " " \
             + "--dilate " + str(params.internal.DIL) + " " \
             + "--erode " + str(params.internal.ERO) + " " \
-            + "--binval " + i + " " \
-            + "--o " + os.path.join(params.OUTDIR, "labels", i + "." + os.path.basename(params.FILENAME))
+            + "--binval " + str(i) + " " \
+            + "--o " + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME))
 
         print(cmd)
 
@@ -66,11 +58,11 @@ def createLabels(params):
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
             + "--i " +  params.FILENAME + " " \
-            + "--match " + i + " " \
-            + "--erode 1 " \
-            + "--dilate 1 " \
-            + "--binval " + i + " " \
-            + "--o " + os.path.join(params.OUTDIR, "labels", i + "." + os.path.basename(params.FILENAME))
+            + "--match " + str(i) + " " \
+            + "--binval " + str(i) + " " \
+            + "--o " + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME))
+#            + "--erode 1 " \
+#            + "--dilate 1 " \
 
         print(cmd)
 
@@ -82,21 +74,21 @@ def createLabels(params):
     # outputs one volume that contains all labels (${HEMI}.${HSFLABEL_00}.mgz)
 
     shutil.copy(
-        os.path.join(params.OUTDIR, "labels", params.HSFLIST[0] + "." + os.path.basename(params.FILENAME)),
+        os.path.join(params.OUTDIR, "labels", str(params.HSFLIST[0]) + "." + os.path.basename(params.FILENAME)),
         os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_00 + ".mgz"))
 
     for i in params.HSFLIST:
 
         print()
-        print("---------------------------------------------------------------")
-        print("Merging label "+i)
+        print("-------------------------------------------------------------------------")
+        print("Merging label " + str(i))
         print()
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fscalc") + " " \
             + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_00 + ".mgz") + " " \
             + "and " \
-            + os.path.join(params.OUTDIR, "labels", i + "." + os.path.basename(params.FILENAME)) + " " \
-            + "mul " + i + " " \
+            + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME)) + " " \
+            + "mul " + str(i) + " " \
             + "--o " + os.path.join(params.OUTDIR,  "labels", params.HEMI + "." + params.internal.HSFLABEL_00 + ".tmp.mgz")
 
         print(cmd)
@@ -116,7 +108,7 @@ def createLabels(params):
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fscalc") + " " \
             + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_00 + ".mgz") + " " \
             + "add " \
-            + os.path.join(params.OUTDIR, "labels", i + "." + os.path.basename(params.FILENAME)) + " " \
+            + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME)) + " " \
             + "--o " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_00 + ".mgz")
 
         print(cmd)

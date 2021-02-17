@@ -2,13 +2,29 @@
 
 ## Changes
 
-### v0.2.0-beta
+### v0.4.0-beta
 
+- fundamental revision incl. changes in command-line interface
+
+### v0.3.0-beta
+
+- introduced logging
+- full lapy integration
 - name change: subfieldDNA --> hippocampal shapetools (briefly: shapetools)
 - support for ASHS_IKND_7T segmentations
 - mandatory `lut` command line argument
 - dropped `hsflist` command line argument
 - changes in default names for output folders and files
+
+### v0.2.0-beta
+
+- re-introduced remeshing as a preprocessing step; requires additional python
+  packages `pyvista` and `pyacvd`. See README.md.
+- added sheet selection argument for `mapValues()` function, plus output of
+  interior and exterior surfaces.
+- starting with this version, the sign of the mean curvature has changed to
+  comply with Freesurfer conventions; what was negative is now positive and
+  vice versa.
 
 ### v0.1.1-beta
 
@@ -29,13 +45,3 @@
 - introduction of `lapy` dependency
 - `hsflist` command line argument is no longer necessary
 - changes and improvements in various algorithms and parameters
-
-## Notes
-
-- If using the `ashs` segmentation, additional labels for the hippocampal head
-  (255) and tail (254) labels are required. The expected file / folder
-  structure is: <SUBJECTS_DIR>/SUBJECT_ID>/mri/<lh|rh>.<SUFFIX>.mgz
-  Use `--lut ashs`. Specify `--hemi` and `--suffix`. Do not use topological
-  fixing (`--no-topological-fixing`).
-- Multiple substructures can have same label, but same substructure cannot have
-  multiple labels.

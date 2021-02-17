@@ -1,0 +1,10 @@
+argparse
+importlib
+nibabel
+numpy
+pandas
+pyacvd
+pyvista
+scipy
+uuid
+lapy@git+https://github.com/deep-mi/lapy

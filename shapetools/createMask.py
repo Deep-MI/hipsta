@@ -60,8 +60,8 @@ def fillHoles(params):
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
         + "-dt input " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_01 + "_merged.nii") + " " \
-        + "-kernel box 1 -dilD -ero " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + ".de." + params.internal.HSFLABEL_01 + "_merged.nii")
+        #  + "-kernel box 1 -dilD -ero " \
 
     print(cmd)
 
@@ -80,8 +80,8 @@ def fillHoles(params):
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
         + "-dt input " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_01 + "_assigned.nii") + " " \
-        + "-kernel box 1 -dilD -ero " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + ".de." + params.internal.HSFLABEL_01 + "_assigned.nii")
+        # + "-kernel box 1 -dilD -ero " \
 
     print(cmd)
 

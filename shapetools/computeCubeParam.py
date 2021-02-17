@@ -373,8 +373,9 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     import lapy as lp
     import numpy as np
 
-    from shapetools.triaUtils import writeVTK, writePSOL
-    from shapetools.triaUtils import tetra_get_boundary_tria, tria_rm_free_vertices
+    from lapy import TriaIO as lpio
+    from lapy import TetIO as lptio
+    from lapy import FuncIO as lpfio
 
     from scipy import sparse as sp
     from scipy import stats as st
@@ -486,113 +487,6 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     # return
     return v4c, t4c, i4c, k4c, newVtcs, newVtcsSgn, newTetra
 
-# ------------------------------------------------------------------------------
-# my_fem_tria_aniso()
-
-def my_fem_tria_aniso(tria, u1, u2, c1, c2, mean_curv=None, wtMeanCurv=0.0, alpha=0.0, lump=False, setMinCurvToZero=False, setMaxCurvToZero=False):
-    """
-    computeABtria(v,t) computes the two sparse symmetric matrices representing
-           the Laplace Beltrami Operator for a given triangle mesh using
-           the linear finite element method (assuming a closed mesh or
-           the Neumann boundary condition).
-
-    Inputs:   v  - vertices : list of lists of 3 floats
-              t  - triangles: N list of lists of 3 int of indices (>=0) into v array
-              u1 - min curv:  min curvature direction per triangle (Nx3 floats)
-              u2 - max curv:  max curvature direction per triangle (Nx3 floats)
-              aniso_mat  - anisotropy matrix: diagonal elements in u1,u2 basis per
-                              triangle (Nx2 floats)
-
-    Outputs:  A  - sparse sym. (n x n) positive semi definite numpy matrix
-              B  - sparse sym. (n x n) positive definite numpy matrix (inner product)
-
-    Can be used to solve sparse generalized Eigenvalue problem: A x = lambda B x
-    or to solve Poisson equation: A x = B f (where f is function on mesh vertices)
-    or to solve Laplace equation: A x = 0
-    or to model the operator's action on a vector x:   y = B\(Ax)
-    """
-    import sys
-    import numpy as np
-    from scipy import sparse
-    # Compute vertex coordinates and a difference vector for each triangle:
-    t1 = tria.t[:, 0]
-    t2 = tria.t[:, 1]
-    t3 = tria.t[:, 2]
-    v1 = tria.v[t1, :]
-    v2 = tria.v[t2, :]
-    v3 = tria.v[t3, :]
-    v2mv1 = v2 - v1
-    v3mv2 = v3 - v2
-    v1mv3 = v1 - v3
-    # transform edge e to basis U = (U1,U2) via U^T * e
-    # Ui is n x 3, e is n x 1, result is n x 2
-    uv2mv1 = np.column_stack((np.sum(u1 * v2mv1, axis=1), np.sum(u2 * v2mv1, axis=1)))
-    uv3mv2 = np.column_stack((np.sum(u1 * v3mv2, axis=1), np.sum(u2 * v3mv2, axis=1)))
-    uv1mv3 = np.column_stack((np.sum(u1 * v1mv3, axis=1), np.sum(u2 * v1mv3, axis=1)))
-    # combined aniso mat
-    if wtMeanCurv > 0.0:
-        # normalize curv to -1 ... +1 interval
-        norm_mean_curv  = mean_curv / np.max(np.abs((mean_curv)))
-        # compute new weighting parameter
-        beta = 1 + wtMeanCurv * norm_mean_curv
-        # compute aniso
-        aniso_mat = np.empty((tria.t.shape[0], 2))
-        if setMinCurvToZero:
-            aniso_mat[:, 1] = 1
-        else:
-            aniso_mat[:, 1] = np.exp(-alpha * np.abs(c1) - wtMeanCurv * mean_curv)
-        if setMaxCurvToZero:
-            aniso_mat[:, 0] = 1
-        else:
-            aniso_mat[:, 0] = np.exp(-alpha * np.abs(c2) - wtMeanCurv * mean_curv)
-    else:
-        # compute aniso
-        aniso_mat = np.empty((tria.t.shape[0], 2))
-        if setMinCurvToZero:
-            aniso_mat[:, 1] = 1
-        else:
-            aniso_mat[:, 1] = np.exp(-alpha * np.abs(c1))
-        if setMaxCurvToZero:
-            aniso_mat[:, 0] = 1
-        else:
-            aniso_mat[:, 0] = np.exp(-alpha * np.abs(c2))
-    # Compute cross product and 4*vol for each triangle:
-    cr = np.cross(v3mv2, v1mv3)
-    vol = 2 * np.sqrt(np.sum(cr * cr, axis=1))
-    # zero vol will cause division by zero below, so set to small value:
-    vol_mean = 0.0001 * np.mean(vol)
-    vol[vol < sys.float_info.epsilon] = vol_mean
-    # compute cotangents for A
-    # using that v2mv1 = - (v3mv2 + v1mv3) this can also be seen by
-    # summing the local matrix entries in the old algorithm
-    # Also: here aniso_mat is the two diagonal entries, not full matrices
-    a12 = np.sum(uv3mv2 * aniso_mat * uv1mv3, axis=1) / vol
-    a23 = np.sum(uv1mv3 * aniso_mat * uv2mv1, axis=1) / vol
-    a31 = np.sum(uv2mv1 * aniso_mat * uv3mv2, axis=1) / vol
-    # compute diagonals (from row sum = 0)
-    a11 = -a12 - a31
-    a22 = -a12 - a23
-    a33 = -a31 - a23
-    # stack columns to assemble data
-    local_a = np.column_stack((a12, a12, a23, a23, a31, a31, a11, a22, a33)).reshape(-1)
-    i = np.column_stack((t1, t2, t2, t3, t3, t1, t1, t2, t3)).reshape(-1)
-    j = np.column_stack((t2, t1, t3, t2, t1, t3, t1, t2, t3)).reshape(-1)
-    # Construct sparse matrix:
-    # a = sparse.csr_matrix((local_a, (i, j)))
-    a = sparse.csc_matrix((local_a, (i, j)), dtype=np.float32)
-    if not lump:
-        # create b matrix data (account for that vol is 4 times area)
-        b_ii = vol / 24
-        b_ij = vol / 48
-        local_b = np.column_stack((b_ij, b_ij, b_ij, b_ij, b_ij, b_ij, b_ii, b_ii, b_ii)).reshape(-1)
-        b = sparse.csc_matrix((local_b, (i, j)), dtype=np.float32)
-    else:
-        # when lumping put all onto diagonal  (area/3 for each vertex)
-        b_ii = vol / 12
-        local_b = np.column_stack((b_ii, b_ii, b_ii)).reshape(-1)
-        i = np.column_stack((t1, t2, t3)).reshape(-1)
-        b = sparse.csc_matrix((local_b, (i, i)), dtype=np.float32)
-    return a, b
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
@@ -603,10 +497,9 @@ def my_fem_tria_aniso(tria, u1, u2, c1, c2, mean_curv=None, wtMeanCurv=0.0, alph
 
 def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     cutTetraIndexFile=None, openBndCutTetraMeshFile=None, tetraIndexFile=None,
-    hemi=None, outputDir=None, paramAddNoise = False, paramLegacy = True,
-    paramAnisoSmooth = 3, paramAnisoAlpha = None, paramWeightMeanCurv = 0.0,
-    labelPrsbc=234, labelSbc=236, labelCA1=238, labelCA3=240, labelBndCA4=2420,
-    labelTail=226, labelHead=232):
+    hemi=None, outputDir=None, paramLegacy=True, paramAnisoSmooth=3,
+    paramAnisoAlpha=None, labelPrsbc=234, labelSbc=236,labelCA1=238,
+    labelCA3=240, labelBndCA4=2420, labelTail=226, labelHead=232):
 
     # --------------------------------------------------------------------------
     # computeCubeParam subfunctions
@@ -733,12 +626,15 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     import numpy as np
 
     import lapy as lp
-    import lapy.DiffGeo as DiffGeo
+
+    from lapy import DiffGeo
+
+    from lapy import TriaIO as lpio
+    from lapy import TetIO as lptio
+    from lapy import FuncIO as lpfio
 
     from scipy.sparse.linalg import LinearOperator, eigsh, splu
 
-    from shapetools.triaUtils import readVTK, writeVTK, readPSOL, writePSOL
-    from shapetools.triaUtils import tria_rm_free_vertices, tetra_get_boundary_tria
 
     # --------------------------------------------------------------------------
     # message
@@ -768,39 +664,31 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
         paramAnisoAlpha = params.internal.anisoAlpha
         paramAnisoSmooth = params.internal.anisoSmooth
-        paramWeightMeanCurv = params.internal.weightMeanCurv
-        paramAddNoise = params.internal.cubeAddNoise
         paramLegacy = params.internal.cubeWriteLegacyVTK
 
-        if params.LUT == "fs711":
-            labelPrsbc = 234
-            labelSbc = 236
-            labelCA1 = 238
-            labelCA3 = 240
-            labelBndCA4 = 2420
-            labelTail = 226
-            labelHead = 232
-
-        elif params.LUT == "ashs":
-            labelPrsbc = 8
-            labelSbc = 8
-            labelCA1 = 1
-            labelCA3 = 4
-            labelBndCA4 = 4
-            labelTail = 254
-            labelHead = 255
+        labelPrsbc = params.LUTDICT['presubiculum']
+        labelSbc = params.LUTDICT['subiculum']
+        labelCA1 = params.LUTDICT['ca1']
+        labelCA3 = params.LUTDICT['ca3']
+        labelBndCA4 = params.LUTDICT['bndca4']
+        labelTail = params.LUTDICT['jointtail']
+        labelHead = params.LUTDICT['jointhead']
 
     # load cut tetra mesh
 
-    v4c, t4c = readVTK(cutTetraMeshFile)
+    tetMeshCut = lptio.import_vtk(cutTetraMeshFile)
+    v4c = tetMeshCut.v
+    t4c = tetMeshCut.t
 
     # load indices of cutting planes
 
-    i4c = readPSOL(cutTetraIndexFile)
+    i4c = lpfio.import_vfunc(cutTetraIndexFile)
+    i4c = np.array(i4c)
 
     # load subfields indices
 
-    j4c = readPSOL(tetraIndexFile)
+    j4c = lpfio.import_vfunc(tetraIndexFile)
+    j4c = np.array(j4c)
 
     # append subfield indices
 
@@ -810,58 +698,31 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     # get a tria mesh that is cut open at its ends, but still consistent with
     # the tetra mesh
 
-    v4cBndOpen, t4cBndOpen = readVTK(openBndCutTetraMeshFile)
+    triaMesh4cBndOpen = lpio.import_vtk(openBndCutTetraMeshFile)
+
+    v4cBndOpen = triaMesh4cBndOpen.v
+    t4cBndOpen = triaMesh4cBndOpen.t
 
     # remove free vertices and orient
 
-    v4cBndOpenRm, t4cBndOpenRm, v4cBndOpenKeep, v4cBndOpenDel = tria_rm_free_vertices(v4cBndOpen, t4cBndOpen)
+    v4cBndOpenKeep, v4cBndOpenDel = triaMesh4cBndOpen.rm_free_vertices_()
 
-    triaMesh4cBndOpenRm = lp.TriaMesh(v4cBndOpenRm, t4cBndOpenRm)
+    triaMesh4cBndOpenRm = lp.TriaMesh(v=triaMesh4cBndOpen.v, t=triaMesh4cBndOpen.t)
+
 
     triaMesh4cBndOpenRm.orient_()
 
+    v4cBndOpenRm = triaMesh4cBndOpenRm.v
     t4cBndOpenRm = triaMesh4cBndOpenRm.t
-
-    # --------------------------------------------------------------------------
-    # add noise (to avoid some numerical problems, especially for artifical
-    # data; option is disabled by default)
-
-    if paramAddNoise is True:
-
-        v4cBndOpenRm = v4cBndOpenRm + (np.random.random_sample(v4cBndOpenRm.shape)-0.5)/1000
 
     # --------------------------------------------------------------------------
     # compute anisotropic laplace
 
-    if paramWeightMeanCurv == 0.0:
+    # compute first eigenfunction
 
-        # compute first eigenfunction
+    fem = lp.Solver(triaMesh4cBndOpenRm, lump=True, aniso=paramAnisoAlpha, aniso_smooth=paramAnisoSmooth)
 
-        fem = lp.Solver(triaMesh4cBndOpenRm, lump=True, aniso=paramAnisoAlpha, aniso_smooth=paramAnisoSmooth)
-
-        anisoLaplEval, anisoLaplEvec = fem.eigs(k=3)
-
-    elif paramWeightMeanCurv > 0.0:
-
-        # compute first eigenfunction with modified anisotropy matrix
-
-        u1, u2, c1, c2 = triaMesh4cBndOpenRm.curvature_tria(smoothit=paramAnisoSmooth)
-
-        mean_curv = (c1 + c2) / 2
-        gauss_curv = c1 * c2
-
-        writePSOL(os.path.join(cutTetraMeshDir, hemi + '.lapy.mean-curv.psol'), triaMesh4cBndOpenRm.map_tfunc_to_vfunc(mean_curv))
-        writePSOL(os.path.join(cutTetraMeshDir, hemi + '.lapy.gauss-curv.psol'), triaMesh4cBndOpenRm.map_tfunc_to_vfunc(gauss_curv))
-
-        #
-
-        fem = lp.Solver(triaMesh4cBndOpenRm)
-
-        fem.stiffness, fem.mass = my_fem_tria_aniso(triaMesh4cBndOpenRm, u1, u2, c1, c2, mean_curv=mean_curv, wtMeanCurv=paramWeightMeanCurv, alpha=paramAnisoAlpha, lump=True)
-
-        fem.geotype = type(triaMesh4cBndOpenRm)
-
-        anisoLaplEval, anisoLaplEvec = fem.eigs(k=3)
+    anisoLaplEval, anisoLaplEvec = fem.eigs(k=3)
 
     # --------------------------------------------------------------------------
     # get mapping of open boundary vertices to subfields
@@ -872,7 +733,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     hsfList = np.array(hsfList).astype(np.int)
 
-    writePSOL(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.tetra.psol'), k4c[hsfList])
+    lpfio.export_vfunc(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.tetra.psol'), k4c[hsfList])
 
     # --------------------------------------------------------------------------
     # post-process eigenfunction (order, flipping)
@@ -892,12 +753,14 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     zeroEdgeIdx = e4cBndOpen[np.where(np.abs(np.sum(np.sign(vfuncXEv1[e4cBndOpen]), axis=1))==0)[0]]
     zeroVtxIdx = np.unique(zeroEdgeIdx)
 
-    if np.sum(k4c[zeroVtxIdx]==labelPrsbc)>0 and np.sum(np.logical_or(k4c[zeroVtxIdx]==labelCA3, k4c[zeroVtxIdx]==labelBndCA4))>0 and (np.sum(np.logical_or(k4c[zeroVtxIdx]==labelCA3, k4c[zeroVtxIdx]==labelBndCA4)) > np.sum(np.logical_or(k4c[zeroVtxIdx]==labelSbc, k4c[zeroVtxIdx]==labelCA1))):
-         print("Not necessary to change order of EV1 and EV2")
-    else:
-         print("Changing order of EV1 and EV2")
-         #import pdb; pdb.set_trace()
-         anisoLaplEvec = anisoLaplEvec[:, (0, 2, 1)]
+    # decide whether or not to change order of EV1 and EV2 ; removed, because
+    # this should not be necessary, and may even introduce errors
+
+    #if np.sum(k4c[zeroVtxIdx]==labelPrsbc)>0 and np.sum(np.logical_or(k4c[zeroVtxIdx]==labelCA3, k4c[zeroVtxIdx]==labelBndCA4))>0 and (np.sum(np.logical_or(k4c[zeroVtxIdx]==labelPrsbc, np.logical_or(k4c[zeroVtxIdx]==labelCA3, k4c[zeroVtxIdx]==labelBndCA4))) > np.sum(np.logical_or(k4c[zeroVtxIdx]==labelSbc, k4c[zeroVtxIdx]==labelCA1))):
+    #     print("Not necessary to change order of EV1 and EV2")
+    #else:
+    #     print("Changing order of EV1 and EV2")
+    #     anisoLaplEvec = anisoLaplEvec[:, (0, 2, 1)]
 
     # decide whether or not to flip anisoLaplEvec[:, 1]  (should be inf -> sup)
 
@@ -907,13 +770,12 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     #  (i.e., reverse) for 240 as well
 
     if np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]> 0, k4c[hsfList]==labelPrsbc))[0], 2]) > np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]<0, k4c[hsfList]==labelPrsbc))[0], 2]):
-        ("No flip necessary for EV1")
+        print("No flip necessary for EV1")
     elif np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]> 0, k4c[hsfList]==labelPrsbc))[0], 2]) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]<0, k4c[hsfList]==labelPrsbc))[0], 2]):
         print("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
         print("Inconsistency detected for EV1, exiting.")
-        #import pdb; pdb.set_trace()
         sys.exit(1)
 
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
@@ -925,11 +787,10 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
     else:
         print("Inconsistency detected for EV2, exiting.")
-        #import pdb; pdb.set_trace()
         sys.exit(1)
 
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])
 
     # --------------------------------------------------------------------------
     # define boundary conditions (note that we changed dimensions and directions!)
@@ -967,9 +828,14 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # first, need to remove free vtcs
 
-    v4cRm, t4cRm, v4cRmKeep, v4cRmDel = tria_rm_free_vertices(v4c,t4c)
+    tetMesh4c = lp.TetMesh(v4c, t4c)
 
-    writeVTK(outfile=os.path.join(cutTetraMeshDir, hemi + '.seam.rm.cut.tetra.vtk'), v=v4cRm, t=t4cRm)
+    v4cRmKeep, v4cRmDel = tetMesh4c.rm_free_vertices_()
+
+    v4cRm = tetMesh4c.v
+    t4cRm = tetMesh4c.t
+
+    lptio.export_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, hemi + '.seam.rm.cut.tetra.vtk'))
 
     #
 
@@ -998,34 +864,38 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # write out functions
 
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.seam.rm.cut.tetra.psol'), vfuncXRm)
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.seam.rm.cut.tetra.psol'), vfuncYRm)
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.seam.rm.cut.tetra.psol'), vfuncZRm)
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.seam.rm.cut.tetra.psol'), vfuncXRm)
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.seam.rm.cut.tetra.psol'), vfuncYRm)
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.seam.rm.cut.tetra.psol'), vfuncZRm)
 
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.poisson0.seam.rm.cut.tetra.psol'), P0)
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.poisson1.seam.rm.cut.tetra.psol'), P1)
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.poisson2.seam.rm.cut.tetra.psol'), P2)
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.seam.rm.cut.tetra.psol'), P0)
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.seam.rm.cut.tetra.psol'), P1)
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.seam.rm.cut.tetra.psol'), P2)
 
     # also write out boundary files for visualization
 
-    t4cRmBnd = tetra_get_boundary_tria(v4cRm, t4cRm)
-    v4cRmBndRm, t4cRmBndRm, v4cRmBndRmKeep, v4cRmBndRmDel = tria_rm_free_vertices(v4cRm,t4cRmBnd)
+    tetMesh4cRmBnd = tetMesh4cRm.boundary_tria()
 
-    writeVTK(outfile=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'), v=v4cRmBndRm, t=t4cRmBndRm)
+    v4cRmBndRmKeep, v4cRmBndRmDel = tetMesh4cRmBnd.rm_free_vertices_()
 
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.tetra.psol'), vfuncXRm[v4cRmBndRmKeep])
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.tetra.psol'), vfuncYRm[v4cRmBndRmKeep])
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.rm.bnd.seam.rm.cut.tetra.psol'), vfuncZRm[v4cRmBndRmKeep])
+    v4cRmBndRm = tetMesh4cRmBnd.v
+    t4cRmBndRm = tetMesh4cRmBnd.t
 
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.poisson0.rm.bnd.seam.rm.cut.tetra.psol'), P0[v4cRmBndRmKeep])
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.poisson1.rm.bnd.seam.rm.cut.tetra.psol'), P1[v4cRmBndRmKeep])
-    writePSOL(os.path.join(cutTetraMeshDir, hemi + '.poisson2.rm.bnd.seam.rm.cut.tetra.psol'), P2[v4cRmBndRmKeep])
+    lpio.export_vtk(tetMesh4cRmBnd, outfile=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'))
+
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.tetra.psol'), vfuncXRm[v4cRmBndRmKeep])
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.tetra.psol'), vfuncYRm[v4cRmBndRmKeep])
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.rm.bnd.seam.rm.cut.tetra.psol'), vfuncZRm[v4cRmBndRmKeep])
+
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.rm.bnd.seam.rm.cut.tetra.psol'), P0[v4cRmBndRmKeep])
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.rm.bnd.seam.rm.cut.tetra.psol'), P1[v4cRmBndRmKeep])
+    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.rm.bnd.seam.rm.cut.tetra.psol'), P2[v4cRmBndRmKeep])
 
     # write out cube
 
     w4cRm = np.vstack((P0,P1,P2)).transpose()
 
-    writeVTK(outfile=os.path.join(cutTetraMeshDir, hemi + '.uvw.seam.rm.cut.tetra.vtk'), v=w4cRm, t=t4cRm)
+    lptio.export_vtk(lp.TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, hemi + '.uvw.seam.rm.cut.tetra.vtk'))
 
     #
 
@@ -1054,6 +924,4 @@ if __name__ == "__main__":
         openBndCutTetraMeshFile=options.openBndCutTetraMeshFile,
         tetraIndexFile=options.tetraIndexFile, hemi=options.hemi,
         outputDir=options.outputdir, paramAnisoSmooth=options.anisoSmooth,
-        paramAnisoAlpha=options.anisoAlpha,
-        paramWeightMeanCurv=options.weightMeanCurv, paramAddNoise=False,
-        paramLegacy=False)
+        paramAnisoAlpha=options.anisoAlpha, paramLegacy=False)

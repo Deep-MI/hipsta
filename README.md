@@ -32,21 +32,18 @@ This script performs the following major processing steps:
 
 ## Usage:
 
-`python3 shapetools.py --subjid <SUBJID> --hemi <hemi> --lut <lookup-table>
-  [--subjdir <SUBJDIR>] [--outputdir <OUTDIR>] [further options]`
+`python3 shapetools.py --filename <filename> --hemi <hemi> --lut <lookup-table> [--outputdir <OUTDIR>] [further options]`
 
 **Mandatory arguments:**   | **Description**
 ---------------------------|----------------------------------------------------
-`--subjid`                 | Subject ID. Must match a subdirectory in Freesurfer's SUBJECTS_DIR or in a manually specified `--subjdir`
+`--filename`               | A segmentation file.
 `--hemi`                   | Hemisphere. Either 'lh' or 'rh'.
 `--lut`                    | Look-up table. Either 'fs711' or 'ashs' or a valid filename.
 
 **Optional arguments:**    | **Description**
 ---------------------------|----------------------------------------------------
-`--subjdir`                | Subjects directory. This directory must contain a folder that matches the subject ID and contains Freesurfer output including the hippocampal subfield segmentation. If not given,  Freesurfer's SUBJECTS_DIR environment variable will be used.
 `--outputdir`              | Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.
-`--sfx`                    | Subfield segmentation suffix. These are different for the label files created with different versions and settings of the subfield segmentation (default: hippoAmygLabels-T1.v20).
-`--no-topological-fixing`  | Disable topological fixing. This is a simple switch and no further parameter is required; if it is given, use Freesurfer's topology fixing program to refine and fix initial surfaces.
+`--topological-fixing`     | Use FreeSurfer's topology fixing program to refine and fix initial surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz.
 `--no-cleanup`             | Do not delete files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.
 `--help`                   | Display this help and exit.
 `--version`                | Display version number and exit.
@@ -54,9 +51,10 @@ This script performs the following major processing steps:
 
 ## Examples:
 
-`python3 shapetools.py --subjid my_subject --hemi lh --lut fs711 --subjdir /my/subjects/directory --outputdir /my/output/directory --sfx hippoAmygLabels-T1.v20`
+`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut fs711 --topological-fixing /path/to/brain.mgz /path/to/wm.mgz --outputdir /my/output/directory`
 
-`python3 shapetools.py --subjid my_subject --hemi lh --lut ashs  --subjdir /my/subjects/directory --suffix my_suffix --no-topological-fixing`
+`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut ashs --outputdir /my/output/directory`
+
 
 ## Outputs:
 
@@ -80,7 +78,8 @@ ml             | merged molecular layer
 de             | dilation and erosion
 mc             | marching cube algorithm
 tf             | topological fixing
-rs             | remeshing and smoothing
+sm             | smoothing
+rs             | remeshing
 tet            | tetrahedral mesh
 bnd            | boundary mesh
 cut            | mesh cut at anterior/posterior ends
@@ -111,25 +110,63 @@ Step | HSF label   | Prefix | Folder         | Contents
 10+11| \<none\>    | \<none\> | thickness      | folder with thickness overlays and mid-surface files
 
 
+## Custom segmentations:
+
+- If using the `ashs` segmentation, additional labels for the hippocampal head
+  (255) and tail (254) labels are required. Use `--lut ashs`.
+- Topological fixing (`--topological-fixing <filename1> <filename2>`) should
+  not be used unless working with FreeSurfer-processed data. `<filename1>` is
+  the `brain.mgz` file and `<filename2>` is the `wm.mgz` file, both found within
+  the `mri` subdirectory of an individual FreeSurfer output directory.
+- If using a custom look-up table (`--lut <filename>`), the expected format for
+  the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are
+  numerical values for RGB colors and transparency (alpha) and will be ignored.
+  For example, `236 Subiculum 255 0 0 0`. Each line may only contain a single
+  anatomical structure. Do not use a header line. The following labels need to
+  be present in the look-up table: `presubiculum`,  `subiculum`, `ca1`, `ca2`,
+  `ca3`, `ca4`, `head`, and `tail`. Additional labels may be present, but will
+  be ignored. Lines starting with `#` will be ignored (and can be used for
+  comments).
+- Multiple substructures can have the same numeric ID, e.g. `presubiculum` and
+  `subiculum` can have the same numeric ID if these substructures are not
+  distinguished in the segmentation. `head` and `tail` can have multiple labels
+  if these are distinguished in the segmentation, but should be combined for
+  the processing within the hippocampal shapetools.
+
+
+## Installation:
+
+Use the following code to download this package from its github repository:
+
+`git clone https://github.com/reuter-lab/hippocampal-shape-tools.git`
+
+You can use the following code to install the required Python depencies into
+your local python package directory:
+
+`pip install --user -r requirements.txt`
+
+
 ## Requirements:
 
-1. A Freesurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME must
-exist as an environment variable and point to a valid Freesurfer installation.
+1. A FreeSurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME must
+exist as an environment variable and point to a valid FreeSurfer installation.
 
-2. A hippocampal subfield segmentation created by Freesurfer 7.11 (development
-versions after 6.0 will also work) must be present in the 'mri' subdirectory of
-the Freesurfer 6.0 or newer processed SUBJECTS_DIR/<subjid> directory.
-Alternatively, a subfield segmentation obtained from the ASHS IKND 7T Young
-Adults is also permissible (some restrictions on filenames and folders apply;
-see CHANGES.md).
+2. A hippocampal subfield segmentation created by FreeSurfer 7.11 (development
+versions after 6.0 will also work) or a subfield segmentation obtained from the
+ASHS IKND 7T Young Adults atlas. A custom segmentation is also permissible
+(some restrictions and settings apply; see `Custom Segmentations`).
 
-3. Python 3.5 or higher including the lapy, numpy, scipy, and nibabel
-libraries.
+3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
+pyacvd libraries. See `requirements.txt` for a full list. The lapy package can
+be obtained from https://github.com/Deep-MI/LaPy. 
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
 downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz
 or http://gmsh.info/bin/MacOSX/older/gmsh-2.16.0-MacOSX.dmg. The 'gmsh' binary
 must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
+
+5. The PYTHONPATH environment variable should include the toolbox directory,
+e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hippocampal-shapetools`.
 
 
 ## References:
