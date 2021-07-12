@@ -55,8 +55,19 @@ def createSurface(params):
 
     elif params.internal.MCA == "mri_tessellate":
 
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_tessellate") + " " \
+        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_pretess") + " " \
             + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz") \
+            + " xyz " \
+            + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz") \
+            + " " \
+            + os.path.join(params.OUTDIR, params.HEMI + ".pt." + params.internal.HSFLABEL_02 + ".mgz")
+
+        print(cmd)
+
+        subprocess.run(cmd.split())
+
+        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_tessellate") + " " \
+            + os.path.join(params.OUTDIR, params.HEMI + ".pt." + params.internal.HSFLABEL_02 + ".mgz") \
             + " 1 " \
             + os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".fsmesh")
 
@@ -262,19 +273,11 @@ def createSurface(params):
     print("-------------------------------------------------------------------------")
     print()
 
-    # smooth surface
-
-    triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
-
-    triaMesh.smooth_(n=params.internal.SMO)
-
-    lpio.export_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".sm." + params.internal.HSFLABEL_05 + ".vtk"))
-
     # remesh
 
     if params.internal.REMESH is True:
 
-        Mesh = pv.PolyData(os.path.join(params.OUTDIR, params.HEMI + ".sm." + params.internal.HSFLABEL_05 + ".vtk"))
+        Mesh = pv.PolyData(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
 
         clustered = pyacvd.Clustering(Mesh)
         clustered.subdivide(4)
@@ -334,11 +337,19 @@ def createSurface(params):
 
         # remove free vertices and re-orient mesh
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + ".sm." + params.internal.HSFLABEL_05 + ".vtk"))
+        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
         triaMesh.rm_free_vertices_()
         triaMesh.orient_()
 
     # save
+
+    lpio.export_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+
+    # smoothing
+
+    triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+
+    triaMesh.smooth_(n=params.internal.SMO)
 
     lpio.export_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rs." + params.internal.HSFLABEL_05 + ".vtk"))
 
