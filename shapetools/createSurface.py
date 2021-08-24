@@ -40,6 +40,8 @@ def createSurface(params):
     print()
 
     # create surface via marching cube algorithm
+    
+    print(params.internal.MCA)
 
     if params.internal.MCA == "mri_mc":
 

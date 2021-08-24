@@ -402,7 +402,7 @@ def _evaluate_args(args):
 
     # marching cube algorithm
 
-    if args.mcc is None:
+    if args.mca is None:
         settings.MCA = "mri_tessellate"
     else:
         settings.MCA = args.mca
