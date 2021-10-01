@@ -113,7 +113,7 @@ Step | HSF label   | Prefix | Folder         | Contents
 ## Custom segmentations:
 
 - If using the `ashs` segmentation, additional labels for the hippocampal head
-  (255) and tail (254) labels are required. Use `--lut ashs`.
+  (label value: 20) and tail (label value: 5) labels are required. Use `--lut ashs`.
 - Topological fixing (`--topological-fixing <filename1> <filename2>`) should
   not be used unless working with FreeSurfer-processed data. `<filename1>` is
   the `brain.mgz` file and `<filename2>` is the `wm.mgz` file, both found within

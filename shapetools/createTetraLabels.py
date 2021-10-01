@@ -106,7 +106,7 @@ def createTetraLabels(params):
 
     # determine files
 
-    MSKFILE = os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned.mgz")
+    MSKFILE = os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02.replace("thr.gauss.", "") + "_assigned.mgz")
 
     print("Using " + params.FILENAME + " as head-body-tail file.")
     print("Using " + MSKFILE + " as mask file.")
@@ -133,7 +133,7 @@ def createTetraLabels(params):
     # create vertex labels 1a:
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_vol2label") + " " \
-        + "--i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz")  + " " \
+        + "--i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02.replace("thr.gauss.", "") + ".mgz")  + " " \
         + "--id 1 " \
         + "--l " + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.tmp.label")
 
@@ -155,7 +155,7 @@ def createTetraLabels(params):
 
     # create vertex labels 1c
 
-    assigned_bnd = nb.freesurfer.load(os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.mgz"))
+    assigned_bnd = nb.freesurfer.load(os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02.replace("thr.gauss.", "") + "_assigned-bnd.mgz"))
     assigned_bnd_v2r_tkr = assigned_bnd.header.get_vox2ras_tkr()
     assigned_bnd_data = assigned_bnd.get_fdata()
 
@@ -175,7 +175,7 @@ def createTetraLabels(params):
     # create vertex labels 1d:
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_info") + " " \
-        + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.mgz") + " " \
+        + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02.replace("thr.gauss.", "") + "_assigned-bnd.mgz") + " " \
         + "--vox2ras-tkr "
 
     print(cmd)

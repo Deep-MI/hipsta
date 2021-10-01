@@ -315,6 +315,16 @@ def _parse_arguments():
         default=False, action="store_true", required=False) # help="Allow ragged mid-surfaces.",
     expert.add_argument('--allow-ragged-triangles', dest='allowRaggedTriangles', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
+    expert.add_argument('--no-crop', dest='nocrop', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not crop image.",
+    expert.add_argument('--no-upsample', dest='noupsample', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not upsample image.",
+    expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not filter image.",        
+    expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
+        default=[0.5, 0.5, 0.5], metavar="<factor x> <factor y> <factor z>", nargs=3, required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
+    expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
+        default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",        
 
     # define help
     help = parser.add_argument_group('Getting help')
@@ -391,26 +401,40 @@ def _evaluate_args(args):
 
     logging.info("Using " + OUTDIR + " as output directory")
 
-    # number of voxels for dilation and erosion
+    # preprocessImage
+
+    settings.CROP = not(args.nocrop)
+
+    # processMask
+    
+    if args.noupsample is True:
+        settings.UPSAMPLE = None
+    else:
+        settings.UPSAMPLE = args.upsample
 
     if args.dilero is None:
-        settings.DIL = 2
-        settings.ERO = 2
+        settings.DIL = 0 # was 2
+        settings.ERO = 0 # was 2
     else:
         settings.DIL = int(args.dilero[0])
         settings.ERO = int(args.dilero[1])
 
+    if args.nofilter is True:
+        settings.FILTERMASK = None
+    else:
+        settings.FILTERMASK = args.filter
+
     # marching cube algorithm
 
     if args.mca is None:
-        settings.MCA = "mri_tessellate"
+        settings.MCA = "mri_mc" # was mri_tesselate
     else:
         settings.MCA = args.mca
 
     # marching cube connectivity; 1=6+, 2=18, 3=6, 4=26
 
     if args.mcc is None:
-        settings.MCC = 3 # was 4
+        settings.MCC = 1 # was 3
     else:
         settings.MCC = int(args.mcc)
 
@@ -462,10 +486,10 @@ def _evaluate_args(args):
     if args.thxyz is None:
         settings.THXn = -0.9
         settings.THXp =  0.9
-        settings.THXk =   41 # changed from 81
-        settings.THYn = -0.975 # changed from -0.9
-        settings.THYp =  0.975 # changed from 0.9
-        settings.THYk =   21 # changed from 41
+        settings.THXk =   41 
+        settings.THYn = -0.975
+        settings.THYp =  0.975
+        settings.THYk =   21
         settings.THZn = -0.9
         settings.THZp =  0.9
         settings.THZk =   11
@@ -726,13 +750,17 @@ def _run_analysis(params):
     # imports
 
     import os
+    import time    
     import logging
 
-    from shapetools.convertFormat import convertFormat
+    from shapetools.preprocessImage import convertFormat
+    from shapetools.preprocessImage import cropImage
+    from shapetools.preprocessImage import upsampleImage     
     from shapetools.createLabels import createLabels
     from shapetools.mergeMolecularLayer import mergeMolecularLayer
-    from shapetools.createMask import fillHoles
-    from shapetools.createMask import createMask
+    from shapetools.processMask import fillHoles
+    from shapetools.processMask import createMask
+    from shapetools.processMask import filterMask
     from shapetools.createSurface import createSurface
     from shapetools.createTetraMesh import createTetraMesh
     from shapetools.createTetraLabels import createTetraLabels
@@ -746,6 +774,12 @@ def _run_analysis(params):
 
     logging.info("Starting convertFormat() ...")
     params = convertFormat(params)
+
+    logging.info("Starting cropImage() ...")
+    params = cropImage(params)
+
+    logging.info("Starting upsampleImage() ...")
+    params = upsampleImage(params)    
 
     # create labels (1)
 
@@ -764,6 +798,9 @@ def _run_analysis(params):
 
     logging.info("Starting createMask() ...")
     params = createMask(params)
+
+    logging.info("Starting filterMask() ...")
+    params = filterMask(params)
 
     # create surface (4)
 
@@ -807,6 +844,7 @@ def _run_analysis(params):
 
     # all done
 
+    logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
     logging.info("Hippocampal shapetools finished without errors.")
 
 
@@ -932,3 +970,4 @@ if __name__ == "__main__":
     # run analysis
 
     run_analysis(args)
+

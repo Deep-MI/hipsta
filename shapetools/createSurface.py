@@ -182,6 +182,10 @@ def createSurface(params):
         shutil.copyfile(
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated"),
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"))
+            
+        shutil.copyfile(
+            os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"),
+            os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated.nofix"))
 
         shutil.copyfile(
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh"),
@@ -219,8 +223,12 @@ def createSurface(params):
 
         # convert back to vtk
 
+#        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
+#            + os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
+#            + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
+
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
-            + os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
+            + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig") + " " \
             + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
 
         print(cmd)
@@ -234,6 +242,8 @@ def createSurface(params):
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "mri", "brain.mgz"))
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "mri", "wm.mgz"))
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"))
+            os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated.nofix"))
+            os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig"))
 
             if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".defect_borders")):
                 os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".defect_borders"))
