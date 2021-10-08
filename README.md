@@ -10,10 +10,11 @@ This is a script for the creation and analysis of hippocampal surfaces.
 
 This script performs the following major processing steps:
 
+0. preprocess image (cropping, upsampling)
 1. create labels
    1. extract HSF labels from label image
    2. merge individual labels
-2. attach molecular layer to neighboring regions
+2. attach molecular layer to neighboring regions (if present)
 3. create mask
    1. fill holes using dilation and erosion
    2. create final mask
@@ -76,6 +77,7 @@ rh             | right hemisphere
 *Prefixes*     |
 ml             | merged molecular layer
 de             | dilation and erosion
+filt           | gaussian filtering and thresholding
 mc             | marching cube algorithm
 tf             | topological fixing
 sm             | smoothing

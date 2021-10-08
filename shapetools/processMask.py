@@ -219,7 +219,7 @@ def filterMask(params):
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
             + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".nii") + " " \
             + "-mul 100 -kernel gauss " + str(params.internal.FILTERMASK[0]) + " -fmean " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".gauss." + params.internal.HSFLABEL_02 + ".nii")
+            + os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".nii")
 
         print(cmd)
 
@@ -230,27 +230,33 @@ def filterMask(params):
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
             + "--in_type nii " \
             + "--out_type mgz " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".gauss." + params.internal.HSFLABEL_02 + ".nii") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".gauss." + params.internal.HSFLABEL_02 + ".mgz")
+            + os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".nii") + " " \
+            + os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".mgz")
 
         print(cmd)
 
         subprocess.run(cmd.split())        
-
+        
         # binarize
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
-            + "--i " + os.path.join(params.OUTDIR, params.HEMI + ".gauss." + params.internal.HSFLABEL_02 + ".mgz") + " " \
+            + "--i " + os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".mgz") + " " \
             + "--min " + str(params.internal.FILTERMASK[1]) + " --binval 1 " \
-            + "--o " + os.path.join(params.OUTDIR, params.HEMI + ".thr.gauss." + params.internal.HSFLABEL_02 + ".mgz")
+            + "--o " + os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".mgz")
 
         print(cmd)
 
         subprocess.run(cmd.split())
         
+        # clean up
+        
+        os.remove(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".nii"))
+        
+        os.remove(os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".nii"))
+        
         # update params
 
-        params.internal.HSFLABEL_02 = "thr.gauss." + params.internal.HSFLABEL_02       
+        params.internal.HSFLABEL_02 = "filt." + params.internal.HSFLABEL_02       
         
     # return
 

@@ -317,12 +317,10 @@ def _parse_arguments():
         default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
     expert.add_argument('--no-crop', dest='nocrop', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not crop image.",
-    expert.add_argument('--no-upsample', dest='noupsample', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not upsample image.",
     expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not filter image.",        
     expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
-        default=[0.5, 0.5, 0.5], metavar="<factor x> <factor y> <factor z>", nargs=3, required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
+        default=None, metavar="<factor x> <factor y> <factor z>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
     expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
         default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",        
 
@@ -407,7 +405,7 @@ def _evaluate_args(args):
 
     # processMask
     
-    if args.noupsample is True:
+    if args.upsample is None:
         settings.UPSAMPLE = None
     else:
         settings.UPSAMPLE = args.upsample
@@ -623,6 +621,14 @@ def _check_arguments(params):
     if params.internal.MCA != "mri_mc" and params.internal.MCA != "mri_tessellate":
         print("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
         sys.exit(1)
+        
+    # check upsampling
+    
+    if params.internal.UPSAMPLE is not None:
+        if len(params.internal.UPSAMPLE ) != 3:
+            logging.error("Incorrect number of --upsampling parameters.")     
+            print("Program exited with ERRORS.")               
+            sys.exit(1)
 
     # create the LUT
 

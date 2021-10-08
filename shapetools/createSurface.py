@@ -190,7 +190,7 @@ def createSurface(params):
         shutil.copyfile(
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh"),
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh.nofix"))
-
+            
         # run topology fixer (will overwrite ${HEMI}.${HSFLABEL_04}.fsmesh - or leave it unchanged)
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_fix_topology") + " " \
@@ -200,7 +200,7 @@ def createSurface(params):
             + params.HEMI
 
         print(cmd)
-
+        
         subprocess.run(cmd.split())
 
         # copy files from temporary subjects dir to output dir
@@ -221,19 +221,30 @@ def createSurface(params):
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh.nofix"),
             os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh.nofix"))
 
-        # convert back to vtk
+        # convert back to vtk (apparently different output from fs6/fs7 topofixer)
+        
+        if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig")):
 
-#        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
-#            + os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
-#            + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
+            # assume freesurfer 7+
+            
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
+                + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig") + " " \
+                + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
 
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
-            + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
+            print(cmd)
 
-        print(cmd)
+            subprocess.run(cmd.split())
+            
+        else:
+            # assume freesurfer 6
 
-        subprocess.run(cmd.split())
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
+                + os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
+                + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
+                
+            print(cmd)
+
+            subprocess.run(cmd.split())            
 
         # delete temporary subjects dir
 
@@ -243,7 +254,9 @@ def createSurface(params):
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "mri", "wm.mgz"))
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"))
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated.nofix"))
-            os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig"))
+            
+            if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig")):
+                os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig"))
 
             if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".defect_borders")):
                 os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".defect_borders"))
