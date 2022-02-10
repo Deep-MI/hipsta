@@ -27,7 +27,7 @@ def fillHoles(params):
     print("-------------------------------------------------------------------------")
     print()
 
-    # dilate/erode by 1 voxel to fill holes; we use the FSL tool because
+    # dilate/erode by n voxels to fill holes; we use the FSL tool because
     # mri_binarize cannot be applied without binarization, which we don't want yet.
     # outputs ${HEMI}.de.${HSFLABEL_01}.mgz
 
@@ -53,15 +53,18 @@ def fillHoles(params):
 
     subprocess.run(cmd.split())
 
-    # 
+    #
 
     os.environ["FSLOUTPUTTYPE"] = "NIFTI"
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
         + "-dt input " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_01 + "_merged.nii") + " " \
-        + "-kernel 3D -dilD -ero " \
+        + "-kernel box " + str(params.internal.DIL) + " -dilD " \
+        + "-kernel box " + str(params.internal.ERO) + " -ero " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + ".de." + params.internal.HSFLABEL_01 + "_merged.nii")
+
+        #+ "-kernel 3D -dilD -ero " \
 
     print(cmd)
 
@@ -80,8 +83,11 @@ def fillHoles(params):
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
         + "-dt input " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_01 + "_assigned.nii") + " " \
-        + "-kernel 3D -dilD -ero " \
+        + "-kernel box " + str(params.internal.DIL) + " -dilD " \
+        + "-kernel box " + str(params.internal.ERO) + " -ero " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + ".de." + params.internal.HSFLABEL_01 + "_assigned.nii")
+
+        #+ "-kernel 3D -dilD -ero " \
 
     print(cmd)
 
@@ -136,7 +142,7 @@ def fillHoles(params):
     # return
 
     return(params)
-  
+
 
 def createMask(params):
     """
@@ -183,9 +189,9 @@ def filterMask(params):
 
     import os
     import subprocess
-    
-    # 
-    
+
+    #
+
     if params.internal.FILTERMASK is not None:
 
         # message
@@ -198,10 +204,10 @@ def filterMask(params):
         print("-------------------------------------------------------------------------")
         print()
 
-        # 
+        #
 
         os.environ["FSLOUTPUTTYPE"] = "NIFTI"
-        
+
         # convert
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
@@ -212,10 +218,10 @@ def filterMask(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())        
-        
+        subprocess.run(cmd.split())
+
         # filter
-        
+
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
             + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".nii") + " " \
             + "-mul 100 -kernel gauss " + str(params.internal.FILTERMASK[0]) + " -fmean " \
@@ -224,7 +230,7 @@ def filterMask(params):
         print(cmd)
 
         subprocess.run(cmd.split())
-        
+
         # convert back
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
@@ -235,8 +241,8 @@ def filterMask(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())        
-        
+        subprocess.run(cmd.split())
+
         # binarize
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
@@ -247,19 +253,17 @@ def filterMask(params):
         print(cmd)
 
         subprocess.run(cmd.split())
-        
+
         # clean up
-        
+
         os.remove(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".nii"))
-        
+
         os.remove(os.path.join(params.OUTDIR, params.HEMI + ".filt." + params.internal.HSFLABEL_02 + ".nii"))
-        
+
         # update params
 
-        params.internal.HSFLABEL_02 = "filt." + params.internal.HSFLABEL_02       
-        
+        params.internal.HSFLABEL_02 = "filt." + params.internal.HSFLABEL_02
+
     # return
 
     return(params)
-
-

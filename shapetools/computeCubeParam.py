@@ -79,8 +79,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
-                    print("Inconsistency while creating seam, exiting.")
-                    sys.exit(1)
+                    print("Inconsistency while creating seam 1, exiting.")
+                    ###sys.exit(1)
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -104,8 +104,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
-                    print("Inconsistency while creating seam, exiting.")
-                    sys.exit(1)
+                    print("Inconsistency while creating seam 2, exiting.")
+                    ###sys.exit(1)
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos2], t4c[i, idxNeg1]]
 
@@ -174,8 +174,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
-                    print("Inconsistency while creating seam, exiting.")
-                    sys.exit(1)
+                    print("Inconsistency while creating seam 3, exiting.")
+                    ###sys.exit(1)
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -199,8 +199,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
-                    print("Inconsistency while creating seam, exiting.")
-                    sys.exit(1)
+                    print("Inconsistency while creating seam 4, exiting.")
+                    ###sys.exit(1)
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg2]]
 
@@ -269,8 +269,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             if len(tmpSgn)==1:
                 newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
             else:
-                print("Inconsistency while creating seam, exiting.")
-                sys.exit(1)
+                print("Inconsistency while creating seam 5, exiting.")
+                ###sys.exit(1)
         else:
             idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -779,15 +779,18 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
         sys.exit(1)
 
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
+    # do not use this criterion with ashs-ctx as LUT
 
-    if np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])<0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])>0:
-        print("No flip necessary for EV2")
-    elif np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])>0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])<0:
-        print("Flipping EV2")
-        anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
-    else:
-        print("Inconsistency detected for EV2, exiting.")
-        sys.exit(1)
+    if params.LUT != "ashs-ctx":
+
+        if np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])<0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])>0:
+            print("No flip necessary for EV2")
+        elif np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])>0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])<0:
+            print("Flipping EV2")
+            anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
+        else:
+            print("Inconsistency detected for EV2, exiting.")
+            sys.exit(1)
 
     lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
     lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])

@@ -226,6 +226,9 @@ def createTetraLabels(params):
 
     lpfio.export_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), np.array([ float(x) for x in asc ])[vRmBndKeep])
 
+    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=np.array([ float(x) for x in asc ])[vRmBndKeep].astype("float32"), affine=None),
+        filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".mgh"))
+
     # clean up
 
     if params.skipCLEANUP is False:

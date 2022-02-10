@@ -524,7 +524,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     origV4flatCol = dict()
 
     minIdx = 0
-    midIdx = int(np.round((len(lLVL4z) - 1) / 2)),
+    midIdx = int(np.round((len(lLVL4z) - 1) / 2))
     maxIdx = len(lLVL4z)-1
 
     for k in [minIdx, midIdx, maxIdx]:

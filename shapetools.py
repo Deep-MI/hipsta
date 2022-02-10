@@ -13,7 +13,7 @@ package.
 
 def get_version():
 
-    VERSION = "v0.3.0-beta"
+    VERSION = "v0.5.0-beta"
 
     return VERSION
 
@@ -153,7 +153,7 @@ def get_help(print_help=True, return_help=False):
     Custom segmentations:
 
       - If using the `ashs` segmentation, additional labels for the hippocampal
-        head (255) and tail (254) labels are required. Use `--lut ashs`.
+        head (20) and tail (5) labels are required. Use `--lut ashs`.
       - If using a custom look-up table (`--lut <filename>`), the expected
         format for the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`,
         `G`, `B`, `A` are numerical values for RGB colors and transparency
@@ -192,7 +192,7 @@ def get_help(print_help=True, return_help=False):
          https://github.com/Deep-MI/LaPy. Required packages will be installed
          automatically when installing this package via pip.
 
-      4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. It
+      4. The gmsh package (version 2.x; http://gmsh.info) must be installed. It
          can be downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz
          or http://gmsh.info/bin/MacOSX/older/gmsh-2.16.0-MacOSX.dmg. The 'gmsh'
          binary must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
@@ -235,6 +235,8 @@ def _check_environment_and_packages():
     import sys
     import shutil
     import logging
+    import importlib.util
+    import packaging.version
 
     # check environment variables
     if os.environ.get('FREESURFER_HOME') is None:
@@ -251,6 +253,18 @@ def _check_environment_and_packages():
     # check for gmsh
     if shutil.which("gmsh") is None:
         logging.error('Could not find a \'gmsh\' executable')
+        print("Program exited with ERRORS.")
+        sys.exit(1)
+
+    # check for LaPy
+    if importlib.util.find_spec("lapy") is not None:
+        import lapy as lp
+        if packaging.version.parse(lp.__version__) < packaging.version.parse("0.3"):
+            logging.error('A version >=0.3 is required for the \'lapy\' package (see README.md for details on installation)')
+            print("Program exited with ERRORS.")
+            sys.exit(1)
+    else:
+        logging.error('Could not find the \'lapy\' package (see README.md for details on installation)')
         print("Program exited with ERRORS.")
         sys.exit(1)
 
@@ -291,6 +305,8 @@ def _parse_arguments():
         default=None, metavar="<filename>", nargs=2, required=False)
     optional.add_argument('--no-cleanup', dest='cleanup', help="Keep files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.",
         default=False, action="store_true", required=False)
+    optional.add_argument('--spherically-project', dest='spherically_project', help="Use eigenvalue-based spherical projection for topology fixing.",
+        default=False, action="store_true", required=False)
 
     # expert options
     expert = parser.add_argument_group('Expert options')
@@ -318,11 +334,15 @@ def _parse_arguments():
     expert.add_argument('--no-crop', dest='nocrop', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not crop image.",
     expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not filter image.",        
+        default=False, action="store_true", required=False) # help="Do not filter image.",
     expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
         default=None, metavar="<factor x> <factor y> <factor z>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
     expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
-        default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",        
+        default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",
+    expert.add_argument('--automated-head', dest='bndHead', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not filter image.",
+    expert.add_argument('--automated-tail', dest='bndTail', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not filter image.",
 
     # define help
     help = parser.add_argument_group('Getting help')
@@ -371,6 +391,7 @@ def _evaluate_args(args):
     # import
 
     import os
+    import sys
     import logging
 
     # message
@@ -404,7 +425,7 @@ def _evaluate_args(args):
     settings.CROP = not(args.nocrop)
 
     # processMask
-    
+
     if args.upsample is None:
         settings.UPSAMPLE = None
     else:
@@ -421,6 +442,9 @@ def _evaluate_args(args):
         settings.FILTERMASK = None
     else:
         settings.FILTERMASK = args.filter
+
+    settings.BNDHEAD = args.bndHead
+    settings.BNDTAIL = args.bndTail
 
     # marching cube algorithm
 
@@ -449,11 +473,13 @@ def _evaluate_args(args):
 
     # topology fixing
 
+    settings.tfx = args.tfx
+
+    settings.spherically_project = args.spherically_project
+
     if args.tfx is None:
-        settings.tfx = args.tfx
         args.skipTFX = True
     else:
-        settings.tfx = args.tfx
         args.skipTFX = False
 
     # anisotropy parameters
@@ -484,7 +510,7 @@ def _evaluate_args(args):
     if args.thxyz is None:
         settings.THXn = -0.9
         settings.THXp =  0.9
-        settings.THXk =   41 
+        settings.THXk =   41
         settings.THYn = -0.975
         settings.THYp =  0.975
         settings.THYk =   21
@@ -621,13 +647,13 @@ def _check_arguments(params):
     if params.internal.MCA != "mri_mc" and params.internal.MCA != "mri_tessellate":
         print("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
         sys.exit(1)
-        
+
     # check upsampling
-    
+
     if params.internal.UPSAMPLE is not None:
         if len(params.internal.UPSAMPLE ) != 3:
-            logging.error("Incorrect number of --upsampling parameters.")     
-            print("Program exited with ERRORS.")               
+            logging.error("Incorrect number of --upsampling parameters.")
+            print("Program exited with ERRORS.")
             sys.exit(1)
 
     # create the LUT
@@ -660,6 +686,34 @@ def _check_arguments(params):
         lutDict = dict(zip(LUTLABEL, LUTINDEX))
 
         hsflist = [ 8, 1, 2, 4 ]
+
+    elif params.LUT == "ashs-ctx":
+
+        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
+
+        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
+            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
+            "head", "tail" ]
+
+        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
+
+        lutDict = dict(zip(LUTLABEL, LUTINDEX))
+
+        hsflist = [ 12, 10, 9, 8, 1, 2, 4 ]
+
+    elif params.LUT == "ashs-ent+phc":
+
+        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
+
+        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
+            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
+            "head", "tail" ]
+
+        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
+
+        lutDict = dict(zip(LUTLABEL, LUTINDEX))
+
+        hsflist = [ 12, 9, 8, 1, 2, 4 ]
 
     elif params.LUT == "ukb":
 
@@ -723,7 +777,8 @@ def _check_arguments(params):
         os.path.join(params.OUTDIR, "tetra-labels"),
         os.path.join(params.OUTDIR, "tetra-cut"),
         os.path.join(params.OUTDIR, "tetra-cube"),
-        os.path.join(params.OUTDIR, "thickness")
+        os.path.join(params.OUTDIR, "thickness"),
+        os.path.join(params.OUTDIR, "qc")
         ]
 
     # loop over list of directories
@@ -756,12 +811,13 @@ def _run_analysis(params):
     # imports
 
     import os
-    import time    
+    import time
     import logging
 
     from shapetools.preprocessImage import convertFormat
     from shapetools.preprocessImage import cropImage
-    from shapetools.preprocessImage import upsampleImage     
+    from shapetools.preprocessImage import upsampleImage
+    from shapetools.preprocessImage import autoMask
     from shapetools.createLabels import createLabels
     from shapetools.mergeMolecularLayer import mergeMolecularLayer
     from shapetools.processMask import fillHoles
@@ -775,6 +831,7 @@ def _run_analysis(params):
     from shapetools.computeCubeParam import computeCubeParam
     from shapetools.computeThickness import computeThickness
     from shapetools.mapValues import mapValues
+    from shapetools.qcPlots import qcPlots
 
     # convert format (0)
 
@@ -785,7 +842,10 @@ def _run_analysis(params):
     params = cropImage(params)
 
     logging.info("Starting upsampleImage() ...")
-    params = upsampleImage(params)    
+    params = upsampleImage(params)
+
+    logging.info("Starting autoMask() ...")
+    params = autoMask(params)
 
     # create labels (1)
 
@@ -813,6 +873,9 @@ def _run_analysis(params):
     logging.info("Starting createSurface() ...")
     params = createSurface(params)
 
+    logging.info("Starting qcPlots() ...")
+    params = qcPlots(params, stage="mesh")
+
     # create tetra mesh for whole hippocampal body (5)
 
     logging.info("Starting createTetraMesh() ...")
@@ -838,10 +901,16 @@ def _run_analysis(params):
     logging.info("Starting computeCubeParam() ...")
     params = computeCubeParam(params)
 
+    logging.info("Starting qcPlots() ...")
+    params = qcPlots(params, stage="profile")
+
     # compute thickness (10)
 
     logging.info("Starting computeThickness() ...")
     params = computeThickness(params)
+
+    logging.info("Starting qcPlots() ...")
+    params = qcPlots(params, stage="hull")
 
     # map subfield mapValues (11)
 
@@ -976,4 +1045,3 @@ if __name__ == "__main__":
     # run analysis
 
     run_analysis(args)
-

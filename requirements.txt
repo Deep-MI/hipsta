@@ -3,6 +3,7 @@ importlib
 nibabel
 numpy
 pandas
+plotly
 pyacvd
 pyvista
 scipy

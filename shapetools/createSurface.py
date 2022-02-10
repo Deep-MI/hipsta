@@ -40,7 +40,7 @@ def createSurface(params):
     print()
 
     # create surface via marching cube algorithm
-    
+
     print(params.internal.MCA)
 
     if params.internal.MCA == "mri_mc":
@@ -163,26 +163,70 @@ def createSurface(params):
 
         # run mris_inflate etc.
 
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_inflate") + " " \
-            + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
-            + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated")
+        if params.internal.spherically_project is False:
 
-        print(cmd)
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_inflate") + " -n 1 " \
+                + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
+                + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated")
 
-        subprocess.run(cmd.split())
+            print(cmd)
 
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_sphere") + " " \
-            + "-q " + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated") + " " \
-            + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".sphere")
+            subprocess.run(cmd.split())
 
-        print(cmd)
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_sphere") + " " \
+                + "-q " + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated") + " " \
+                + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".sphere")
 
-        subprocess.run(cmd.split())
+            print(cmd)
+
+            subprocess.run(cmd.split())
+
+        else:
+
+            # use spherically project
+            from lapy import Solver
+            from lapy import TriaIO as lpio
+
+            # load
+            tria = lpio.import_fssurf(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh"))
+
+            # compute
+            fem = Solver(tria, lump=False)
+            evals, evecs = fem.eigs(k=4)
+            tria.v = evecs[:, 1:4]
+
+            # write
+            lpio.export_fssurf(tria, os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".preinflated"))
+
+            # inflate
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_inflate") + " -n 10 " \
+                + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".preinflated") + " " \
+                + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated")
+
+            print(cmd)
+
+            subprocess.run(cmd.split())
+
+            # load
+            tria = lpio.import_fssurf(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated"))
+
+            # use simple normalization instead of mris_sphere
+            tria.v[:,0] = tria.v[:,0] - np.min(tria.v[:,0])
+            tria.v[:,1] = tria.v[:,1] - np.min(tria.v[:,1])
+            tria.v[:,2] = tria.v[:,2] - np.min(tria.v[:,2])
+            tria.v[:,0] = tria.v[:,0] / np.max(tria.v[:,0]) - 0.5
+            tria.v[:,1] = tria.v[:,1] / np.max(tria.v[:,1]) - 0.5
+            tria.v[:,2] = tria.v[:,2] / np.max(tria.v[:,2]) - 0.5
+
+            # write
+            lpio.export_fssurf(tria, os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".sphere"))
+
+        # copy files
 
         shutil.copyfile(
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated"),
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"))
-            
+
         shutil.copyfile(
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"),
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated.nofix"))
@@ -190,7 +234,7 @@ def createSurface(params):
         shutil.copyfile(
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh"),
             os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh.nofix"))
-            
+
         # run topology fixer (will overwrite ${HEMI}.${HSFLABEL_04}.fsmesh - or leave it unchanged)
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_fix_topology") + " " \
@@ -200,7 +244,7 @@ def createSurface(params):
             + params.HEMI
 
         print(cmd)
-        
+
         subprocess.run(cmd.split())
 
         # copy files from temporary subjects dir to output dir
@@ -222,11 +266,11 @@ def createSurface(params):
             os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh.nofix"))
 
         # convert back to vtk (apparently different output from fs6/fs7 topofixer)
-        
+
         if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig")):
 
             # assume freesurfer 7+
-            
+
             cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
                 + os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig") + " " \
                 + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
@@ -234,17 +278,18 @@ def createSurface(params):
             print(cmd)
 
             subprocess.run(cmd.split())
-            
+
         else:
+
             # assume freesurfer 6
 
             cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
                 + os.path.join(params.OUTDIR, "fixed-surface", params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".fsmesh") + " " \
                 + os.path.join(params.OUTDIR, params.HEMI + ".tf." + params.internal.HSFLABEL_04 + ".vtk")
-                
+
             print(cmd)
 
-            subprocess.run(cmd.split())            
+            subprocess.run(cmd.split())
 
         # delete temporary subjects dir
 
@@ -254,7 +299,7 @@ def createSurface(params):
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "mri", "wm.mgz"))
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated"))
             os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".inflated.nofix"))
-            
+
             if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig")):
                 os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".orig"))
 
@@ -269,6 +314,9 @@ def createSurface(params):
 
             if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".sulc")):
                 os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + ".sulc"))
+
+            if os.path.exists(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".preinflated")):
+                os.remove(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".preinflated"))
 
             os.rmdir(os.path.join(params.OUTDIR, TMPSUBJ, "mri"))
             os.rmdir(os.path.join(params.OUTDIR, TMPSUBJ, "surf"))
@@ -302,61 +350,79 @@ def createSurface(params):
 
     if params.internal.REMESH is True:
 
-        Mesh = pv.PolyData(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
+        if shutil.which("mris_remesh") is None:
 
-        clustered = pyacvd.Clustering(Mesh)
-        clustered.subdivide(4)
-        clustered.cluster(Mesh.n_points)
+            Mesh = pv.PolyData(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
 
-        remeshed = clustered.create_mesh()
+            clustered = pyacvd.Clustering(Mesh)
+            clustered.subdivide(4)
+            clustered.cluster(Mesh.n_points)
 
-        vr = remeshed.points
-        tr = np.reshape(remeshed.faces, (int(len(remeshed.faces)/4), 4))[:,1:]
+            remeshed = clustered.create_mesh()
 
-        # check remesh results
+            vr = remeshed.points
+            tr = np.reshape(remeshed.faces, (int(len(remeshed.faces)/4), 4))[:,1:]
 
-        # creates list of edges
-        trSort = np.sort(tr, axis=1)
-        trSortEdges = np.concatenate((trSort[:,[0,1]],  trSort[:,[1,2]], trSort[:,[0,2]]), axis=0)
+            # check remesh results
 
-        # remove trias that have an edge that only occurs once (boundary trias)
-        countEdges = np.unique(trSortEdges, axis=0, return_counts=True)
-        removeEdges = countEdges[0][np.where(countEdges[1]==1)[0]]
-        if len(removeEdges)>0:
-            removeTrias = np.unique([ np.where(np.sum(np.logical_or(trSort==i[0], trSort==i[1]), axis=1)==2)[0] for i in removeEdges ])
-            trSortRmBnd = np.delete(trSort, removeTrias, axis=0)
+            # creates list of edges
+            trSort = np.sort(tr, axis=1)
+            trSortEdges = np.concatenate((trSort[:,[0,1]],  trSort[:,[1,2]], trSort[:,[0,2]]), axis=0)
+
+            # remove trias that have an edge that only occurs once (boundary trias)
+            countEdges = np.unique(trSortEdges, axis=0, return_counts=True)
+            removeEdges = countEdges[0][np.where(countEdges[1]==1)[0]]
+            if len(removeEdges)>0:
+                removeTrias = np.unique([ np.where(np.sum(np.logical_or(trSort==i[0], trSort==i[1]), axis=1)==2)[0] for i in removeEdges ])
+                trSortRmBnd = np.delete(trSort, removeTrias, axis=0)
+            else:
+                trSortRmBnd = trSort.copy()
+
+            # assure that any edge occurs exactly two times (duplicates)
+            trSortRmBndEdges = np.concatenate((trSortRmBnd[:,[0,1]],  trSortRmBnd[:,[1,2]], trSortRmBnd[:,[0,2]]), axis=0)
+            if len(np.where(np.unique(trSortRmBndEdges, axis=0, return_counts=True)[1]!=2)[0])!=0:
+                print("Duplicate edges in mesh, exiting.")
+                sys.exit(1)
+
+            # assure that every edge must be part of exactly two different triangles (no boundary edges, no duplicates)
+            countEdgesInTrias = np.array([ np.sum(np.sum(np.logical_or(trSortRmBnd==trSortRmBndEdges[i,0], trSortRmBnd==trSortRmBndEdges[i,1]), axis=1)==2) for i in range(0, len(trSortRmBndEdges)) ])
+            if (countEdgesInTrias!=2).any():
+                print("Boundary or duplicate edges in mesh, exiting.")
+                sys.exit(1)
+
+            # restrict to largest connected component
+
+            triaMesh = lp.TriaMesh(v=vr, t=trSortRmBnd)
+            comps = sp.csgraph.connected_components(triaMesh.adj_sym, directed=False)
+            if comps[0]>1:
+                compsLargest = np.argmax(np.unique(comps[1], return_counts=True)[1])
+                vtcsRemove = np.where(comps[1]!=compsLargest)
+                triaKeep = np.sum(np.isin(trSortRmBnd, vtcsRemove), axis=1)==0
+                trSortRmBndRmComps = trSortRmBnd[triaKeep,:]
+            else:
+                trSortRmBndRmComps = trSortRmBnd
+
+            # remove free vertices and re-orient mesh
+
+            triaMesh = lp.TriaMesh(v=vr, t=trSortRmBndRmComps)
+            triaMesh.rm_free_vertices_()
+            triaMesh.orient_()
+
         else:
-            trSortRmBnd = trSort.copy()
 
-        # assure that any edge occurs exactly two times (duplicates)
-        trSortRmBndEdges = np.concatenate((trSortRmBnd[:,[0,1]],  trSortRmBnd[:,[1,2]], trSortRmBnd[:,[0,2]]), axis=0)
-        if len(np.where(np.unique(trSortRmBndEdges, axis=0, return_counts=True)[1]!=2)[0])!=0:
-            print("Duplicate edges in mesh, exiting.")
-            sys.exit(1)
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
+                + "--remesh  -i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk") + " " \
+                + "-o " + os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk")
 
-        # assure that every edge must be part of exactly two different triangles (no boundary edges, no duplicates)
-        countEdgesInTrias = np.array([ np.sum(np.sum(np.logical_or(trSortRmBnd==trSortRmBndEdges[i,0], trSortRmBnd==trSortRmBndEdges[i,1]), axis=1)==2) for i in range(0, len(trSortRmBndEdges)) ])
-        if (countEdgesInTrias!=2).any():
-            print("Boundary or duplicate edges in mesh, exiting.")
-            sys.exit(1)
+            print(cmd)
 
-        # restrict to largest connected component
+            subprocess.run(cmd.split())
 
-        triaMesh = lp.TriaMesh(v=vr, t=trSortRmBnd)
-        comps = sp.csgraph.connected_components(triaMesh.adj_sym, directed=False)
-        if comps[0]>1:
-            compsLargest = np.argmax(np.unique(comps[1], return_counts=True)[1])
-            vtcsRemove = np.where(comps[1]!=compsLargest)
-            triaKeep = np.sum(np.isin(trSortRmBnd, vtcsRemove), axis=1)==0
-            trSortRmBndRmComps = trSortRmBnd[triaKeep,:]
-        else:
-            trSortRmBndRmComps = trSortRmBnd
+            # remove free vertices and re-orient mesh
 
-        # remove free vertices and re-orient mesh
-
-        triaMesh = lp.TriaMesh(v=vr, t=trSortRmBndRmComps)
-        triaMesh.rm_free_vertices_()
-        triaMesh.orient_()
+            triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+            triaMesh.rm_free_vertices_()
+            triaMesh.orient_()
 
     else:
 
