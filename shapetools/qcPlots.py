@@ -89,12 +89,18 @@ def qcPlots(params, stage=None):
 
         triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
 
-        camera = dict(
-            up=dict(x=0, y=0, z=1),
-            center=dict(x=0, y=0, z=0),
-            eye=dict(x=-2, y=0, z=0))
+        if params.HEMI =="lh":
+            camera = dict(
+                up=dict(x=0, y=0, z=1),
+                center=dict(x=0, y=0, z=0),
+                eye=dict(x=-2, y=1, z=1))
+        else:
+            camera = dict(
+                up=dict(x=0, y=0, z=1),
+                center=dict(x=0, y=0, z=0),
+                eye=dict(x=2, y=-1, z=1))
 
-        lpp.plot_tria_mesh(triaMesh, background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.mesh.png'), no_display=True, scale_png=0.5)
+        lpp.plot_tria_mesh(triaMesh, tcolor=[50,50,50], background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.mesh.png'), no_display=True, scale_png=0.5)
 
     # profile
     if stage=="profile":
@@ -141,14 +147,20 @@ def qcPlots(params, stage=None):
     # hull
     if stage=="hull":
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
+        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk"))
 
-        camera = dict(
-            up=dict(x=0, y=0, z=1),
-            center=dict(x=0, y=0, z=0),
-            eye=dict(x=-2, y=0, z=0))
+        if params.HEMI =="lh":
+            camera = dict(
+                up=dict(x=0, y=0, z=1),
+                center=dict(x=0, y=0, z=0),
+                eye=dict(x=-2, y=1, z=1))
+        else:
+            camera = dict(
+                up=dict(x=0, y=0, z=1),
+                center=dict(x=0, y=0, z=0),
+                eye=dict(x=2, y=-1, z=1))
 
-        lpp.plot_tria_mesh(triaMesh, background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.hull.png'), no_display=True, scale_png=0.5)
+        lpp.plot_tria_mesh(triaMesh, tcolor=[50,50,50], background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.hull.png'), no_display=True, scale_png=0.5)
 
     # return
     return params
