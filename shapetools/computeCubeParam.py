@@ -79,6 +79,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
+                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
                     print("Inconsistency while creating seam 1, exiting.")
                     ###sys.exit(1)
             else:
@@ -104,6 +105,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
+                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
                     print("Inconsistency while creating seam 2, exiting.")
                     ###sys.exit(1)
             else:
@@ -174,6 +176,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
+                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
                     print("Inconsistency while creating seam 3, exiting.")
                     ###sys.exit(1)
             else:
@@ -199,6 +202,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 if len(tmpSgn)==1:
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
+                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
                     print("Inconsistency while creating seam 4, exiting.")
                     ###sys.exit(1)
             else:
@@ -269,6 +273,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             if len(tmpSgn)==1:
                 newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
             else:
+                newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
                 print("Inconsistency while creating seam 5, exiting.")
                 ###sys.exit(1)
         else:
@@ -622,19 +627,19 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     # import
 
     import os, sys
-
-    import numpy as np
+    import logging
 
     import lapy as lp
+    import numpy as np
+    import nibabel as nb
 
     from lapy import DiffGeo
-
     from lapy import TriaIO as lpio
     from lapy import TetIO as lptio
     from lapy import FuncIO as lpfio
 
+    from sklearn.decomposition import PCA
     from scipy.sparse.linalg import LinearOperator, eigsh, splu
-
 
     # --------------------------------------------------------------------------
     # message
@@ -709,7 +714,6 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     triaMesh4cBndOpenRm = lp.TriaMesh(v=triaMesh4cBndOpen.v, t=triaMesh4cBndOpen.t)
 
-
     triaMesh4cBndOpenRm.orient_()
 
     v4cBndOpenRm = triaMesh4cBndOpenRm.v
@@ -776,12 +780,12 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
         print("Inconsistency detected for EV1, exiting.")
-        sys.exit(1)
+        ###sys.exit(1)
 
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
-    # do not use this criterion with ashs-ctx as LUT
+    # do not use this criterion with ashs-ctx as LUT (and others)
 
-    if params.LUT != "ashs-ctx":
+    if params.LUT != "ashs-ctx" and params.LUT != "ashs-noca3" and params.LUT != "ashs-ctx-nohc" and params.LUT != "ashs-ent":
 
         if np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])<0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])>0:
             print("No flip necessary for EV2")
@@ -790,7 +794,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
             anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
         else:
             print("Inconsistency detected for EV2, exiting.")
-            sys.exit(1)
+            ###sys.exit(1)
 
     lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
     lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])
@@ -802,13 +806,26 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     v4c, t4c, i4c, k4c, newVtcs, newVtcsSgn, newTetra = getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec)
 
-    # x: 234 -> 240
+    # get 2nd principal axis, note that direction may be arbitrary, will
+    # possibly be switched below; note that this replaces EV2-based newVtcsSgn,
+    # which we may remove in the future (TODO)
+
+    pca = PCA(n_components=3)
+    pca_scores = pca.fit_transform(v4c)
+
+    # x: medial -> lateral
 
     vfuncX = np.zeros(np.shape(v4c)[0])
     srcX = np.zeros(np.shape(v4c)[0])
-    srcX[newVtcs[newVtcsSgn>0]] = 1
+    srcX[newVtcs[v4c[newVtcs,0]<np.mean(v4c[newVtcs,0])]] = -1
+    ###srcX[newVtcs[pca_scores[newVtcs,1]<0]] = -1
+    ###srcX[newVtcs[v4c[newVtcs,0]>0]] = 1
+    ###srcX[newVtcs[newVtcsSgn>0]] = 1
     snkX = np.zeros(np.shape(v4c)[0])
-    snkX[newVtcs[newVtcsSgn<0]] = -1
+    snkX[newVtcs[v4c[newVtcs,0]>=np.mean(v4c[newVtcs,0])]] = 1
+    ###snkX[newVtcs[pca_scores[newVtcs,1]>0]] = 1
+    ###snkX[newVtcs[v4c[newVtcs,0]<0]] = -1
+    ###snkX[newVtcs[newVtcsSgn<0]] = -1
     vfuncX = srcX + snkX
 
     # y: Tail (226) -> Head (232) (post --> ant)
@@ -825,6 +842,30 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     snkZ = np.zeros(np.shape(anisoLaplEvec[:,1])[0])
     snkZ[anisoLaplEvec[:,1]>0] = 1
     vfuncZ[v4cBndOpenKeep] = srcZ + snkZ
+
+    # determine left / right
+
+    img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".hsf.mgz"))
+    mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+    pts = np.concatenate((v4c, np.ones((v4c.shape[0], 1))), axis=1)
+    ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+    if params.HEMI=="lh":
+        if (ras[:,0]<0.0).all():
+            # lateral (snk, +1) should be more negative than medial (src, -1), otherwise flip
+            if np.mean(ras[np.where(vfuncX>0)[0],0]) > np.mean(ras[np.where(vfuncX<0)[0],0]):
+                vfuncX = -vfuncX
+        else:
+            logging.info("Ambiguous hemisphere info, exiting.")
+            sys.exit(1)
+    elif params.HEMI=="rh":
+        if (ras[:,0]>0.0).all():
+            # lateral (snk, +1) should be more positive than medial (src, -1), otherwise flip
+            if np.mean(ras[np.where(vfuncX>0)[0],0]) < np.mean(ras[np.where(vfuncX<0)[0],0]):
+                vfuncX = -vfuncX
+        else:
+            logging.info("Ambiguous hemisphere info, exiting.")
+            sys.exit(1)
 
     # --------------------------------------------------------------------------
     # compute ABtetra and Poisson functions

@@ -47,22 +47,10 @@ def createLabels(params):
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
             + "--i " +  params.FILENAME + " " \
             + "--match " + str(i) + " " \
-            + "--dilate " + str(params.internal.DIL) + " " \
-            + "--erode " + str(params.internal.ERO) + " " \
             + "--binval " + str(i) + " " \
-            + "--o " + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME))
-
-        print(cmd)
-
-        subprocess.run(cmd.split())
-
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
-            + "--i " +  params.FILENAME + " " \
-            + "--match " + str(i) + " " \
-            + "--binval " + str(i) + " " \
-            + "--o " + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME))
-#            + "--erode 1 " \
-#            + "--dilate 1 " \
+            + "--o " + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME))            
+#            + "--dilate " + str(params.internal.DIL) + " " \
+#            + "--erode " + str(params.internal.ERO) + " " \
 
         print(cmd)
 

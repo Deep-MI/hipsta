@@ -1,0 +1,18 @@
+# this is a list of example uses of the run-queue.sh command:
+#
+# there are 1-3 cases, and for each of them, a 'sleep' command 
+# with variable duration will be executed (and possibly terminated)
+#
+# type 'run-queue.sh' to show the help message; for reference:
+# run-queue.sh <NCASES> <NQUEUES> <SUBJECTS_DIR> <START> <LIST_FILE> <CMD_FILE> <SUFFIX> <TIMEOUT>"
+#
+run-queue.sh 1 1 0 logs id.lst cmd.lst -r0 0
+run-queue.sh 3 1 0 logs id.lst cmd.lst -r1 0
+run-queue.sh 3 3 0 logs id.lst cmd.lst -r2 0
+run-queue.sh 2 2 1 logs id.lst cmd.lst -r3 0
+run-queue.sh 3 3 0 logs id.lst cmd.lst -r4 8
+run-queue.sh 3 3 0 logs id.lst cmd.lst -r5 12
+nohup run-queue.sh 3 3 0 logs id.lst cmd.lst -r6 12
+nohup run-queue.sh 3 3 0 logs id.lst cmd.lst -r7 12 > logfile.log
+nohup run-queue.sh 3 3 0 logs id.lst cmd.lst -r8 12 > logfile.log &
+

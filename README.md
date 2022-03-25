@@ -10,7 +10,7 @@ This is a script for the creation and analysis of hippocampal surfaces.
 
 This script performs the following major processing steps:
 
-0. preprocess image (cropping, upsampling)
+0. preprocess image (cropping, upsampling, automask)
 1. create labels
    1. extract HSF labels from label image
    2. merge individual labels
@@ -22,6 +22,7 @@ This script performs the following major processing steps:
    1. create initial surface using marching cube algorithm
    2. topology fixing (optional)
    3. smooth (fixed) surface
+   4. remesh surface (optional)
 5. create tetrahedral mesh from triangular surface
 6. create label files for tetra mesh
 7. remove boundary mask (preprocessing for mesh cutting)
@@ -29,6 +30,7 @@ This script performs the following major processing steps:
 9. create cube parametrization
 10. compute thickness and curvature
 11. map subfield values (and other volume-based data)
+12. create supplementary files for visualization
 
 
 ## Usage:
@@ -39,15 +41,46 @@ This script performs the following major processing steps:
 ---------------------------|----------------------------------------------------
 `--filename`               | A segmentation file.
 `--hemi`                   | Hemisphere. Either 'lh' or 'rh'.
-`--lut`                    | Look-up table. Either 'fs711' or 'ashs' or a valid filename.
+`--lut`                    | Look-up table. A valid filename or one of the following: 'fs711', 'ashs', 'ashs-ca2ca3', 'ashs-noca3', 'ashs-ctx', 'ashs-ctx-nohc', 'ashs-ent'.
 
 **Optional arguments:**    | **Description**
 ---------------------------|----------------------------------------------------
 `--outputdir`              | Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.
-`--topological-fixing`     | Use FreeSurfer's topology fixing program to refine and fix initial surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz.
 `--no-cleanup`             | Do not delete files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.
+
+**Getting help:**    | **Description**
+---------------------------|----------------------------------------------------
 `--help`                   | Display this help and exit.
+`--more-help`              | Display extensive help and exit.
 `--version`                | Display version number and exit.
+
+**Experimental arguments:**| **Description**
+---------------------------|----------------------------------------------------
+`--no-crop`                | Do not crop image.
+`--upsample [ <float> <float> <float> ]` | A list of parameters to fine-tune image upsampling: specify three multiplicative factors to determine the final voxel size. If none are given, resample to the smallest voxel size.
+`--automated-head`         | Automatically identify boundary towards hippocampal head.
+`--automated-tail`         | Automatically identify boundary towards hippocampal tail.
+`--margin-head <int>`      | Margin for automated head identification.
+`--margin-tail <int>`      | Margin for automated tail identification.
+`--dilation-erosion <int> <int>` | Settings for dilation-erosion procedure. Specify two numbers for width of dilation and erosion. Default is `0 0`.
+`--no-filter`              | Do not filter image.
+`--filter <int> <int>`     | A list of parameters to fine-tune image filtering. Specify two numbers for filter width and threshold. Default is `0.5 50`
+`--long-filter`            | Filter image along longitudinal axis, i.e. attempt to create smooth transitions between slices.
+`--close-mask [<string>]`  | Apply closing operation to mask, i.e. attempt to close small holes. Default is `regular`, alternative is `experimental`.
+`--mca <string>`           | Marching-cube algorithm. Either `mri_mc` (default) or `mri_tessellate`.
+`--mcc <integer>`          | Marching-cube connectivity. Only used for `mri_mc` algorithm. Default is `1`. See `mri_mc --help` for details.
+`--topological-fixing`     | Use FreeSurfer's topology fixing program to refine and fix initial surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz.
+`--smooth <integer>`       | Mesh smoothing iterations. Default is `5`.
+`--remesh [ <int> ]`       | Switch on remeshing, i.e. create a regular, evenly spaced surface grid. If a number is given, resample to that
+`--no-check-surface`       | Do not check surface and proceed even if holes are present.
+`--no-check-boundaries`    | Do not check boundaries and proceed if there are less / more than two continuous boundary loops.
+`--no-qc`                  | Do not perform QC.
+`--cut-params <float> <float>` | A list of parameters to fine-tune the cut operation. Default cutting range is `[-0.975, 0.975]`.
+`--aniso-alpha <float> [ <float> ]` | Anisotropy parameters. Specify either one or two numbers.
+`--aniso-smooth <int>`     | Anisotropy smoothing. Specify a number to control the number of smoothing iterations. Default is `10`.
+`--thickness-params <...>` | A list of parameters to fine-tune the thickness computation. Specify three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default values are `-0.9 0.9 41 -0.975 0.975 21 -0.9 0.9 11`.
+`--allow-ragged`           | Allow ragged mid-surfaces.
+`--allow-ragged-triangles` | Allow triangles for ragged mid-surfaces.
 
 
 ## Examples:
@@ -75,9 +108,14 @@ Abbreviation   | Intpretation
 lh             | left hemisphere
 rh             | right hemisphere
 *Prefixes*     |
+crop           | crop image
+ups            | upsample image
+am             | auto-mask for head and tail
 ml             | merged molecular layer
 de             | dilation and erosion
 filt           | gaussian filtering and thresholding
+cm             | close mask
+lf             | longitudinal filter
 mc             | marching cube algorithm
 tf             | topological fixing
 sm             | smoothing
@@ -98,18 +136,18 @@ merged         | molecular layer subregions merged with other regions
 
 Step | HSF label   | Prefix | Folder         | Contents
 -----|-------------|--------|----------------|-----------------------------
-1    | \<none\>    | \<none\> | labels         | files with volume labels
+1    | \<none\>    | \<none\> | labels       | files with volume labels
 2    | HSFLABEL_01 | ml     | merge-ml       | files created during the merging of the molecular layer
 3    | HSFLABEL_02 | de     | mask           | files created during creation and post-processing of binary masks
 4a   | HSFLABEL_03 | mc     | \<none\>       | \<none\>
 4b   | HSFLABEL_05 | tf     | fixed-surface  | files created during topological fixing (optional)
 4c   | HSFLABEL_06 | rs     | \<none\>       | \<none\>
 5    | HSFLABEL_07 | tet    | \<none\>       | \<none\>
-6    | \<none\>    | \<none\> | tetra-label    | files created during tetrahedral mesh construction
-7    | \<none\>    | \<none\> | tetra-cut      | files created during preprocessing for tetrahedral mesh cutting
+6    | \<none\>    | \<none\> | tetra-label  | files created during tetrahedral mesh construction
+7    | \<none\>    | \<none\> | tetra-cut    | files created during preprocessing for tetrahedral mesh cutting
 8    | HSFLABEL_09 | cut    | tetra-cut      | files created during tetrahedral mesh cutting
-9    | \<none\>    | bnd, open, uvw | tetra-cube     | files created during cube parametrization
-10+11| \<none\>    | \<none\> | thickness      | folder with thickness overlays and mid-surface files
+9    | \<none\>    | bnd, open, uvw | tetra-cube | files created during cube parametrization
+10+11| \<none\>    | \<none\> | thickness    | folder with thickness overlays and mid-surface files
 
 
 ## Custom segmentations:
@@ -138,7 +176,7 @@ Step | HSF label   | Prefix | Folder         | Contents
 
 ## Installation:
 
-Use the following code to download this package from its github repository:
+Use the following code to download this package from its GitHub repository:
 
 `git clone https://github.com/reuter-lab/hippocampal-shape-tools.git`
 
@@ -160,7 +198,7 @@ ASHS IKND 7T Young Adults atlas. A custom segmentation is also permissible
 
 3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
 pyacvd libraries. See `requirements.txt` for a full list. The lapy package can
-be obtained from https://github.com/Deep-MI/LaPy. 
+be obtained from https://github.com/Deep-MI/LaPy.
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
 downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz

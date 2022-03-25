@@ -148,6 +148,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
         allowRagged = False
         allowRaggedTriangles = False
+        skipOrient = False
 
     else:
 
@@ -171,6 +172,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
         allowRagged = params.internal.allowRagged
         allowRaggedTriangles = params.internal.allowRaggedTriangles
+        skipOrient = params.internal.skipOrient
 
     # load mesh
 
@@ -640,9 +642,33 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     triaMidRm = lp.TriaMesh(triaMid.v, triaMid.t)
     triaMaxRm = lp.TriaMesh(triaMax.v, triaMax.t)
 
-    triaMinRm.orient_()
-    triaMidRm.orient_()
-    triaMaxRm.orient_()
+    #
+
+    if skipOrient is False:
+        import logging
+        from scipy.sparse import csgraph as sc
+        if sc.connected_components(triaMinRm._construct_adj_sym())[0]==1:
+            triaMinRm.orient_()
+            skipOrientMin = False
+        else:
+            logging.warning("Warning: exterior surface contains more than one component, not orienting. Check your results.")
+            skipOrientMin = True
+        if sc.connected_components(triaMidRm._construct_adj_sym())[0]==1:
+            triaMidRm.orient_()
+            skipOrientMid = False
+        else:
+            logging.warning("Warning: mid-surface contains more than one component, not orienting. Check your results.")
+            skipOrientMid = True
+        if sc.connected_components(triaMaxRm._construct_adj_sym())[0]==1:
+            triaMaxRm.orient_()
+            skipOrientMax = False
+        else:
+            logging.warning("Warning: interior surface contains more than one component, not orienting. Check your results.")
+            skipOrientMax = True
+    else:
+        skipOrientMin = True
+        skipOrientMid = True
+        skipOrientMax = True
 
     #
 
@@ -669,49 +695,89 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     # --------------------------------------------------------------------------
     # export curvature
 
-    u1Min, u2Min, c1Min, c2Min = triaMinRm.curvature_tria()
-    u1Mid, u2Mid, c1Mid, c2Mid = triaMidRm.curvature_tria()
-    u1Max, u2Max, c1Max, c2Max = triaMaxRm.curvature_tria()
+    if skipOrientMin is False:
 
-    mean_curvMin= (c1Min + c2Min) / 2
-    mean_curvMid= (c1Mid + c2Mid) / 2
-    mean_curvMax= (c1Max + c2Max) / 2
+        u1Min, u2Min, c1Min, c2Min = triaMinRm.curvature_tria()
 
-    gauss_curvMin = c1Min * c2Min
-    gauss_curvMid = c1Mid * c2Mid
-    gauss_curvMax = c1Max * c2Max
+        mean_curvMin= (c1Min + c2Min) / 2
 
-    mean_curvMin = triaMinRm.map_tfunc_to_vfunc(mean_curvMin)
-    mean_curvMid = triaMidRm.map_tfunc_to_vfunc(mean_curvMid)
-    mean_curvMax = triaMaxRm.map_tfunc_to_vfunc(mean_curvMax)
+        gauss_curvMin = c1Min * c2Min
 
-    gauss_curvMin = triaMinRm.map_tfunc_to_vfunc(gauss_curvMin)
-    gauss_curvMid = triaMidRm.map_tfunc_to_vfunc(gauss_curvMid)
-    gauss_curvMax = triaMaxRm.map_tfunc_to_vfunc(gauss_curvMax)
+        mean_curvMin = triaMinRm.map_tfunc_to_vfunc(mean_curvMin)
 
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.psol'), mean_curvMin)
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.psol'), mean_curvMid)
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.psol'), mean_curvMax)
+        gauss_curvMin = triaMinRm.map_tfunc_to_vfunc(gauss_curvMin)
 
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.psol'), gauss_curvMin)
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.psol'), gauss_curvMid)
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.psol'), gauss_curvMax)
+        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.psol'), mean_curvMin)
 
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMin.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.mgh'))
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMid.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.mgh'))
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMax.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.mgh'))
+        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.psol'), gauss_curvMin)
 
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=gauss_curvMin.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.mgh'))
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=gauss_curvMid.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.mgh'))
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=gauss_curvMax.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.mgh'))
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMin.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.mgh'))
 
-    pd.DataFrame(np.concatenate((cMinRm, np.array(mean_curvMin, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.csv'), header=False, index=False)
-    pd.DataFrame(np.concatenate((cMidRm, np.array(mean_curvMid, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.csv'), header=False, index=False)
-    pd.DataFrame(np.concatenate((cMaxRm, np.array(mean_curvMax, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.csv'), header=False, index=False)
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=gauss_curvMin.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.mgh'))
 
-    pd.DataFrame(np.concatenate((cMinRm, np.array(gauss_curvMin, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.csv'), header=False, index=False)
-    pd.DataFrame(np.concatenate((cMidRm, np.array(gauss_curvMid, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.csv'), header=False, index=False)
-    pd.DataFrame(np.concatenate((cMaxRm, np.array(gauss_curvMax, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.csv'), header=False, index=False)
+        pd.DataFrame(np.concatenate((cMinRm, np.array(mean_curvMin, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.csv'), header=False, index=False)
+
+        pd.DataFrame(np.concatenate((cMinRm, np.array(gauss_curvMin, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.csv'), header=False, index=False)
+
+    else:
+
+        logging.warning("Warning: Not computing curvature for exterior surface, check surface.")
+
+    if skipOrientMid is False:
+
+        u1Mid, u2Mid, c1Mid, c2Mid = triaMidRm.curvature_tria()
+
+        mean_curvMid= (c1Mid + c2Mid) / 2
+
+        gauss_curvMid = c1Mid * c2Mid
+
+        mean_curvMid = triaMidRm.map_tfunc_to_vfunc(mean_curvMid)
+
+        gauss_curvMid = triaMidRm.map_tfunc_to_vfunc(gauss_curvMid)
+
+        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.psol'), mean_curvMid)
+
+        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.psol'), gauss_curvMid)
+
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMid.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.mgh'))
+
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=gauss_curvMid.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.mgh'))
+
+        pd.DataFrame(np.concatenate((cMidRm, np.array(mean_curvMid, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.csv'), header=False, index=False)
+
+        pd.DataFrame(np.concatenate((cMidRm, np.array(gauss_curvMid, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.csv'), header=False, index=False)
+
+    else:
+
+        logging.warning("Warning: Not computing curvature for mid-surface, check surface.")
+
+    if skipOrientMax is False:
+
+        u1Max, u2Max, c1Max, c2Max = triaMaxRm.curvature_tria()
+
+        mean_curvMax= (c1Max + c2Max) / 2
+
+        gauss_curvMax = c1Max * c2Max
+
+        mean_curvMax = triaMaxRm.map_tfunc_to_vfunc(mean_curvMax)
+
+        gauss_curvMax = triaMaxRm.map_tfunc_to_vfunc(gauss_curvMax)
+
+        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.psol'), mean_curvMax)
+
+        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.psol'), gauss_curvMax)
+
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMax.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.mgh'))
+
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=gauss_curvMax.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.mgh'))
+
+        pd.DataFrame(np.concatenate((cMaxRm, np.array(mean_curvMax, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.csv'), header=False, index=False)
+
+        pd.DataFrame(np.concatenate((cMaxRm, np.array(gauss_curvMax, ndmin=2).transpose()), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.csv'), header=False, index=False)
+
+    else:
+
+        logging.warning("Warning: Not computing curvature for interior surface, check surface.")
 
     # -----------------------------------------------------------------------------
     # create hull

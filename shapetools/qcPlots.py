@@ -85,7 +85,7 @@ def qcPlots(params, stage=None):
     from shapetools.triaUtils import levelsetsTria
 
     # mesh
-    if stage=="mesh":
+    if params.internal.noqc is False and stage=="mesh":
 
         triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
 
@@ -103,7 +103,7 @@ def qcPlots(params, stage=None):
         lpp.plot_tria_mesh(triaMesh, tcolor=[50,50,50], background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.mesh.png'), no_display=True, scale_png=0.5)
 
     # profile
-    if stage=="profile":
+    if params.internal.noqc is False and stage=="profile":
 
         triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.tetra.vtk"))
 
@@ -124,7 +124,6 @@ def qcPlots(params, stage=None):
         tmpxSort2, tmpySort2 = sortLevelSets([lvl2_2, lvl2i_2, lvl2j_2], dims=[0, 2])
         tmpxSort3, tmpySort3 = sortLevelSets([lvl2_3, lvl2i_3, lvl2j_3], dims=[0, 2])
         tmpxSort4, tmpySort4 = sortLevelSets([lvl2_4, lvl2i_4, lvl2j_4], dims=[0, 2])
-
 
         #
 

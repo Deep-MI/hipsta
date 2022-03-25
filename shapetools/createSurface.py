@@ -348,7 +348,7 @@ def createSurface(params):
 
     # remesh
 
-    if params.internal.REMESH is True:
+    if params.internal.REMESH is not None:
 
         if shutil.which("mris_remesh") is None:
 
@@ -410,9 +410,14 @@ def createSurface(params):
 
         else:
 
-            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
-                + "--remesh  -i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk") + " " \
-                + "-o " + os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk")
+            if params.internal.REMESH == 0:
+                cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
+                    + "--remesh  -i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk") + " " \
+                    + "-o " + os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk")
+            elif params.internal.REMESH > 0:
+                cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
+                    + "--nvert " + str(params.internal.REMESH) + "  -i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk") + " " \
+                    + "-o " + os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk")
 
             print(cmd)
 

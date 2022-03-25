@@ -111,17 +111,53 @@ def upsampleImage(params):
         print("Upsampling")
         print()
 
-        # crop
+        # upsample
 
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
-            + " -ds " + str(params.internal.UPSAMPLE[0]) + " " + str(params.internal.UPSAMPLE[1]) + "  " + str(params.internal.UPSAMPLE[2]) + " " \
-            + " -rt nearest " \
-            + params.FILENAME + " " \
-            + os.path.splitext(params.FILENAME)[0] + ".ups" + os.path.splitext(params.FILENAME)[1]
+        if len(params.internal.UPSAMPLE) == 3:
 
-        print(cmd)
+            print("Upsampling with custom parameters ...")
+            print()
 
-        subprocess.run(cmd.split())
+            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
+                + " -ds " + str(params.internal.UPSAMPLE[0]) + " " + str(params.internal.UPSAMPLE[1]) + "  " + str(params.internal.UPSAMPLE[2]) + " " \
+                + " -rt nearest " \
+                + params.FILENAME + " " \
+                + os.path.splitext(params.FILENAME)[0] + ".ups" + os.path.splitext(params.FILENAME)[1]
+
+            print(cmd)
+
+            subprocess.run(cmd.split())
+
+        elif len(params.internal.UPSAMPLE) == 0:
+
+            #
+            import nibabel as nb
+            import numpy as np
+            import plotly.express as px
+            from scipy import ndimage
+            from nilearn import image as nli
+
+            #
+            print("Upsampling to min voxel size ...")
+            print()
+
+            # get image and info
+            img = nb.load(params.FILENAME)
+            dat = img.get_fdata()
+            vxsz = img.header["delta"]
+            affn = img.affine
+
+            # compute new affine
+            target_affn = affn.copy()
+            target_affn[0:4,0] *= min(vxsz)/vxsz[0]
+            target_affn[0:4,1] *= min(vxsz)/vxsz[1]
+            target_affn[0:4,2] *= min(vxsz)/vxsz[2]
+
+            # resample
+            img_int = nli.resample_img(img, target_affine=target_affn, interpolation="nearest")
+
+            # save
+            nb.save(img_int, os.path.splitext(params.FILENAME)[0] + ".ups" + os.path.splitext(params.FILENAME)[1])
 
         # update params
 
@@ -130,7 +166,6 @@ def upsampleImage(params):
     # return
 
     return(params)
-
 
 
 def autoMask(params):
@@ -182,7 +217,22 @@ def autoMask(params):
         labelCA1 = params.LUTDICT["ca1"]
         labelCA2 = params.LUTDICT["ca2"]
         labelCA3 = params.LUTDICT["ca3"]
-        labelPHC = params.LUTDICT["parahippocampal"]
+        if "parahippocampal" in params.LUTDICT.keys():
+            labelPHC = params.LUTDICT["parahippocampal"]
+        else:
+            labelPHC = None
+        if "entorhinal" in params.LUTDICT.keys():
+            labelENT = params.LUTDICT["entorhinal"]
+        else:
+            labelENT = None
+        if "ba35" in params.LUTDICT.keys():
+            labelBA35 = params.LUTDICT["ba35"]
+        else:
+            labelBA35 = None
+        if "ba36" in params.LUTDICT.keys():
+            labelBA36= params.LUTDICT["ba36"]
+        else:
+            labelBA36 = None
 
         # head
         if params.internal.BNDHEAD is True:
@@ -190,13 +240,40 @@ def autoMask(params):
             print("Using auto-mask for head")
             # remove any potentially existing head labels
             dat[dat==labelHead] = 0
-            # find instance of CA2/CA3
-            idxCA23 = np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))
+            #
+            if params.LUT == "ashs-ctx":
+                if labelCA2 is not None and labelCA3 is not None and labelENT is not None and labelBA35 is not None:
+                    # find instance of CA2/CA3
+                    idxHead = np.argwhere(np.logical_or(dat==labelBA35, np.logical_or(dat==labelENT, np.logical_or(dat==labelCA2, dat==labelCA3))))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-ctx-nohc":
+                if labelENT is not None and labelBA35 is not None:
+                    # find instance of ENT or BA35
+                    idxHead = np.argwhere(np.logical_or(dat==labelENT, dat==labelBA35))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-ent":
+                if labelENT is not None:
+                    # find instance of ENT
+                    idxHead = np.argwhere(dat==labelENT)
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            else:
+                if labelCA2 is not None and labelCA3 is not None:
+                    # find instance of CA2/CA3
+                    idxHead = np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
             # get min/max row/col/slice
             if imgDimsAPDir == -1:
-                cutFrom = np.min(idxCA23[:, imgDimsAP])
+                cutFrom = np.min(idxHead[:, imgDimsAP]) + params.internal.BNDHEADMARGIN
             elif imgDimsAPDir == 1:
-                cutFrom = np.max(idxCA23[:, imgDimsAP])
+                cutFrom = np.max(idxHead[:, imgDimsAP]) - params.internal.BNDHEADMARGIN
             # set to zero
             if imgDimsAP == 0 and imgDimsAPDir == -1:
                 dat[:cutFrom, :, :] = 0
@@ -221,26 +298,70 @@ def autoMask(params):
         # tail
         if params.internal.BNDTAIL is True:
             #
+            # TODO: look for consistent mask definitions, i.e. coords vs indices
+            #
             print("Using auto-mask for tail")
             # remove any potentially existing tail labels
             dat[dat==labelTail] = 0
-            # find instance of Tail
-            if np.any(dat==labelPHC):
-                idxTail = np.intersect1d(np.argwhere(dat==labelPHC)[:,imgDimsAP],
-                    np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                    np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                    np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
-                    np.argwhere(dat==labelCA3)[:,imgDimsAP]))))
+            #
+            if params.LUT == "ashs-ctx":
+                if labelPHC is not None and labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
+                    # find instance of Sbc/CA1/CA2/CA3 and PHC
+                    idxTail = np.intersect1d(np.argwhere(dat==labelPHC)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
+                        np.argwhere(dat==labelCA3)[:,imgDimsAP]))))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-ctx-nohc":
+                if labelPHC is not None:
+                    # find instance of PHC
+                    idxTail = np.argwhere(dat==labelPHC)[:,imgDimsAP]
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-ent":
+                if labelENT is not None:
+                    # find instance of ENT
+                    idxTail = np.argwhere(dat==labelENT)[:,imgDimsAP]
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-noca3":
+                if labelSbc is not None and labelCA1 is not None and labelCA2 is not None:
+                    # find instance of Sbc/CA1/CA2/CA3
+                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
+                        np.argwhere(dat==labelCA2)[:,imgDimsAP]))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-ca2ca3":
+                if labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
+                    # find instance of Sbc/CA1/(CA2orCA3)
+                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
+                        np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))[:,imgDimsAP]))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
             else:
-                idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                    np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                    np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
-                    np.argwhere(dat==labelCA3)[:,imgDimsAP])))
+                if labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
+                    # find instance of Sbc/CA1/CA2/CA3
+                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
+                        np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
+                        np.argwhere(dat==labelCA3)[:,imgDimsAP])))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
             # get min/max row/col/slice
             if imgDimsAPDir == -1:
-                cutFrom = np.max(idxTail)
+                cutFrom = np.max(idxTail) - params.internal.BNDTAILMARGIN
             elif imgDimsAPDir == 1:
-                cutFrom = np.min(idxTail)
+                cutFrom = np.min(idxTail) + params.internal.BNDTAILMARGIN
             # set to zero
             if imgDimsAP == 0 and imgDimsAPDir == -1:
                 dat[cutFrom+1:, :, :] = 0

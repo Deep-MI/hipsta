@@ -386,7 +386,7 @@ def tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
 # ------------------------------------------------------------------------------
 # cutTetra()
 
-def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=None, tetraCutOutFileFunc=None, tetraCutOutDir=None, labelHead=232, labelTail=226, labelBndHead=2320, labelBndTail=2260, labelBndCA4=2420):
+def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=None, tetraCutOutFileFunc=None, tetraCutOutDir=None, labelHead=232, labelTail=226, labelBndHead=2320, labelBndTail=2260, labelBndCA4=2420, cutRange=[-0.975, 0.975]):
     """
     This is a function to cut tetrahedral meshes
 
@@ -437,6 +437,8 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
         labelBndTail = params.LUTDICT['bndtail']
         labelBndCA4 = params.LUTDICT['bndca4']
 
+        cutRange = params.internal.cutrange
+
         hemi = params.HEMI
 
     # -------------------------------------------------------------------------
@@ -450,8 +452,7 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
     l4idx[np.where(l4idx==labelBndHead)[0]] = -1
     l4idx[np.where(l4idx==labelBndTail)[0]] = 1
 
-    lc = [ -0.975, 0.975 ]
-    #lc = [ -0.995, 0.995 ]
+    #cutRange = [ -0.975, 0.975 ]
 
     # -------------------------------------------------------------------------
     # preprocess data
@@ -464,11 +465,11 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
     # -------------------------------------------------------------------------
 
     # compute level sets
-    vlTail, llTail, ilTail, jlTail, olTail = levelsetsTetra(v4, t4, l4, lc[0])
-    vlHead, llHead, ilHead, jlHead, olHead = levelsetsTetra(v4, t4, l4, lc[1])
+    vlTail, llTail, ilTail, jlTail, olTail = levelsetsTetra(v4, t4, l4, cutRange[0])
+    vlHead, llHead, ilHead, jlHead, olHead = levelsetsTetra(v4, t4, l4, cutRange[1])
 
     # find all tetras that do not exceed the cutting criteria
-    t4c1 = t4[np.where(np.sum(np.isin(t4, np.where((l4>lc[0]) & (l4<lc[1]))), axis=1)==4), :][0]
+    t4c1 = t4[np.where(np.sum(np.isin(t4, np.where((l4>cutRange[0]) & (l4<cutRange[1]))), axis=1)==4), :][0]
 
     # add new points to v and generate new triangles
     v4c = np.concatenate((v4, vlTail[0], vlHead[0]), axis=0)

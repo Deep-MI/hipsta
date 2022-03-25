@@ -58,6 +58,7 @@ def get_help(print_help=True, return_help=False):
       9. create cube parametrization
       10. compute thickness and curvature
       11. map subfield values (and other volume-based data, optional)
+      12. create supplementary files for visualization
 
 
     Usage:
@@ -78,11 +79,6 @@ def get_help(print_help=True, return_help=False):
 
       --outputdir Directory where the results will be written. If not given, a
                   subfolder within each subject's directory will be created.
-
-      --topological-fixing <filename> <filename>
-                  Use FreeSurfer's topology fixing program to refine and fix
-                  initial surfaces. Can only be used with FreeSurfer-processed
-                  data. Expects two files as input, brain.mgz and wm.mgz.
 
       --no-cleanup
                   Do not delete files that may be useful for diagnostic or
@@ -301,18 +297,20 @@ def _parse_arguments():
 
     optional.add_argument('--outputdir', dest="outputdir", help="Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.",
         default=None, metavar="<directory>", required=False)
-    optional.add_argument('--topological-fixing', dest='tfx', help="Enable topological fixing algorithm for surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz, from FreeSurfer\'s `mri` subdirectory.",
-        default=None, metavar="<filename>", nargs=2, required=False)
     optional.add_argument('--no-cleanup', dest='cleanup', help="Keep files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.",
-        default=False, action="store_true", required=False)
-    optional.add_argument('--spherically-project', dest='spherically_project', help="Use eigenvalue-based spherical projection for topology fixing.",
         default=False, action="store_true", required=False)
 
     # expert options
     expert = parser.add_argument_group('Expert options')
 
+    optional.add_argument('--spherically-project', dest='spherically_project',  help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Use eigenvalue-based spherical projection for topology fixing."
+    optional.add_argument('--topological-fixing', dest='tfx', help=argparse.SUPPRESS,
+        default=None, metavar="<filename>", nargs=2, required=False) # help="Enable topological fixing algorithm for surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz, from FreeSurfer\'s `mri` subdirectory.",
+    expert.add_argument('--cut-params', dest="cutrange", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the cut operation.",
     expert.add_argument('--thickness-params', dest="thxyz", help=argparse.SUPPRESS,
-            default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the thickness computation.",
+        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the thickness computation.",
     expert.add_argument('--dilation-erosion', dest="dilero", help=argparse.SUPPRESS,
         default=None, metavar="<params>", nargs='+', required=False) # help="A list of parameters to fine-tune the surface creation.",
     expert.add_argument('--mca', dest="mca", help=argparse.SUPPRESS,
@@ -322,7 +320,7 @@ def _parse_arguments():
     expert.add_argument('--smooth', dest="smooth", help=argparse.SUPPRESS,
         default=None, metavar="<params>", required=False) # help="Mesh smoothing iterations.",
     expert.add_argument('--remesh', dest='remesh', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Switch on remeshing.",
+        default=None, metavar="<params>", nargs='*', required=False) # help="Switch on remeshing.",
     expert.add_argument('--aniso-alpha', dest="anisoAlpha", help=argparse.SUPPRESS,
         default=[40], metavar="<params>", nargs='+', required=False) # help="Anisotropy parameter.",
     expert.add_argument('--aniso-smooth', dest="anisoSmooth", help=argparse.SUPPRESS,
@@ -331,18 +329,34 @@ def _parse_arguments():
         default=False, action="store_true", required=False) # help="Allow ragged mid-surfaces.",
     expert.add_argument('--allow-ragged-triangles', dest='allowRaggedTriangles', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
+    expert.add_argument('--no-qc', dest='noqc', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Skip QC",
     expert.add_argument('--no-crop', dest='nocrop', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not crop image.",
     expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not filter image.",
+    expert.add_argument('--long-filter', dest='longfilter', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Filter image along longitudinal axis.",
+    expert.add_argument('--close-mask', dest='closemask', help=argparse.SUPPRESS,
+        default=None, metavar="regular|experimental", nargs="*", required=False) # help="Apply closing opreation to mask.",
     expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
-        default=None, metavar="<factor x> <factor y> <factor z>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
+        default=None, metavar="<factor x> <factor y> <factor z>", nargs='*', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
     expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
         default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",
+    expert.add_argument('--no-check-surface', dest='nochecksurface', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not check surface.",
+    expert.add_argument('--no-check-boundaries', dest='nocheckboundaries', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not boundaries.",
+    expert.add_argument('--skip-orient', dest='skiporient', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not check surface.",
     expert.add_argument('--automated-head', dest='bndHead', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not filter image.",
+        default=False, action="store_true", required=False) # help="",
     expert.add_argument('--automated-tail', dest='bndTail', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not filter image.",
+        default=False, action="store_true", required=False) # help="",
+    expert.add_argument('--margin-head', dest="bndHeadMargin", help=argparse.SUPPRESS,
+        default=[0], metavar="<params>", nargs=1, required=False)
+    expert.add_argument('--margin-tail', dest="bndTailMargin", help=argparse.SUPPRESS,
+        default=[0], metavar="<params>", nargs=1, required=False)
 
     # define help
     help = parser.add_argument_group('Getting help')
@@ -376,6 +390,7 @@ def _parse_arguments():
         print("ERROR: the --lut argument is required, exiting. Use --help to see details.")
         sys.exit(1)
 
+    #
     return args
 
 
@@ -443,8 +458,42 @@ def _evaluate_args(args):
     else:
         settings.FILTERMASK = args.filter
 
+    if args.longfilter is False:
+        settings.LONGFILTER = None
+    else:
+        settings.LONGFILTER = args.longfilter
+
+    if args.closemask is None:
+        settings.CLOSEMASK = args.closemask
+    else:
+        if len(args.closemask) == 0:
+            settings.CLOSEMASK = "regular"
+        elif len(args.closemask) == 1:
+            if args.closemask[0] != "regular" and args.closemask[0] != "experimental" and args.closemask[0] != "experimental_v2":
+                logging.error("The --close-mask argument can be either 'regular' or 'experimental'")
+                print("Program exited with ERRORS.")
+                sys.exit(1)
+            else:
+                settings.CLOSEMASK = args.closemask[0]
+        else:
+            logging.error("The --close-mask argument can take only 0 or 1 options, but " + str(len(args.closemask)) + " were specified")
+            print("Program exited with ERRORS.")
+            sys.exit(1)
+
+    if args.nochecksurface is True:
+        settings.CHECKSURFACE = None
+    else:
+        settings.CHECKSURFACE = args.nochecksurface
+
+    if args.nocheckboundaries is True:
+        settings.CHECKBOUNDARIES = None
+    else:
+        settings.CHECKBOUNDARIES = args.nocheckboundaries
+
     settings.BNDHEAD = args.bndHead
     settings.BNDTAIL = args.bndTail
+    settings.BNDHEADMARGIN = int(args.bndHeadMargin[0])
+    settings.BNDTAILMARGIN = int(args.bndTailMargin[0])
 
     # marching cube algorithm
 
@@ -469,7 +518,12 @@ def _evaluate_args(args):
 
     # remeshing
 
-    settings.REMESH = args.remesh
+    if args.remesh is None:
+        settings.REMESH = None
+    elif not args.remesh:
+        settings.REMESH = 0
+    else:
+        settings.REMESH = int(args.remesh[0])
 
     # topology fixing
 
@@ -481,6 +535,10 @@ def _evaluate_args(args):
         args.skipTFX = True
     else:
         args.skipTFX = False
+
+    # qc
+
+    settings.noqc = args.noqc
 
     # anisotropy parameters
 
@@ -504,6 +562,13 @@ def _evaluate_args(args):
     # legacy parameters
 
     settings.cubeWriteLegacyVTK = True
+
+    # cutting params
+
+    if args.cutrange is None:
+        settings.cutrange = [-0.975, 0.975]
+    else:
+        settings.cutrange = [float(args.cutrange[0]), float(args.cutrange[1])]
 
     # thickness params
 
@@ -530,6 +595,7 @@ def _evaluate_args(args):
 
     settings.allowRagged = args.allowRagged
     settings.allowRaggedTriangles = args.allowRaggedTriangles
+    settings.skipOrient = args.skiporient
 
     # mapValues params
 
@@ -651,8 +717,8 @@ def _check_arguments(params):
     # check upsampling
 
     if params.internal.UPSAMPLE is not None:
-        if len(params.internal.UPSAMPLE ) != 3:
-            logging.error("Incorrect number of --upsampling parameters.")
+        if len(params.internal.UPSAMPLE ) != 0 and len(params.internal.UPSAMPLE ) != 3:
+            logging.error("Incorrect number of --upsampling parameters, must be 0 or 3.")
             print("Program exited with ERRORS.")
             sys.exit(1)
 
@@ -672,7 +738,21 @@ def _check_arguments(params):
 
         hsflist = [ 234, 236, 238, 240, 246 ]
 
-    elif params.LUT == "ashs":
+    elif params.LUT == "fs711-noml":
+
+        logging.info("Found internal, modified look-up table for FreeSurfer 7.11.")
+
+        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2",
+            "ca3", "ca4", "dg" ]
+
+        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240,
+            242, 244 ]
+
+        lutDict = dict(zip(LUTLABEL, LUTINDEX))
+
+        hsflist = [ 234, 236, 238, 240]
+
+    elif params.LUT == "ashs" or params.LUT == "ashs-ca2ca3":
 
         logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
 
@@ -686,6 +766,22 @@ def _check_arguments(params):
         lutDict = dict(zip(LUTLABEL, LUTINDEX))
 
         hsflist = [ 8, 1, 2, 4 ]
+
+    elif params.LUT == "ashs-noca3":
+
+        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
+
+        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
+            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
+            "head", "tail" ]
+
+        #LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 255, 254 ]
+        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
+
+        lutDict = dict(zip(LUTLABEL, LUTINDEX))
+
+        hsflist = [ 8, 1, 2 ]
+
 
     elif params.LUT == "ashs-ctx":
 
@@ -701,7 +797,7 @@ def _check_arguments(params):
 
         hsflist = [ 12, 10, 9, 8, 1, 2, 4 ]
 
-    elif params.LUT == "ashs-ent+phc":
+    elif params.LUT == "ashs-ctx-nohc":
 
         logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
 
@@ -713,7 +809,21 @@ def _check_arguments(params):
 
         lutDict = dict(zip(LUTLABEL, LUTINDEX))
 
-        hsflist = [ 12, 9, 8, 1, 2, 4 ]
+        hsflist = [ 12, 10, 9]
+
+    elif params.LUT == "ashs-ent":
+
+        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
+
+        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
+            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
+            "head", "tail" ]
+
+        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
+
+        lutDict = dict(zip(LUTLABEL, LUTINDEX))
+
+        hsflist = [ 9 ]
 
     elif params.LUT == "ukb":
 
@@ -738,16 +848,17 @@ def _check_arguments(params):
                 header=None, skipinitialspace=True, skip_blank_lines=True,
                 error_bad_lines=False, warn_bad_lines=True)
 
-            lut = np.array(lut)
+            #lut = np.array(lut)
+            #lutLbl = np.char.lower(lut[:, 1].astype(str))
+            #lutIdx = lut[:, 0]
+            #lutDict = dict()
+            #for i in np.unique(lutLbl):
+            #    lutDict[i] = lutIdx[np.where(lutLbl==i)][0]
+            #hsflist = [lutDict['presubiculum'].item(), lutDict['subiculum'].item(), lutDict['ca1'].item(), lutDict['ca2'].item(), lutDict['ca3'].item(), lutDict['ca4'].item()]
+            #hsflist = [ int(x.item()) for x in lutDict ]
 
-            lutLbl = np.char.lower(lut[:, 1].astype(str))
-            lutIdx = lut[:, 0]
-
-            lutDict = dict()
-            for i in np.unique(lutLbl):
-                lutDict[i] = lutIdx[np.where(lutLbl==i)[0]]
-
-            hsflist = [lutDict['presubiculum'].item(), lutDict['subiculum'].item(), lutDict['ca1'].item(), lutDict['ca2'].item(), lutDict['ca3'].item(), lutDict['ca4'].item()]
+            lutDict = dict(zip(lut[0], lut[1]))
+            hsflist = list(lut[1])
 
         except:
 
@@ -757,7 +868,7 @@ def _check_arguments(params):
 
     else:
 
-        logging.error("Look-up table can only be \'fs711\', \'ashs\', or an existing file, but not " + params.LUT)
+        logging.error("Look-up table can only be \'fs711\', \'ashs\', \'ashs-ca2ca3\', \'ashs-ctx\', \'ashs-ctx-nohc\', \'ashs-ent\', \'ashs-noca3\', or an existing file, but not " + params.LUT)
         print("Program exited with ERRORS.")
         sys.exit(1)
 
@@ -823,6 +934,9 @@ def _run_analysis(params):
     from shapetools.processMask import fillHoles
     from shapetools.processMask import createMask
     from shapetools.processMask import filterMask
+    from shapetools.processMask import longFilter
+    from shapetools.processMask import closeMask
+    from shapetools.checkSurface import checkSurface
     from shapetools.createSurface import createSurface
     from shapetools.createTetraMesh import createTetraMesh
     from shapetools.createTetraLabels import createTetraLabels
@@ -831,6 +945,7 @@ def _run_analysis(params):
     from shapetools.computeCubeParam import computeCubeParam
     from shapetools.computeThickness import computeThickness
     from shapetools.mapValues import mapValues
+    from shapetools.createSupplementaryFiles import createSupplementaryFiles
     from shapetools.qcPlots import qcPlots
 
     # convert format (0)
@@ -865,6 +980,12 @@ def _run_analysis(params):
     logging.info("Starting createMask() ...")
     params = createMask(params)
 
+    logging.info("Starting longFilter() ...")
+    params = longFilter(params)
+
+    logging.info("Starting closeMask() ...")
+    params = closeMask(params)
+
     logging.info("Starting filterMask() ...")
     params = filterMask(params)
 
@@ -876,52 +997,74 @@ def _run_analysis(params):
     logging.info("Starting qcPlots() ...")
     params = qcPlots(params, stage="mesh")
 
-    # create tetra mesh for whole hippocampal body (5)
+    logging.info("Starting checkSurface() ...")
+    cont, params = checkSurface(params, stage="check_surface")
 
-    logging.info("Starting createTetraMesh() ...")
-    params = createTetraMesh(params)
+    #
 
-    # create label files for tetra mesh (6)
+    if cont is True:
 
-    logging.info("Starting createTetraLabels() ...")
-    params = createTetraLabels(params)
+        # create tetra mesh for whole hippocampal body (5)
 
-    # remove boundary mask (7)
+        logging.info("Starting createTetraMesh() ...")
+        params = createTetraMesh(params)
 
-    logging.info("Starting removeBoundaryMask() ...")
-    params = removeBoundaryMask(params)
+        # create label files for tetra mesh (6)
 
-    # create tetra mesh for cut hippocampal body (8)
+        logging.info("Starting createTetraLabels() ...")
+        params = createTetraLabels(params)
 
-    logging.info("Starting cutTetra() ...")
-    params = cutTetra(params)
+        # remove boundary mask (7)
 
-    # compute cube parametrization (9)
+        logging.info("Starting removeBoundaryMask() ...")
+        params = removeBoundaryMask(params)
 
-    logging.info("Starting computeCubeParam() ...")
-    params = computeCubeParam(params)
+        # create tetra mesh for cut hippocampal body (8)
 
-    logging.info("Starting qcPlots() ...")
-    params = qcPlots(params, stage="profile")
+        logging.info("Starting cutTetra() ...")
+        params = cutTetra(params)
 
-    # compute thickness (10)
 
-    logging.info("Starting computeThickness() ...")
-    params = computeThickness(params)
+        logging.info("Starting checkSurface() ...")
+        cont, params = checkSurface(params, stage="check_boundaries")
 
-    logging.info("Starting qcPlots() ...")
-    params = qcPlots(params, stage="hull")
+        #
 
-    # map subfield mapValues (11)
+        if cont is True:
 
-    logging.info("Starting mapValues() ...")
-    params = mapValues(params)
+            # compute cube parametrization (9)
+
+            logging.info("Starting computeCubeParam() ...")
+            params = computeCubeParam(params)
+
+            logging.info("Starting qcPlots() ...")
+            params = qcPlots(params, stage="profile")
+
+            # compute thickness (10)
+
+            logging.info("Starting computeThickness() ...")
+            params = computeThickness(params)
+
+            logging.info("Starting qcPlots() ...")
+            params = qcPlots(params, stage="hull")
+
+            # map subfield mapValues (11)
+
+            logging.info("Starting mapValues() ...")
+            params = mapValues(params)
+
+            # map subfield mapValues (12)
+
+            logging.info("Starting createSupplementaryFiles() ...")
+            params = createSupplementaryFiles(params)
 
     # all done
 
     logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
-    logging.info("Hippocampal shapetools finished without errors.")
-
+    if cont is True:
+        logging.info("Hippocampal shapetools finished without errors.")
+    else:
+        logging.info("Hippocampal shapetools finished WITH ERRORS.")
 
 # ------------------------------------------------------------------------------
 # start logging
@@ -973,6 +1116,9 @@ def _start_logging(args):
     logging.info("Starting logging for hippocampal shapetools ...")
     logging.info("Version: %s", get_version())
     logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
+
+    # log args
+    logging.info("Command: " + " ".join(sys.argv))
 
     # update args
     args.logfile = logfile
