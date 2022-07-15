@@ -13,7 +13,7 @@ package.
 
 def get_version():
 
-    VERSION = "v0.5.0-beta"
+    VERSION = "v0.6.0-beta"
 
     return VERSION
 
@@ -74,7 +74,6 @@ def get_help(print_help=True, return_help=False):
       --lut       A valid look-up table for hippocampal subfield segmentation.
                   Either 'fs711' or 'ashs' or a valid filename.
 
-
     Optional input arguments:
 
       --outputdir Directory where the results will be written. If not given, a
@@ -84,7 +83,11 @@ def get_help(print_help=True, return_help=False):
                   Do not delete files that may be useful for diagnostic or
                   debugging purposes, but are not strictly necessary otherwise.
 
+    Getting help:
+
       --help      Display this help and exit.
+
+      --more-help Display extensive help and exit.
 
       --version   Display version number and exit.
 
@@ -303,52 +306,10 @@ def _parse_arguments():
     # expert options
     expert = parser.add_argument_group('Expert options')
 
-    optional.add_argument('--spherically-project', dest='spherically_project',  help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Use eigenvalue-based spherical projection for topology fixing."
-    optional.add_argument('--topological-fixing', dest='tfx', help=argparse.SUPPRESS,
-        default=None, metavar="<filename>", nargs=2, required=False) # help="Enable topological fixing algorithm for surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz, from FreeSurfer\'s `mri` subdirectory.",
-    expert.add_argument('--cut-params', dest="cutrange", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the cut operation.",
-    expert.add_argument('--thickness-params', dest="thxyz", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the thickness computation.",
-    expert.add_argument('--dilation-erosion', dest="dilero", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='+', required=False) # help="A list of parameters to fine-tune the surface creation.",
-    expert.add_argument('--mca', dest="mca", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Marching-cube algorithm.",
-    expert.add_argument('--mcc', dest="mcc", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Marching-cube connectivity.",
-    expert.add_argument('--smooth', dest="smooth", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Mesh smoothing iterations.",
-    expert.add_argument('--remesh', dest='remesh', help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='*', required=False) # help="Switch on remeshing.",
-    expert.add_argument('--aniso-alpha', dest="anisoAlpha", help=argparse.SUPPRESS,
-        default=[40], metavar="<params>", nargs='+', required=False) # help="Anisotropy parameter.",
-    expert.add_argument('--aniso-smooth', dest="anisoSmooth", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Anisotropy smoothing.",
-    expert.add_argument('--allow-ragged', dest='allowRagged', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Allow ragged mid-surfaces.",
-    expert.add_argument('--allow-ragged-triangles', dest='allowRaggedTriangles', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
-    expert.add_argument('--no-qc', dest='noqc', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Skip QC",
     expert.add_argument('--no-crop', dest='nocrop', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not crop image.",
-    expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not filter image.",
-    expert.add_argument('--long-filter', dest='longfilter', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Filter image along longitudinal axis.",
-    expert.add_argument('--close-mask', dest='closemask', help=argparse.SUPPRESS,
-        default=None, metavar="regular|experimental", nargs="*", required=False) # help="Apply closing opreation to mask.",
     expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
         default=None, metavar="<factor x> <factor y> <factor z>", nargs='*', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
-    expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
-        default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",
-    expert.add_argument('--no-check-surface', dest='nochecksurface', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not check surface.",
-    expert.add_argument('--no-check-boundaries', dest='nocheckboundaries', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not boundaries.",
-    expert.add_argument('--skip-orient', dest='skiporient', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not check surface.",
     expert.add_argument('--automated-head', dest='bndHead', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="",
     expert.add_argument('--automated-tail', dest='bndTail', help=argparse.SUPPRESS,
@@ -357,6 +318,50 @@ def _parse_arguments():
         default=[0], metavar="<params>", nargs=1, required=False)
     expert.add_argument('--margin-tail', dest="bndTailMargin", help=argparse.SUPPRESS,
         default=[0], metavar="<params>", nargs=1, required=False)
+    expert.add_argument('--dilation-erosion', dest="dilero", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", nargs='+', required=False) # help="A list of parameters to fine-tune the surface creation.",
+    expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not filter image.",
+    expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
+        default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",
+    expert.add_argument('--long-filter', dest='longfilter', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Filter image along longitudinal axis.",
+    expert.add_argument('--close-mask', dest='closemask', help=argparse.SUPPRESS,
+        default=None, metavar="regular|experimental", nargs="*", required=False) # help="Apply closing opreation to mask.",
+    expert.add_argument('--mca', dest="mca", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", required=False) # help="Marching-cube algorithm.",
+    expert.add_argument('--mcc', dest="mcc", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", required=False) # help="Marching-cube connectivity.",
+    optional.add_argument('--topological-fixing', dest='tfx', help=argparse.SUPPRESS,
+        default=None, metavar="<filename>", nargs=2, required=False) # help="Enable topological fixing algorithm for surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz, from FreeSurfer\'s `mri` subdirectory.",
+    expert.add_argument('--smooth', dest="smooth", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", required=False) # help="Mesh smoothing iterations.",
+    expert.add_argument('--remesh', dest='remesh', help=argparse.SUPPRESS,
+        default=None, metavar="<params>", nargs='*', required=False) # help="Switch on remeshing.",
+    expert.add_argument('--no-check-surface', dest='nochecksurface', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not check surface.",
+    expert.add_argument('--no-check-boundaries', dest='nocheckboundaries', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not boundaries.",
+    expert.add_argument('--no-qc', dest='noqc', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Skip QC",
+    expert.add_argument('--cut-params', dest="cutrange", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the cut operation.",
+    expert.add_argument('--aniso-alpha', dest="anisoAlpha", help=argparse.SUPPRESS,
+        default=[40], metavar="<params>", nargs='+', required=False) # help="Anisotropy parameter.",
+    expert.add_argument('--aniso-smooth', dest="anisoSmooth", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", required=False) # help="Anisotropy smoothing.",
+    expert.add_argument('--thickness-params', dest="thxyz", help=argparse.SUPPRESS,
+        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the thickness computation.",
+    expert.add_argument('--allow-ragged', dest='allowRagged', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Allow ragged mid-surfaces.",
+    expert.add_argument('--allow-ragged-triangles', dest='allowRaggedTriangles', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
+
+    # Deprecated options
+    expert.add_argument('--spherically-project', dest='spherically_project',  help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Use eigenvalue-based spherical projection for topology fixing."
+    expert.add_argument('--skip-orient', dest='skiporient', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Do not check surface.",
 
     # define help
     help = parser.add_argument_group('Getting help')
