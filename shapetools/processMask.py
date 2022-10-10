@@ -58,10 +58,10 @@ def fillHoles(params):
     os.environ["FSLOUTPUTTYPE"] = "NIFTI"
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
-        + "-dt input " \
+        + "-dt int " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_01 + "_merged.nii") + " " \
-        + "-kernel box " + str(params.internal.DIL) + " -dilD " \
-        + "-kernel box " + str(params.internal.ERO) + " -ero " \
+        + "-kernel boxv " + str(params.internal.DIL) + " -dilD " \
+        + "-kernel boxv " + str(params.internal.ERO) + " -ero " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + ".de." + params.internal.HSFLABEL_01 + "_merged.nii")
 
     print(cmd)
@@ -69,10 +69,10 @@ def fillHoles(params):
     subprocess.run(cmd.split())
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fslmaths.fsl") + " " \
-        + "-dt input " \
+        + "-dt int " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_01 + "_assigned.nii") + " " \
-        + "-kernel box " + str(params.internal.DIL) + " -dilD " \
-        + "-kernel box " + str(params.internal.ERO) + " -ero " \
+        + "-kernel boxv " + str(params.internal.DIL) + " -dilD " \
+        + "-kernel boxv " + str(params.internal.ERO) + " -ero " \
         + os.path.join(params.OUTDIR, "mask", params.HEMI + ".de." + params.internal.HSFLABEL_01 + "_assigned.nii")
 
     print(cmd)
@@ -277,22 +277,22 @@ def longFilter(params):
         img = nb.load(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz"))
         dat = img.get_fdata()
 
-        k = np.zeros((3,3,3))
-        k[1,1,:] = 1
+        #k = np.zeros((3,3,3))
+        #k[1,1,:] = 1
         #k[:,1,1] = 1
 
-        #k = np.zeros((5,5,5))
-        #k[2,2,:] = 1
+        k = np.zeros(params.internal.LONGFILTER_SIZE)
+        k[2,2,:] = 1
 
         dat_filtered = ndimage.convolve(dat, k, mode="constant", cval=0.0)
 
         dat_filtered = dat_filtered>0
 
         # opening
-        dat_filtered = ndimage.binary_opening(dat_filtered)
+        #dat_filtered = ndimage.binary_opening(dat_filtered)
 
         # closing
-        dat_filtered = ndimage.binary_closing(dat_filtered)
+        #dat_filtered = ndimage.binary_closing(dat_filtered)
 
         nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.get_affine()), filename=os.path.join(params.OUTDIR, params.HEMI + ".lf." + params.internal.HSFLABEL_02 + ".mgz"))
 

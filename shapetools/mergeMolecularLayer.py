@@ -143,6 +143,9 @@ def mergeML(params, inputfile=None, outputfile=None, offset=None, suffix=None):
         n=1
         tmpML=np.transpose((np.empty([0]),np.empty([0]),np.empty([0])))
         while np.shape(tmpML)[0]==0:
+            if n>10 or (np.int((vxML[i,0]-n))<0) or (np.int((vxML[i,0]+n))>(vx.shape[0]-1)) or (np.int((vxML[i,1]-n))<0) or (np.int((vxML[i,0]+n))>(vx.shape[1]-1)) or (np.int((vxML[i,2]-n))<0) or (np.int((vxML[i,0]+n))>(vx.shape[2]-1)):
+                vxML[i,3]=0
+                break
             tmp=vx[np.ix_(range(np.int((vxML[i,0]-n)),np.int((vxML[i,0]+n)+1)),range(np.int((vxML[i,1]-n)),np.int((vxML[i,1]+n)+1)),range(np.int((vxML[i,2]-n)),np.int((vxML[i,2]+n)+1)))]
             tmpML=np.transpose(np.where((tmp!=0)&(tmp!=246)&(tmp!=245)&(tmp!=214)))
             if np.shape(tmpML)[0]!=0:
@@ -155,7 +158,6 @@ def mergeML(params, inputfile=None, outputfile=None, offset=None, suffix=None):
         tmpML=None
 
     # write back to vx and im
-    vxOld=vx
     for i in range(np.shape(vxML)[0]):
         vx[np.int(vxML[i,0]),np.int(vxML[i,1]),np.int(vxML[i,2])]=vxML[i,3]
 
@@ -185,7 +187,7 @@ def mergeMolecularLayer(params):
     # check if ML is present in lookup table and hsflist; if not, just copy
     # files
 
-    if "ML" in params.LUTDICT.keys():
+    if "ml" in params.LUTDICT.keys():
 
         #
         print("Attaching the molecular layer")

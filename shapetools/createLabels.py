@@ -31,8 +31,7 @@ def createLabels(params):
 
     # process HSF label image
 
-    # This step extracts HSFs from the label image (note that dilate and erode may
-    # create masks that are not disjunct; this will be taken care of). It outputs
+    # This step extracts HSFs from the label image. It outputs
     # several files that contain binary masks for subfields, i.e.
     # (XXX_XX_<label>_<original-mri>.mgz)
 
@@ -43,14 +42,12 @@ def createLabels(params):
         print("Working on label " + str(i))
         print()
 
-        # create a mask after erosion and dilation
+        # create a mask
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
             + "--i " +  params.FILENAME + " " \
             + "--match " + str(i) + " " \
             + "--binval " + str(i) + " " \
             + "--o " + os.path.join(params.OUTDIR, "labels", str(i) + "." + os.path.basename(params.FILENAME))            
-#            + "--dilate " + str(params.internal.DIL) + " " \
-#            + "--erode " + str(params.internal.ERO) + " " \
 
         print(cmd)
 

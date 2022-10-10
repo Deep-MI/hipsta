@@ -89,6 +89,9 @@ def levelsetsTria(v, t, p, levelsets):
             # find the two non - outyling points
             oix = np.setdiff1d((0, 1, 2), oi)
 
+            #
+            oi = oi.item()
+
             # check if we have interpolated for one or both of these points before
 
             if np.count_nonzero(A[t[n[i], oi], t[n[i], oix[0]]]) ==0 :
@@ -106,8 +109,7 @@ def levelsetsTria(v, t, p, levelsets):
                 v10 = s10 * d10 + v[ t[n[i], oi], :]
 
                 # update vi and index(order matters)
-
-                vi.append(v10.tolist()[0])
+                vi.append(v10.tolist())
 
                 ti10 = len(vi)
 
@@ -118,7 +120,7 @@ def levelsetsTria(v, t, p, levelsets):
 
             else:
 
-                ti10 = int(A[ t[n[i], oi], t[n[i], oix[0]] ].toarray().item())
+                ti10 = int(A[ t[n[i], oi], t[n[i], oix[0]] ])
 
             # essentially the same as above, just for oix[1]
 
@@ -131,8 +133,7 @@ def levelsetsTria(v, t, p, levelsets):
                 v20 = s20 * d20 + v[ t[n[i], oi], :]
 
                 # update vi and index(order matters)
-
-                vi.append(v20.tolist()[0])
+                vi.append(v20.tolist())
 
                 ti20 = len(vi)
 
@@ -141,15 +142,10 @@ def levelsetsTria(v, t, p, levelsets):
 
             else:
 
-                ti20 = int(A[ t[n[i], oi], t[n[i], oix[1]] ].toarray().item())
+                ti20 = int(A[ t[n[i], oi], t[n[i], oix[1]] ])
 
             # store new indices
-
             ti.append((ti10,ti20))
-
-            # clean up
-
-            # clear oi oix d10 d20 s10 s20 v10 v20 t10 t20
 
         # store
 
@@ -224,7 +220,7 @@ def levelsetsTetra(v, t, p, levelsets):
 
                 # check if we have interpolated for one or more of these points before
 
-                if np.sum(np.count_nonzero(A[t[n[i], oi], t[n[i], oix[0]]])) == 0:
+                if np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[0]]])) == 0:
 
                     # compute difference vectors between outlying point and other points
 
@@ -239,23 +235,22 @@ def levelsetsTetra(v, t, p, levelsets):
                     v10 = s10 * d10 + v[ t[n[i], oi], :]
 
                     # update vi and index(order matters)
-
-                    vi.append(v10.tolist()[0])
+                    vi.append(v10.tolist()[0]) # OK [a][0] -> l
 
                     ti10 = len(vi)
 
                     # store between which two points we are interpolating (to avoid having duplicate points)
 
-                    A[ t[n[i], oi], t[n[i], oix[0]] ] = ti10
-                    A[ t[n[i], oix[0]], t[n[i], oi] ] = ti10
+                    A[ t[n[i], oi.item()], t[n[i], oix[0]] ] = ti10
+                    A[ t[n[i], oix[0]], t[n[i], oi.item()] ] = ti10
 
                 else:
 
-                    ti10 = int(A[ t[n[i], oi], t[n[i], oix[0]] ].toarray().item())
+                    ti10 = int(A[ t[n[i], oi.item()], t[n[i], oix[0]] ])
 
                 # essentially the same as above, just for oix[1]
 
-                if np.sum(np.count_nonzero(A[t[n[i], oi], t[n[i], oix[1]]])) == 0:
+                if np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[1]]])) == 0:
 
                     d20 = v[ t[n[i], oix[1]], :] - v[ t[n[i], oi], :]
 
@@ -264,21 +259,20 @@ def levelsetsTetra(v, t, p, levelsets):
                     v20 = s20 * d20 + v[ t[n[i], oi], :]
 
                     # update vi and index(order matters)
-
-                    vi.append(v20.tolist()[0])
+                    vi.append(v20.tolist()[0]) # OK [a][0] -> l
 
                     ti20 = len(vi)
 
-                    A[ t[n[i], oi], t[n[i], oix[1]] ] = ti20
-                    A[ t[n[i], oix[1]], t[n[i], oi] ] = ti20
+                    A[ t[n[i], oi.item()], t[n[i], oix[1]] ] = ti20
+                    A[ t[n[i], oix[1]], t[n[i], oi.item()] ] = ti20
 
                 else:
 
-                    ti20 = int(A[ t[n[i], oi], t[n[i], oix[1]] ].toarray().item())
+                    ti20 = int(A[ t[n[i], oi.item()], t[n[i], oix[1]] ])
 
                 # essentially the same as above, just for oix[2]
 
-                if np.sum(np.count_nonzero(A[t[n[i], oi], t[n[i], oix[2]]])) == 0:
+                if np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[2]]])) == 0:
 
                     d30 = v[ t[n[i], oix[2]], :] - v[ t[n[i], oi], :]
 
@@ -287,23 +281,21 @@ def levelsetsTetra(v, t, p, levelsets):
                     v30 = s30 * d30 + v[ t[n[i], oi], :]
 
                     # update vi and index(order matters)
-
-                    vi.append(v30.tolist()[0])
+                    vi.append(v30.tolist()[0]) # OK [a][0] -> l
 
                     ti30 = len(vi)
 
-                    A[ t[n[i], oi], t[n[i], oix[2]] ] = ti30
-                    A[ t[n[i], oix[2]], t[n[i], oi] ] = ti30
+                    A[ t[n[i], oi.item()], t[n[i], oix[2]] ] = ti30
+                    A[ t[n[i], oix[2]], t[n[i], oi.item()] ] = ti30
 
                 else:
 
-                    ti30 = int(A[ t[n[i], oi], t[n[i], oix[2]] ].toarray().item())
+                    ti30 = int(A[ t[n[i], oi.item()], t[n[i], oix[2]] ])
 
                 # store new indices
+                ti.append((ti10,ti20,ti30)) # OK
 
-                ti.append((ti10,ti20,ti30))
-
-                m.append(n[i])
+                m.append(n[i]) # OK
 
             elif len(oi) == 2:
 
@@ -330,8 +322,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     v20 = s20 * d20 + v[ t[n[i], oi[0]], :]
 
                     # update vi and index (order matters)
-
-                    vi.append(v20.tolist())
+                    vi.append(v20.tolist()) ### a->l OK
 
                     ti20 = len(vi)
 
@@ -363,8 +354,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     v30 = s30 * d30 + v[ t[n[i], oi[0]], :]
 
                     # update vi and index (order matters)
-
-                    vi.append(v30.tolist())
+                    vi.append(v30.tolist()) # a->l OK
 
                     ti30 = len(vi)
 
@@ -396,8 +386,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     v21 = s21 * d21 + v[ t[n[i], oi[1]], :]
 
                     # update vi and index (order matters)
-
-                    vi.append(v21.tolist())
+                    vi.append(v21.tolist()) # a->l OK
 
                     ti21 = len(vi)
 
@@ -429,8 +418,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     v31 = s31 * d31 + v[ t[n[i], oi[1]], :]
 
                     # update vi and index (order matters)
-
-                    vi.append(v31.tolist())
+                    vi.append(v31.tolist()) # a->l OK
 
                     ti31 = len(vi)
 

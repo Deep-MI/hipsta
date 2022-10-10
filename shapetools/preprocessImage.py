@@ -299,7 +299,6 @@ def autoMask(params):
         if params.internal.BNDTAIL is True:
             #
             # TODO: look for consistent mask definitions, i.e. coords vs indices
-            #
             print("Using auto-mask for tail")
             # remove any potentially existing tail labels
             dat[dat==labelTail] = 0
@@ -331,10 +330,18 @@ def autoMask(params):
                     sys.exit(1)
             elif params.LUT == "ashs-noca3":
                 if labelSbc is not None and labelCA1 is not None and labelCA2 is not None:
-                    # find instance of Sbc/CA1/CA2/CA3
+                    # find instance of Sbc/CA1/CA2
                     idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
                         np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
                         np.argwhere(dat==labelCA2)[:,imgDimsAP]))
+                else:
+                    logging.info("Insufficient label information, exiting.")
+                    sys.exit(1)
+            elif params.LUT == "ashs-noca3ca2":
+                if labelSbc is not None and labelCA1 is not None:
+                    # find instance of Sbc/CA1
+                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
+                        np.argwhere(dat==labelCA1)[:,imgDimsAP])
                 else:
                     logging.info("Insufficient label information, exiting.")
                     sys.exit(1)

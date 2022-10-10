@@ -326,6 +326,8 @@ def _parse_arguments():
         default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",
     expert.add_argument('--long-filter', dest='longfilter', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Filter image along longitudinal axis.",
+    expert.add_argument('--long-filter-size', dest='longfilter_size', help=argparse.SUPPRESS,
+        default=[5], metavar="<params>", nargs=1, required=False)
     expert.add_argument('--close-mask', dest='closemask', help=argparse.SUPPRESS,
         default=None, metavar="regular|experimental", nargs="*", required=False) # help="Apply closing opreation to mask.",
     expert.add_argument('--mca', dest="mca", help=argparse.SUPPRESS,
@@ -467,6 +469,8 @@ def _evaluate_args(args):
         settings.LONGFILTER = None
     else:
         settings.LONGFILTER = args.longfilter
+
+    settings.LONGFILTER_SIZE = (int(args.longfilter_size[0]), int(args.longfilter_size[0]), int(args.longfilter_size[0]))
 
     if args.closemask is None:
         settings.CLOSEMASK = args.closemask
@@ -757,7 +761,7 @@ def _check_arguments(params):
 
         hsflist = [ 234, 236, 238, 240]
 
-    elif params.LUT == "ashs" or params.LUT == "ashs-ca2ca3":
+    elif params.LUT == "ashs" or params.LUT == "ashs-ca2ca3" or params.LUT == "ashs-noca3ca2":
 
         logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
 
@@ -873,7 +877,7 @@ def _check_arguments(params):
 
     else:
 
-        logging.error("Look-up table can only be \'fs711\', \'ashs\', \'ashs-ca2ca3\', \'ashs-ctx\', \'ashs-ctx-nohc\', \'ashs-ent\', \'ashs-noca3\', or an existing file, but not " + params.LUT)
+        logging.error("Look-up table can only be \'fs711\', \'ashs\', \'ashs-ca2ca3\', \'ashs-ctx\', \'ashs-ctx-nohc\', \'ashs-ent\', \'ashs-noca3\', \'ashs-noca3ca2\', or an existing file, but not " + params.LUT)
         print("Program exited with ERRORS.")
         sys.exit(1)
 

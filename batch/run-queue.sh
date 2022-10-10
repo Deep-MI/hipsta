@@ -22,7 +22,7 @@ if [ $# -ne 8 ] ; then
     echo "i.e. the 'bash' environment, and should be run from such an environment. "
     echo
     echo
-    echo "usage: run-queue.sh <NCASES> <NQUEUES> <SUBJECTS_DIR> <START> <LIST_FILE> <CMD_FILE> <SUFFIX> <TIMEOUT>"
+    echo "usage: run-queue.sh <NCASES> <NQUEUES> <START> <SUBJECTS_DIR> <LIST_FILE> <CMD_FILE> <SUFFIX> <TIMEOUT>"
     echo
     echo "  NCASES          ... number of cases to run"
     echo "  NCQUEUES        ... number of queues to run in parallel"
