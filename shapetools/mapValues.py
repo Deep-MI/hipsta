@@ -351,6 +351,9 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
        integr = np.nanmax(lookup3D[:,:,SELECT], axis=2)
     elif INTEGRATE == "min":
         integr = np.nanmin(lookup3D[:,:,SELECT], axis=2)
+    elif INTEGRATE == "nonzeromin":
+        lookup3D[lookup3D==0]=np.Inf
+        integr = np.nanmin(lookup3D[:,:,SELECT], axis=2)
     elif INTEGRATE == "none":
         if len(SELECT)>1:
             print("Error: cannot use --integrate none with multiple sampling points, exiting.")
