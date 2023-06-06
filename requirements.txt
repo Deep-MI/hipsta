@@ -9,4 +9,4 @@ pyvista
 scipy
 uuid
 nilearn
-lapy@git+https://github.com/deep-mi/lapy
+lapy
