@@ -66,7 +66,7 @@ This script performs the following major processing steps:
 `--no-filter`              | Do not filter image.
 `--filter <int> <int>`     | A list of parameters to fine-tune image filtering. Specify two numbers for filter width and threshold. Default is `0.5 50`
 `--long-filter`            | Filter image along longitudinal axis, i.e. attempt to create smooth transitions between slices.
-`--long-filter-size`       | Size of longitudinal filter. 
+`--long-filter-size`       | Size of longitudinal filter.
 `--close-mask [<string>]`  | Apply closing operation to mask, i.e. attempt to close small holes. Default is `regular`, alternative is `experimental`.
 `--mca <string>`           | Marching-cube algorithm. Either `mri_mc` (default) or `mri_tessellate`.
 `--mcc <integer>`          | Marching-cube connectivity. Only used for `mri_mc` algorithm. Default is `1`. See `mri_mc --help` for details.
@@ -191,17 +191,17 @@ It is recommended to run this pipeline within its own virtual environment.
 1. A FreeSurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME must
 exist as an environment variable and point to a valid FreeSurfer installation.
 
-2. A hippocampal subfield segmentation created by FreeSurfer 7.11 or later 
-or the ASHS software. A custom segmentation is also permissible (some restrictions 
+2. A hippocampal subfield segmentation created by FreeSurfer 7.11 or later
+or the ASHS software. A custom segmentation is also permissible (some restrictions
 and settings apply; see `Custom Segmentations`).
 
 3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
-pyacvd libraries. See `requirements.txt` for a full list. 
+pyacvd libraries. See `requirements.txt` for a full list.
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
-downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz
-or http://gmsh.info/bin/MacOSX/older/gmsh-2.16.0-MacOSX.dmg. The 'gmsh' binary
-must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
+downloaded from e.g. `https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz` or
+`https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg`. The 'gmsh' binary must
+also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`.
 
 5. The PYTHONPATH environment variable should include the toolbox directory,
 e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`.
