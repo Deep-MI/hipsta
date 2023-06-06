@@ -386,10 +386,10 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     from scipy import stats as st
 
     # initialize
-    newVtcs = np.empty(shape=(0), dtype=np.int)
-    newVtcsSgn = np.empty(shape=(0), dtype=np.int)
-    newVtcsAdj = sp.lil_matrix((len(v4c), len(v4c)), dtype=np.int)
-    newTetra = np.empty(shape=(0, 4), dtype=np.int)
+    newVtcs = np.empty(shape=(0), dtype=int)
+    newVtcsSgn = np.empty(shape=(0), dtype=int)
+    newVtcsAdj = sp.lil_matrix((len(v4c), len(v4c)), dtype=int)
+    newTetra = np.empty(shape=(0, 4), dtype=int)
 
     # assign first eigenfunction
     vfuncXEv1 = np.zeros(np.shape(v4c)[0]) * np.nan
@@ -735,7 +735,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
         hsfList = f.read().splitlines()
 
-    hsfList = np.array(hsfList).astype(np.int)
+    hsfList = np.array(hsfList).astype(int)
 
     lpfio.export_vfunc(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.tetra.psol'), k4c[hsfList])
 

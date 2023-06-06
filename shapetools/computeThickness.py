@@ -798,7 +798,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     for l in range(0, len(f)):
 
         # get indices
-        i, j, k = f[l, 0:3].astype(np.int)
+        i, j, k = f[l, 0:3].astype(int)
 
         # assign coordinates
         vert[i,j,k,:] = f[l, 3:6]

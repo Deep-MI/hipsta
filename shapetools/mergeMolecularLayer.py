@@ -120,7 +120,7 @@ def mergeML(params, inputfile=None, outputfile=None, offset=None, suffix=None):
     im=nb.load(inputfile)
 
     # get voxel data
-    vx=im.get_data()
+    vx=im.get_fdata()
 
     # get all voxels that are not zero; sort by dimensions 1,2,3
     vxNZ=list(np.nonzero(vx))
@@ -143,10 +143,10 @@ def mergeML(params, inputfile=None, outputfile=None, offset=None, suffix=None):
         n=1
         tmpML=np.transpose((np.empty([0]),np.empty([0]),np.empty([0])))
         while np.shape(tmpML)[0]==0:
-            if n>10 or (np.int((vxML[i,0]-n))<0) or (np.int((vxML[i,0]+n))>(vx.shape[0]-1)) or (np.int((vxML[i,1]-n))<0) or (np.int((vxML[i,0]+n))>(vx.shape[1]-1)) or (np.int((vxML[i,2]-n))<0) or (np.int((vxML[i,0]+n))>(vx.shape[2]-1)):
+            if n>10 or (int((vxML[i,0]-n))<0) or (int((vxML[i,0]+n))>(vx.shape[0]-1)) or (int((vxML[i,1]-n))<0) or (int((vxML[i,0]+n))>(vx.shape[1]-1)) or (int((vxML[i,2]-n))<0) or (int((vxML[i,0]+n))>(vx.shape[2]-1)):
                 vxML[i,3]=0
                 break
-            tmp=vx[np.ix_(range(np.int((vxML[i,0]-n)),np.int((vxML[i,0]+n)+1)),range(np.int((vxML[i,1]-n)),np.int((vxML[i,1]+n)+1)),range(np.int((vxML[i,2]-n)),np.int((vxML[i,2]+n)+1)))]
+            tmp=vx[np.ix_(range(int((vxML[i,0]-n)),int((vxML[i,0]+n)+1)),range(int((vxML[i,1]-n)),int((vxML[i,1]+n)+1)),range(int((vxML[i,2]-n)),int((vxML[i,2]+n)+1)))]
             tmpML=np.transpose(np.where((tmp!=0)&(tmp!=246)&(tmp!=245)&(tmp!=214)))
             if np.shape(tmpML)[0]!=0:
                 tmp0=np.asmatrix(tmpML[np.where(np.sum(tmpML,axis=1)==min(np.sum(tmpML,axis=1))),:])
@@ -159,9 +159,9 @@ def mergeML(params, inputfile=None, outputfile=None, offset=None, suffix=None):
 
     # write back to vx and im
     for i in range(np.shape(vxML)[0]):
-        vx[np.int(vxML[i,0]),np.int(vxML[i,1]),np.int(vxML[i,2])]=vxML[i,3]
+        vx[int(vxML[i,0]),int(vxML[i,1]),int(vxML[i,2])]=vxML[i,3]
 
-    om=nb.MGHImage(dataobj=vx,affine=im.get_affine(),header=im.header)
+    om=nb.MGHImage(dataobj=vx,affine=im.affine,header=im.header)
     nb.save(img=om,filename=outputfile)
 
     # update params
