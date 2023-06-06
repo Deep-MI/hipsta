@@ -241,34 +241,12 @@ def autoMask(params):
             # remove any potentially existing head labels
             dat[dat==labelHead] = 0
             #
-            if params.LUT == "ashs-ctx":
-                if labelCA2 is not None and labelCA3 is not None and labelENT is not None and labelBA35 is not None:
-                    # find instance of CA2/CA3
-                    idxHead = np.argwhere(np.logical_or(dat==labelBA35, np.logical_or(dat==labelENT, np.logical_or(dat==labelCA2, dat==labelCA3))))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-ctx-nohc":
-                if labelENT is not None and labelBA35 is not None:
-                    # find instance of ENT or BA35
-                    idxHead = np.argwhere(np.logical_or(dat==labelENT, dat==labelBA35))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-ent":
-                if labelENT is not None:
-                    # find instance of ENT
-                    idxHead = np.argwhere(dat==labelENT)
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
+            if labelCA2 is not None and labelCA3 is not None:
+                # find instance of CA2/CA3
+                idxHead = np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))
             else:
-                if labelCA2 is not None and labelCA3 is not None:
-                    # find instance of CA2/CA3
-                    idxHead = np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
+                logging.info("Insufficient label information, exiting.")
+                sys.exit(1)
             # get min/max row/col/slice
             if imgDimsAPDir == -1:
                 cutFrom = np.min(idxHead[:, imgDimsAP]) + params.internal.BNDHEADMARGIN
@@ -303,67 +281,15 @@ def autoMask(params):
             # remove any potentially existing tail labels
             dat[dat==labelTail] = 0
             #
-            if params.LUT == "ashs-ctx":
-                if labelPHC is not None and labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
-                    # find instance of Sbc/CA1/CA2/CA3 and PHC
-                    idxTail = np.intersect1d(np.argwhere(dat==labelPHC)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
-                        np.argwhere(dat==labelCA3)[:,imgDimsAP]))))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-ctx-nohc":
-                if labelPHC is not None:
-                    # find instance of PHC
-                    idxTail = np.argwhere(dat==labelPHC)[:,imgDimsAP]
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-ent":
-                if labelENT is not None:
-                    # find instance of ENT
-                    idxTail = np.argwhere(dat==labelENT)[:,imgDimsAP]
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-noca3":
-                if labelSbc is not None and labelCA1 is not None and labelCA2 is not None:
-                    # find instance of Sbc/CA1/CA2
-                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                        np.argwhere(dat==labelCA2)[:,imgDimsAP]))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-noca3ca2":
-                if labelSbc is not None and labelCA1 is not None:
-                    # find instance of Sbc/CA1
-                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                        np.argwhere(dat==labelCA1)[:,imgDimsAP])
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
-            elif params.LUT == "ashs-ca2ca3":
-                if labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
-                    # find instance of Sbc/CA1/(CA2orCA3)
-                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                        np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))[:,imgDimsAP]))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
+            if labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
+                # find instance of Sbc/CA1/CA2/CA3
+                idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
+                    np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
+                    np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
+                    np.argwhere(dat==labelCA3)[:,imgDimsAP])))
             else:
-                if labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
-                    # find instance of Sbc/CA1/CA2/CA3
-                    idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
-                        np.argwhere(dat==labelCA3)[:,imgDimsAP])))
-                else:
-                    logging.info("Insufficient label information, exiting.")
-                    sys.exit(1)
+                logging.info("Insufficient label information, exiting.")
+                sys.exit(1)
             # get min/max row/col/slice
             if imgDimsAPDir == -1:
                 cutFrom = np.max(idxTail) - params.internal.BNDTAILMARGIN

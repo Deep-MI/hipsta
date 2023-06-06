@@ -13,7 +13,7 @@ package.
 
 def get_version():
 
-    VERSION = "v0.6.0-beta"
+    VERSION = "v0.7.0-beta"
 
     return VERSION
 
@@ -761,91 +761,19 @@ def _check_arguments(params):
 
         hsflist = [ 234, 236, 238, 240]
 
-    elif params.LUT == "ashs" or params.LUT == "ashs-ca2ca3" or params.LUT == "ashs-noca3ca2":
+    elif params.LUT == "ashs":
 
-        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
+        logging.info("Found internal, modified look-up table for ASHS atlas.")
 
         LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
             "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
             "head", "tail" ]
 
-        #LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 255, 254 ]
         LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
 
         lutDict = dict(zip(LUTLABEL, LUTINDEX))
 
         hsflist = [ 8, 1, 2, 4 ]
-
-    elif params.LUT == "ashs-noca3":
-
-        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
-
-        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
-            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
-            "head", "tail" ]
-
-        #LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 255, 254 ]
-        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 8, 1, 2 ]
-
-
-    elif params.LUT == "ashs-ctx":
-
-        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
-
-        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
-            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
-            "head", "tail" ]
-
-        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 12, 10, 9, 8, 1, 2, 4 ]
-
-    elif params.LUT == "ashs-ctx-nohc":
-
-        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
-
-        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
-            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
-            "head", "tail" ]
-
-        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 12, 10, 9]
-
-    elif params.LUT == "ashs-ent":
-
-        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
-
-        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
-            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
-            "head", "tail" ]
-
-        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 9 ]
-
-    elif params.LUT == "ukb":
-
-        logging.info("Found internal, modified look-up table for UKB segmentation.")
-
-        LUTLABEL = [ "ca4", "dentate", "ca23", "ca1", "sbc", "uncus",
-            "parsbcpresbc", "cyst", "tail", "ca1ca1bnd", "ca1sbcbnd", "head" ]
-
-        LUTINDEX = [ 1, 1, 2, 3, 4, 5, 6, 7, 100, 133, 134, 200 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 6, 4, 3, 2 ]
 
     elif os.path.isfile(params.LUT):
 
@@ -856,15 +784,6 @@ def _check_arguments(params):
             lut = pandas.read_csv(params.LUT, sep=' ', comment='#',
                 header=None, skipinitialspace=True, skip_blank_lines=True,
                 error_bad_lines=False, warn_bad_lines=True)
-
-            #lut = np.array(lut)
-            #lutLbl = np.char.lower(lut[:, 1].astype(str))
-            #lutIdx = lut[:, 0]
-            #lutDict = dict()
-            #for i in np.unique(lutLbl):
-            #    lutDict[i] = lutIdx[np.where(lutLbl==i)][0]
-            #hsflist = [lutDict['presubiculum'].item(), lutDict['subiculum'].item(), lutDict['ca1'].item(), lutDict['ca2'].item(), lutDict['ca3'].item(), lutDict['ca4'].item()]
-            #hsflist = [ int(x.item()) for x in lutDict ]
 
             lutDict = dict(zip(lut[0], lut[1]))
             hsflist = list(lut[1])
@@ -877,7 +796,7 @@ def _check_arguments(params):
 
     else:
 
-        logging.error("Look-up table can only be \'fs711\', \'ashs\', \'ashs-ca2ca3\', \'ashs-ctx\', \'ashs-ctx-nohc\', \'ashs-ent\', \'ashs-noca3\', \'ashs-noca3ca2\', or an existing file, but not " + params.LUT)
+        logging.error("Look-up table can only be \'fs711\', \'ashs\', or an existing file, but not " + params.LUT)
         print("Program exited with ERRORS.")
         sys.exit(1)
 
