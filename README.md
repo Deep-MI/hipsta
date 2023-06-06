@@ -1,9 +1,9 @@
-# shapetools.py
+# Hippocampal shape and thickness analysis
 
 
 ## Purpose:
 
-This is a script for the creation and analysis of hippocampal surfaces.
+This is a collection of scripts for hippocampal shape and thickness analysis.
 
 
 ## Description:
@@ -48,7 +48,7 @@ This script performs the following major processing steps:
 `--outputdir`              | Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.
 `--no-cleanup`             | Do not delete files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.
 
-**Getting help:**    | **Description**
+**Getting help:**          | **Description**
 ---------------------------|----------------------------------------------------
 `--help`                   | Display this help and exit.
 `--more-help`              | Display extensive help and exit.
@@ -66,6 +66,7 @@ This script performs the following major processing steps:
 `--no-filter`              | Do not filter image.
 `--filter <int> <int>`     | A list of parameters to fine-tune image filtering. Specify two numbers for filter width and threshold. Default is `0.5 50`
 `--long-filter`            | Filter image along longitudinal axis, i.e. attempt to create smooth transitions between slices.
+`--long-filter-size`       | Size of longitudinal filter. 
 `--close-mask [<string>]`  | Apply closing operation to mask, i.e. attempt to close small holes. Default is `regular`, alternative is `experimental`.
 `--mca <string>`           | Marching-cube algorithm. Either `mri_mc` (default) or `mri_tessellate`.
 `--mcc <integer>`          | Marching-cube connectivity. Only used for `mri_mc` algorithm. Default is `1`. See `mri_mc --help` for details.
@@ -83,9 +84,7 @@ This script performs the following major processing steps:
 `--allow-ragged-triangles` | Allow triangles for ragged mid-surfaces.
 
 
-## Examples:
-
-`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut fs711 --topological-fixing /path/to/brain.mgz /path/to/wm.mgz --outputdir /my/output/directory`
+## Example:
 
 `python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut ashs --outputdir /my/output/directory`
 
@@ -178,12 +177,13 @@ Step | HSF label   | Prefix | Folder         | Contents
 
 Use the following code to download this package from its GitHub repository:
 
-`git clone https://github.com/reuter-lab/hippocampal-shape-tools.git`
+`git clone https://github.com/Deep-MI/Hipsta.git`
 
-You can use the following code to install the required Python depencies into
-your local python package directory:
+You can use the following code to install the required Python depencies:
 
-`pip install --user -r requirements.txt`
+`pip install -r requirements.txt`
+
+It is recommended to run this pipeline within its own virtual environment.
 
 
 ## Requirements:
@@ -191,14 +191,12 @@ your local python package directory:
 1. A FreeSurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME must
 exist as an environment variable and point to a valid FreeSurfer installation.
 
-2. A hippocampal subfield segmentation created by FreeSurfer 7.11 (development
-versions after 6.0 will also work) or a subfield segmentation obtained from the
-ASHS IKND 7T Young Adults atlas. A custom segmentation is also permissible
-(some restrictions and settings apply; see `Custom Segmentations`).
+2. A hippocampal subfield segmentation created by FreeSurfer 7.11 or later 
+or the ASHS software. A custom segmentation is also permissible (some restrictions 
+and settings apply; see `Custom Segmentations`).
 
 3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
-pyacvd libraries. See `requirements.txt` for a full list. The lapy package can
-be obtained from https://github.com/Deep-MI/LaPy.
+pyacvd libraries. See `requirements.txt` for a full list. 
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
 downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz
@@ -206,14 +204,16 @@ or http://gmsh.info/bin/MacOSX/older/gmsh-2.16.0-MacOSX.dmg. The 'gmsh' binary
 must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
 
 5. The PYTHONPATH environment variable should include the toolbox directory,
-e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hippocampal-shapetools`.
+e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`.
 
 
 ## References:
 
 Please cite the following publications if you use these scripts in your work:
 
-- Reuter, M., Wolter, F.-E., Shenton, M., & Niethammer, M. (2009). Laplace-Beltrami Eigenvalues and Topological Features of Eigenfunctions for Statistical Shape Analysis. Computer-Aided Design, 41, 739-755.
+- Diers, K., Baumeister, H., Jessen, F., Düzel, E., Berron, D., & Reuter, M. (2023). An automated, geometry-based method for hippocampal shape and thickness analysis. Neuroimage, 276:120182. doi: [10.1016/j.neuroimage.2023.120182](https://doi.org/10.1016/j.neuroimage.2023.120182).
+
+Please also consider citing the these publications:
 
 - Geuzaine, C., & Remacle, J.-F. (2009). Gmsh: a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering, 79, 1309-1331.
 

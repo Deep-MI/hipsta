@@ -33,7 +33,7 @@ def get_help(print_help=True, return_help=False):
 
     Purpose:
 
-    This is a script for the creation and analysis of hippocampal surfaces.
+    This is a collection of scripts for hippocampal shape and thickness analysis.
 
 
     Description:
@@ -146,74 +146,85 @@ def get_help(print_help=True, return_help=False):
       8. A 'tetra-cut' folder with intermediate results, primarily files
          created during mesh cutting.
 
-      9. A 'thickness' folder with thickness overlays and mid-surfaces.
+      8. A 'tetra-cube' folder with intermediate results, primarily files
+         created during cube parametrization.
+
+      10. A 'thickness' folder with thickness overlays and mid-surfaces.
 
 
     Custom segmentations:
 
-      - If using the `ashs` segmentation, additional labels for the hippocampal
-        head (20) and tail (5) labels are required. Use `--lut ashs`.
-      - If using a custom look-up table (`--lut <filename>`), the expected
-        format for the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`,
-        `G`, `B`, `A` are numerical values for RGB colors and transparency
-        (alpha) and will be ignored. For example, `236 Subiculum 255 0 0 0`.
-        Each line may only contain a single anatomical structure. Do not use a
-        header line. The following labels need to be present in the look-up
-        table: `presubiculum`, `subiculum`, `ca1`, `ca2`, `ca3`, `ca4`, `head`,
-        and `tail`. Additional labels may be present, but will be ignored.
-        Lines starting with `#` will    be ignored (and can be used for comments).
-      - Multiple substructures can have the same numeric ID, e.g. `presubiculum`
-        and `subiculum` can have the same numeric ID if these substructures are
-        not distinguished in the segmentation. `head` and `tail` can have
-        multiple labels if these are distinguished in the segmentation, but
-        should be combined for the processing within the hippocampal shapetools.
-      - Topological fixing (`--topological-fixing <filename1> <filename2>`)
-        should not be used unless working with FreeSurfer-processed data.
-        `<filename1>` is the `brain.mgz` file and `<filename2>` is the `wm.mgz`
-        file, both found within the `mri` subdirectory of an individual
-        FreeSurfer output directory.
+    - If using the `ashs` segmentation, additional labels for the hippocampal head
+      (label value: 20) and tail (label value: 5) labels are required. Use `--lut ashs`.
+    - Topological fixing (`--topological-fixing <filename1> <filename2>`) should
+      not be used unless working with FreeSurfer-processed data. `<filename1>` is
+      the `brain.mgz` file and `<filename2>` is the `wm.mgz` file, both found within
+      the `mri` subdirectory of an individual FreeSurfer output directory.
+    - If using a custom look-up table (`--lut <filename>`), the expected format for
+      the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are
+      numerical values for RGB colors and transparency (alpha) and will be ignored.
+      For example, `236 Subiculum 255 0 0 0`. Each line may only contain a single
+      anatomical structure. Do not use a header line. The following labels need to
+      be present in the look-up table: `presubiculum`,  `subiculum`, `ca1`, `ca2`,
+      `ca3`, `ca4`, `head`, and `tail`. Additional labels may be present, but will
+      be ignored. Lines starting with `#` will be ignored (and can be used for
+      comments).
+    - Multiple substructures can have the same numeric ID, e.g. `presubiculum` and
+      `subiculum` can have the same numeric ID if these substructures are not
+      distinguished in the segmentation. `head` and `tail` can have multiple labels
+      if these are distinguished in the segmentation, but should be combined for
+      the processing within the hippocampal shapetools.
 
 
     Requirements:
 
-      1. A FreeSurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME
-         must exist as an environment variable and point to a valid FreeSurfer
-         installation.
+    1. A FreeSurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME must
+       exist as an environment variable and point to a valid FreeSurfer installation.
 
-      2. A hippocampal subfield segmentation created by FreeSurfer 7.11
-         (development versions after 6.0 will also work) or a subfield
-         segmentation obtained from the ASHS IKND 7T Young Adults atlas. A
-         custom segmentation is also permissible (some restrictions and
-         settings apply; see `Custom Segmentations`).
+    2. A hippocampal subfield segmentation created by FreeSurfer 7.11 or later 
+       or the ASHS software. A custom segmentation is also permissible (some restrictions 
+       and settings apply; see `Custom Segmentations`).
 
-      3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel,
-         pyvista, and pyacvd libraries. The lapy package can be obtained from
-         https://github.com/Deep-MI/LaPy. Required packages will be installed
-         automatically when installing this package via pip.
+    3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
+       pyacvd libraries. See `requirements.txt` for a full list. 
 
-      4. The gmsh package (version 2.x; http://gmsh.info) must be installed. It
-         can be downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz
-         or http://gmsh.info/bin/MacOSX/older/gmsh-2.16.0-MacOSX.dmg. The 'gmsh'
-         binary must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
+    4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
+       downloaded from e.g. http://gmsh.info/bin/Linux/older/gmsh-2.16.0-Linux64.tgz
+       or http://gmsh.info/bin/MacOSX/older/gmsh-2.16.0-MacOSX.dmg. The 'gmsh' binary
+       must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
 
-      5. The PYTHONPATH environment variable should include the toolbox
-         directory, e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hippocampal-shapetools`.
+    5. The PYTHONPATH environment variable should include the toolbox directory,
+       e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`.
 
 
     References:
 
-      Please cite the following publications if using this script in your work
-      (see also README file for further references):
+    Please cite the following publications if you use these scripts in your work:
 
-      - M. Reuter, F.-E. Wolter, M. Shenton, M. Niethammer. Laplace-Beltrami
-        Eigenvalues and Topological Features of Eigenfunctions for Statistical
-        Shape Analysis. Computer-Aided Design 41 (10), pp.739-755, 2009.
-        http://dx.doi.org/10.1016/j.cad.2009.02.007
+    - Diers, K., Baumeister, H., Jessen, F., Düzel, E., Berron, D., & Reuter, M. (2023). An 
+      automated, geometry-based method for hippocampal shape and thickness analysis. Neuroimage, 
+    276:120182. doi: [10.1016/j.neuroimage.2023.120182](https://doi.org/10.1016/j.neuroimage.2023.120182).
 
-      - C. Geuzaine and J.-F. Remacle. Gmsh: a three-dimensional finite element
-        mesh generator with built-in pre- and post-processing facilities.
-        International Journal for Numerical Methods in Engineering 79(11), pp.
-        1309-1331, 2009.
+    Please also consider citing the these publications:
+
+    - Geuzaine, C., & Remacle, J.-F. (2009). Gmsh: a three-dimensional finite element mesh 
+      generator with built-in pre- and post-processing facilities. International Journal 
+      for Numerical Methods in Engineering, 79, 1309-1331.
+
+    - Andreux, M., Rodola, E., Aubry, M., & Cremers, D. (2014). Anisotropic Laplace-Beltrami 
+      operators for shape analysis. In European Conference on Computer Vision (pp. 299-312). 
+    Springer, Cham.
+
+    - Iglesias, J. E., Augustinack, J. C., Nguyen, K., Player, C. M., Player, A., Wright, M., 
+      ... & Fischl, B. (2015). A computational atlas of the hippocampal formation using ex vivo, 
+      ultra-high resolution MRI: application to adaptive segmentation of in vivo MRI. Neuroimage, 
+      115, 117-137.
+
+    - Yushkevich, P. A., Pluta, J., Wang, H., Ding, S.L., Xie, L., Gertje, E., Mancuso, L., 
+      Kliot, D., Das, S. R., & Wolk, D.A. (2015). Automated Volumetry and Regional Thickness 
+      Analysis of Hippocampal Subfields and Medial Temporal Cortical Structures in Mild Cognitive 
+      Impairment. Human Brain Mapping, 36, 258-287.
+
 
     """
 
