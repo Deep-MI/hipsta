@@ -3,12 +3,12 @@
 
 ## Purpose:
 
-This is a collection of scripts for hippocampal shape and thickness analysis.
-
+This repository contains a collection of scripts for hippocampal shape and thickness 
+analysis as described in our recent [publication](doi.org/10.1016/j.neuroimage.2023.120182).
 
 ## Description:
 
-This script performs the following major processing steps:
+The main analysis script performs the following major processing steps:
 
 0. preprocess image (cropping, upsampling, automask)
 1. create labels
