@@ -69,7 +69,7 @@ def createSupplementaryFiles(params):
 
     elif LUT == "ashs":
 
-        logging.info("Found internal, modified look-up table for ASHS IKND Magdeburg Young Adult 7T Atlas.")
+        logging.info("Found internal, modified look-up table for ASHS atlas.")
 
         # get labels
 
