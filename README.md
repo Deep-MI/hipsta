@@ -1,4 +1,4 @@
-# Hippocampal shape and thickness analysis
+# HIPpocampal Shape and Thickness Analysis - HIPSTA
 
 
 ## Purpose:
