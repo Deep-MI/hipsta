@@ -33,6 +33,19 @@ This script performs the following major processing steps:
 12. create supplementary files for visualization
 
 
+## Current status and future development:
+
+The hippocampal shape and thickness analysis package is currently in its beta stage, which means 
+that it's open for testing, but may still contain unresolved issues. Future changes with regard 
+to the algorithms, interfaces, and package structure are to be expected.
+
+In the near future, we anticipate the following changes and additions:
+
+- improved documentation including walk-through examples
+- improved interfaces and installation options; availability as a python package
+- provision of Docker and/or Singularity files to avoid issues with differences in dependencies and enviroments
+
+
 ## Usage:
 
 `python3 shapetools.py --filename <filename> --hemi <hemi> --lut <lookup-table> [--outputdir <OUTDIR>] [further options]`
@@ -41,7 +54,7 @@ This script performs the following major processing steps:
 ---------------------------|----------------------------------------------------
 `--filename`               | A segmentation file.
 `--hemi`                   | Hemisphere. Either 'lh' or 'rh'.
-`--lut`                    | Look-up table. A valid filename or one of the following: 'fs711', 'ashs', 'ashs-ca2ca3', 'ashs-noca3', 'ashs-ctx', 'ashs-ctx-nohc', 'ashs-ent'.
+`--lut`                    | Look-up table. A valid filename or one of the following: 'fs711', 'ashs'.
 
 **Optional arguments:**    | **Description**
 ---------------------------|----------------------------------------------------
@@ -86,7 +99,7 @@ This script performs the following major processing steps:
 
 ## Example:
 
-`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut ashs --outputdir /my/output/directory`
+`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut fs711  --outputdir /my/output/directory`
 
 
 ## Outputs:
@@ -149,28 +162,28 @@ Step | HSF label   | Prefix | Folder         | Contents
 10+11| \<none\>    | \<none\> | thickness    | folder with thickness overlays and mid-surface files
 
 
-## Custom segmentations:
+## Supported segmentations:
 
 - If using the `ashs` segmentation, additional labels for the hippocampal head
-  (label value: 20) and tail (label value: 5) labels are required. Use `--lut ashs`.
+  (label value: 20) and tail (label value: 5) labels are recommended.
 - Topological fixing (`--topological-fixing <filename1> <filename2>`) should
   not be used unless working with FreeSurfer-processed data. `<filename1>` is
   the `brain.mgz` file and `<filename2>` is the `wm.mgz` file, both found within
   the `mri` subdirectory of an individual FreeSurfer output directory.
 - If using a custom look-up table (`--lut <filename>`), the expected format for
-  the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are
+  the file is: `<numeric ID> <name> <R> <G> <B> <A>`. \<R\>, \<G\>, \<B\>, \<A\> are
   numerical values for RGB colors and transparency (alpha) and will be ignored.
   For example, `236 Subiculum 255 0 0 0`. Each line may only contain a single
   anatomical structure. Do not use a header line. The following labels need to
-  be present in the look-up table: `presubiculum`,  `subiculum`, `ca1`, `ca2`,
-  `ca3`, `ca4`, `head`, and `tail`. Additional labels may be present, but will
+  be present in the look-up table: _presubiculum_, _subiculum_, _ca1_, _ca2_,
+  _ca3_, _ca4_, _head_, and _tail_. Additional labels may be present, but will
   be ignored. Lines starting with `#` will be ignored (and can be used for
   comments).
-- Multiple substructures can have the same numeric ID, e.g. `presubiculum` and
-  `subiculum` can have the same numeric ID if these substructures are not
-  distinguished in the segmentation. `head` and `tail` can have multiple labels
-  if these are distinguished in the segmentation, but should be combined for
-  the processing within the hippocampal shapetools.
+- Multiple substructures can have the same numeric ID, e.g. _presubiculum_ and
+  _subiculum_ can have the same numeric ID if these substructures are not
+  distinguished in the segmentation. The _head_ and _tail_ subregions can have 
+  multiple labels if these are distinguished in the segmentation, but should be 
+  combined for the processing within the hippocampal shapetools.
 
 
 ## Installation:
@@ -193,18 +206,21 @@ exist as an environment variable and point to a valid FreeSurfer installation.
 
 2. A hippocampal subfield segmentation created by FreeSurfer 7.11 or later
 or the ASHS software. A custom segmentation is also permissible (some restrictions
-and settings apply; see `Custom Segmentations`).
+and settings apply; see [Supported Segmentations](https://github.com/Deep-MI/Hipsta#supported-segmentations)).
 
 3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
-pyacvd libraries. See `requirements.txt` for a full list.
+pyacvd libraries, among others. See `requirements.txt` for a full list.
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
-downloaded from e.g. `https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz` or
-`https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg`. The 'gmsh' binary must
-also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`.
+downloaded from e.g. as [linux](https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz) or
+[MacOSX](https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg) . The 'gmsh' binary must 
+be on the $PATH:
 
-5. The PYTHONPATH environment variable should include the toolbox directory,
-e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`.
+`export PATH=${PATH}:/path/to/gmsh-directory/bin`
+
+5. The PYTHONPATH environment variable should include the toolbox directory:
+
+`export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`
 
 
 ## References:
