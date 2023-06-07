@@ -212,15 +212,15 @@ and settings apply; see [Supported Segmentations](https://github.com/Deep-MI/Hip
 pyacvd libraries, among others. See `requirements.txt` for a full list.
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
-downloaded from e.g. as [linux](https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz) or
+downloaded e.g. as binaries for [linux](https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz) or
 [MacOSX](https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg) . The 'gmsh' binary must 
 be on the $PATH:
 
-`export PATH=${PATH}:/path/to/gmsh-directory/bin`
+   `export PATH=${PATH}:/path/to/gmsh-directory/bin`
 
 5. The PYTHONPATH environment variable should include the toolbox directory:
 
-`export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`
+   `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`
 
 
 ## References:
