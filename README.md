@@ -4,7 +4,7 @@
 ## Purpose:
 
 This repository contains a collection of scripts for hippocampal shape and thickness 
-analysis as described in our recent [publication](doi.org/10.1016/j.neuroimage.2023.120182).
+analysis as described in our recent [publication](https://doi.org/10.1016/j.neuroimage.2023.120182).
 
 ## Description:
 
