@@ -372,6 +372,8 @@ def _parse_arguments():
         default=False, action="store_true", required=False) # help="Allow ragged mid-surfaces.",
     expert.add_argument('--allow-ragged-triangles', dest='allowRaggedTriangles', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
+    expert.add_argument('--logfiledir', dest='logfiledir', help=argparse.SUPPRESS,
+        default=None, metavar="<directory>", required=False) # help="Where to store temporary logfile. Default: current working directory.",
 
     # Deprecated options
     expert.add_argument('--spherically-project', dest='spherically_project',  help=argparse.SUPPRESS,
@@ -1040,17 +1042,22 @@ def _start_logging(args):
         sys.exit(1)
     sys.excepthook = foo
 
-    # check if logfile can be written in current working directory
+    # check if logfile can be written in logfiledir
+    if args.logfiledir is not None:
+        logfiledir = args.logfiledir
+    else:
+        logfiledir = os.getcwd()
+
     try:
-        testfile = tempfile.TemporaryFile(dir=os.getcwd())
+        testfile = tempfile.TemporaryFile(dir=logfiledir)
         testfile.close()
     except OSError as e:
-        print('Directory ' + os.getcwd() + ' not writeable for temporary logfile.')
+        print('Directory ' + logfiledir + ' not writeable for temporary logfile.')
         print("Program exited with ERRORS.")
         sys.exit(1)
 
     # start logging
-    logfile =  os.path.join(os.getcwd() , 'logfile-' + str(uuid.uuid4()) + '.log')
+    logfile =  os.path.join(logfiledir, 'logfile-' + str(uuid.uuid4()) + '.log')
     logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
     logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) # this adds output to stdout
 
