@@ -219,7 +219,7 @@ def createTetraLabels(params):
 
     tetMeshBnd.orient_()
 
-    io.write_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
+    TetMesh.write_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
 
     io.write_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), np.array([ float(x) for x in asc ])[vRmBndKeep])
 
