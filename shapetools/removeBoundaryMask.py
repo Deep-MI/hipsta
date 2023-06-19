@@ -242,7 +242,7 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
 
     tetMeshBnd.orient_()
 
-    tetMeshBnd.write_vtk(outfile=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
+    tetMeshBnd.write_vtk(filename=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
 
     io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), vIdx)
 

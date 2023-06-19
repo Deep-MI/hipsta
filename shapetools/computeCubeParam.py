@@ -906,7 +906,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     v4cRmBndRm = tetMesh4cRmBnd.v
     t4cRmBndRm = tetMesh4cRmBnd.t
 
-    TriaMesh.write_vtk(tetMesh4cRmBnd, outfile=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'))
+    TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'))
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.tetra.psol'), vfuncXRm[v4cRmBndRmKeep])
     io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.tetra.psol'), vfuncYRm[v4cRmBndRmKeep])
