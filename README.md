@@ -99,7 +99,19 @@ In the near future, we anticipate the following changes and additions:
 
 ## Example:
 
+The most straigthforward way of running the shape and thickness analysis is from 
+the command line:
+
 `python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut fs711  --outputdir /my/output/directory`
+
+However, this requires that some additional settings are made and that some external 
+software packages are installed. See the sections on [installation](#installation) 
+and [requirements](#requirements).
+
+As an alternative to directly running the scripts, we also provide [Docker](docker/Docker.md) 
+and [Singularity](singularity/Singularity.md) versions of the package, which 
+facilitate processing across different environments and take care of installing 
+additional dependencies.
 
 
 ## Outputs:
@@ -198,8 +210,14 @@ You can use the following code to install the required Python depencies:
 
 It is recommended to run this pipeline within its own virtual environment.
 
+The above steps are not necessary when running the [Docker](docker/Docker.md) or
+[Singularity](singularity/Singularity.md) versions of the package.
 
 ## Requirements:
+
+Unless using the [Docker](docker/Docker.md) or [Singularity](singularity/Singularity.md) 
+versions of the package, the following conditions need to be met for running an
+analysis:
 
 1. A FreeSurfer version (6.x or 7.x) must be sourced, i.e. FREESURFER_HOME must
 exist as an environment variable and point to a valid FreeSurfer installation.
@@ -209,18 +227,19 @@ or the ASHS software. A custom segmentation is also permissible (some restrictio
 and settings apply; see [Supported Segmentations](https://github.com/Deep-MI/Hipsta#supported-segmentations)).
 
 3. Python 3.8 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
-pyacvd libraries, among others. See `requirements.txt` for a full list.
+pyacvd libraries, among others. See `requirements.txt` for a full list, and use
+`pip install -r requirements.txt` to install.
 
 4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
 downloaded e.g. as binaries for [linux](https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz) or
 [MacOSX](https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg) . The 'gmsh' binary must 
 be on the $PATH:
 
-   `export PATH=${PATH}:/path/to/gmsh-directory/bin`
+    `export PATH=${PATH}:/path/to/gmsh-directory/bin`
 
 5. The PYTHONPATH environment variable should include the toolbox directory:
 
-   `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`
+    `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`
 
 
 ## References:
