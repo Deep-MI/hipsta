@@ -185,7 +185,7 @@ def get_help(print_help=True, return_help=False):
        or the ASHS software. A custom segmentation is also permissible (some restrictions
        and settings apply; see `Custom Segmentations`).
 
-    3. Python 3.5 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
+    3. Python 3.8 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
        pyacvd libraries. See `requirements.txt` for a full list.
 
     4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
@@ -272,8 +272,8 @@ def _check_environment_and_packages():
     # check for LaPy
     if importlib.util.find_spec("lapy") is not None:
         import lapy as lp
-        if packaging.version.parse(lp.__version__) < packaging.version.parse("0.3"):
-            logging.error('A version >=0.3 is required for the \'lapy\' package (see README.md for details on installation)')
+        if packaging.version.parse(lp.__version__) < packaging.version.parse("1.0"):
+            logging.error('A version >=1.0 is required for the \'lapy\' package (see README.md for details on installation)')
             print("Program exited with ERRORS.")
             sys.exit(1)
     else:

@@ -113,10 +113,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     import pandas as pd
     import nibabel as nb
 
-    import lapy as lp
-    from lapy import TriaIO as lpio
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TriaMesh, TetMesh, io
 
     from shapetools.triaUtils import levelsetsTetra
 
@@ -176,14 +173,14 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
     # load mesh
 
-    tetMesh = lptio.import_vtk(IN_MESH)
+    tetMesh = TetMesh.read_vtk(IN_MESH)
 
     v4 = tetMesh.v
     t4 = tetMesh.t
 
     # load function
 
-    tetMeshUVW = lptio.import_vtk(IN_FUNC)
+    tetMeshUVW = TetMesh.read_vtk(IN_FUNC)
 
     p4 = tetMeshUVW.v
     q4 = tetMeshUVW.t
@@ -211,16 +208,16 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     if VERBOSE is True:
 
         for i in range(0,len(vLVL4px)):
-            lpio.export_vtk(lp.TriaMesh(vLVL4x[i], tLVL4x[i]-1), os.path.join(OUT_DIR, HEMI + '.vlx.lvl'+str(i)+'.vtk'))
-            lpio.export_vtk(lp.TriaMesh(vLVL4px[i], tLVL4px[i]-1), os.path.join(OUT_DIR, HEMI + '.uvw.vlx.lvl'+str(i)+'.vtk'))
+            TriaMesh.write_vtk(TriaMesh(vLVL4x[i], tLVL4x[i]-1), os.path.join(OUT_DIR, HEMI + '.vlx.lvl'+str(i)+'.vtk'))
+            TriaMesh.write_vtk(TriaMesh(vLVL4px[i], tLVL4px[i]-1), os.path.join(OUT_DIR, HEMI + '.uvw.vlx.lvl'+str(i)+'.vtk'))
 
         for i in range(0,len(vLVL4py)):
-            lpio.export_vtk(lp.TriaMesh(vLVL4y[i], tLVL4y[i]-1), os.path.join(OUT_DIR, HEMI + '.vly.lvl'+str(i)+'.vtk'))
-            lpio.export_vtk(lp.TriaMesh(vLVL4py[i], tLVL4py[i]-1), os.path.join(OUT_DIR, HEMI + '.uvw.vly.lvl'+str(i)+'.vtk'))
+            TriaMesh.write_vtk(TriaMesh(vLVL4y[i], tLVL4y[i]-1), os.path.join(OUT_DIR, HEMI + '.vly.lvl'+str(i)+'.vtk'))
+            TriaMesh.write_vtk(TriaMesh(vLVL4py[i], tLVL4py[i]-1), os.path.join(OUT_DIR, HEMI + '.uvw.vly.lvl'+str(i)+'.vtk'))
 
         for i in range(0,len(vLVL4pz)):
-            lpio.export_vtk(lp.TriaMesh(vLVL4z[i], tLVL4z[i]-1), os.path.join(OUT_DIR, HEMI + '.vlz.lvl'+str(i)+'.vtk'))
-            lpio.export_vtk(lp.TriaMesh(vLVL4pz[i], tLVL4pz[i]-1), os.path.join(OUT_DIR, HEMI + '.uvw.vlz.lvl'+str(i)+'.vtk'))
+            TriaMesh.write_vtk(TriaMesh(vLVL4z[i], tLVL4z[i]-1), os.path.join(OUT_DIR, HEMI + '.vlz.lvl'+str(i)+'.vtk'))
+            TriaMesh.write_vtk(TriaMesh(vLVL4pz[i], tLVL4pz[i]-1), os.path.join(OUT_DIR, HEMI + '.uvw.vlz.lvl'+str(i)+'.vtk'))
 
     # now loop across levelsets
 
@@ -400,7 +397,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
                 if np.sum(tmp): # empty lists are false
                     llxLgth[ii, ij] = np.sum(tmp)
 
-    lpio.export_vtk(lp.TriaMesh(np.array(vlx), np.asmatrix(tlx)-1), os.path.join(OUT_DIR, HEMI + '.grid-lines-x.vtk'))
+    TriaMesh.write_vtk(TriaMesh(np.array(vlx), np.asmatrix(tlx)-1), os.path.join(OUT_DIR, HEMI + '.grid-lines-x.vtk'))
 
     dfx = pd.DataFrame(llxLgth)
 
@@ -451,7 +448,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
                 if np.sum(tmp): # empty lists are false
                     llyLgth[ii, ij] = np.sum(tmp)
 
-    lpio.export_vtk(lp.TriaMesh(np.array(vly), np.asmatrix(tly)-1), os.path.join(OUT_DIR, HEMI + '.grid-lines-y.vtk'))
+    TriaMesh.write_vtk(TriaMesh(np.array(vly), np.asmatrix(tly)-1), os.path.join(OUT_DIR, HEMI + '.grid-lines-y.vtk'))
 
     dfy = pd.DataFrame(llyLgth)
 
@@ -502,7 +499,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
                 if np.sum(tmp): # empty lists are false
                     llzLgth[ii, ij] = np.sum(tmp)
 
-    lpio.export_vtk(lp.TriaMesh(np.array(vlz), np.asmatrix(tlz)-1), os.path.join(OUT_DIR, HEMI + '.grid-lines-z.vtk'))
+    TriaMesh.write_vtk(TriaMesh(np.array(vlz), np.asmatrix(tlz)-1), os.path.join(OUT_DIR, HEMI + '.grid-lines-z.vtk'))
 
     dfz = pd.DataFrame(llzLgth)
 
@@ -626,9 +623,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     cMid = origV4flat[:, 0:3]
     cMax = origV4flat[:, 0:3]
 
-    triaMin = lp.TriaMesh(vMin, tMin)
-    triaMid = lp.TriaMesh(vMid, tMid)
-    triaMax = lp.TriaMesh(vMax, tMax)
+    triaMin = TriaMesh(vMin, tMin)
+    triaMid = TriaMesh(vMid, tMid)
+    triaMax = TriaMesh(vMax, tMax)
 
     vMinKeep, vMinDel = triaMin.rm_free_vertices_()
     vMidKeep, vMidDel = triaMid.rm_free_vertices_()
@@ -638,9 +635,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     cMidRm = cMid[vMidKeep,:]
     cMaxRm = cMid[vMaxKeep,:]
 
-    triaMinRm = lp.TriaMesh(triaMin.v, triaMin.t)
-    triaMidRm = lp.TriaMesh(triaMid.v, triaMid.t)
-    triaMaxRm = lp.TriaMesh(triaMax.v, triaMax.t)
+    triaMinRm = TriaMesh(triaMin.v, triaMin.t)
+    triaMidRm = TriaMesh(triaMid.v, triaMid.t)
+    triaMaxRm = TriaMesh(triaMax.v, triaMax.t)
 
     #
 
@@ -672,9 +669,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
     #
 
-    lpio.export_vtk(triaMinRm, os.path.join(OUT_DIR, HEMI + '.ext-surface.vtk'))
-    lpio.export_vtk(triaMidRm, os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
-    lpio.export_vtk(triaMaxRm, os.path.join(OUT_DIR, HEMI + '.int-surface.vtk'))
+    TriaMesh.write_vtk(triaMinRm, os.path.join(OUT_DIR, HEMI + '.ext-surface.vtk'))
+    TriaMesh.write_vtk(triaMidRm, os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
+    TriaMesh.write_vtk(triaMaxRm, os.path.join(OUT_DIR, HEMI + '.int-surface.vtk'))
 
     pd.DataFrame(np.concatenate((cMinRm, triaMinRm.v), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.ext-surface.csv'), header=False, index=False)
     pd.DataFrame(np.concatenate((cMidRm, triaMidRm.v), axis=1)).to_csv(os.path.join(OUT_DIR, HEMI + '.mid-surface.csv'), header=False, index=False)
@@ -688,7 +685,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     for i in range(0, len(cMidRm)):
         thickness.append(np.array(dfz)[int(cMidRm[i,0]), int(cMidRm[i,1])])
 
-    lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.thickness.psol'), np.array(thickness))
+    io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.thickness.psol'), np.array(thickness))
 
     nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=np.array(thickness).astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.mid-surface.thickness.mgh'))
 
@@ -707,9 +704,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
         gauss_curvMin = triaMinRm.map_tfunc_to_vfunc(gauss_curvMin)
 
-        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.psol'), mean_curvMin)
+        io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.psol'), mean_curvMin)
 
-        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.psol'), gauss_curvMin)
+        io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.ext-surface.gauss-curv.psol'), gauss_curvMin)
 
         nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMin.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.ext-surface.mean-curv.mgh'))
 
@@ -735,9 +732,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
         gauss_curvMid = triaMidRm.map_tfunc_to_vfunc(gauss_curvMid)
 
-        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.psol'), mean_curvMid)
+        io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.psol'), mean_curvMid)
 
-        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.psol'), gauss_curvMid)
+        io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.mid-surface.gauss-curv.psol'), gauss_curvMid)
 
         nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMid.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.mid-surface.mean-curv.mgh'))
 
@@ -763,9 +760,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
         gauss_curvMax = triaMaxRm.map_tfunc_to_vfunc(gauss_curvMax)
 
-        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.psol'), mean_curvMax)
+        io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.psol'), mean_curvMax)
 
-        lpfio.export_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.psol'), gauss_curvMax)
+        io.write_vfunc(os.path.join(OUT_DIR, HEMI + '.int-surface.gauss-curv.psol'), gauss_curvMax)
 
         nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=mean_curvMax.astype("float32"), affine=None), filename=os.path.join(OUT_DIR, HEMI + '.int-surface.mean-curv.mgh'))
 
@@ -833,7 +830,7 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     vertList = np.reshape(vert, (d1*d2*d3, 3))
     triaNoNan = np.array(tria)[np.sum(np.sum(np.isnan(vertList[tria,:]), axis=2), axis=1)==0,:]
 
-    lpio.export_vtk(lp.TriaMesh(vertList, triaNoNan), os.path.join(OUT_DIR, HEMI + '.hull.vtk'))
+    TriaMesh.write_vtk(TriaMesh(vertList, triaNoNan), os.path.join(OUT_DIR, HEMI + '.hull.vtk'))
 
     # --------------------------------------------------------------------------
     # return

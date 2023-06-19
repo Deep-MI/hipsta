@@ -24,9 +24,8 @@ def createSurface(params):
     import pyacvd
     import pyvista as pv
     import numpy as np
-    import lapy as lp
 
-    from lapy import TriaIO as lpio
+    from lapy import TriaMesh
     from scipy import sparse as sp
 
     # message
@@ -185,10 +184,9 @@ def createSurface(params):
 
             # use spherically project
             from lapy import Solver
-            from lapy import TriaIO as lpio
 
             # load
-            tria = lpio.import_fssurf(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh"))
+            tria = TriaMesh.read_fssurf(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".fsmesh"))
 
             # compute
             fem = Solver(tria, lump=False)
@@ -196,7 +194,7 @@ def createSurface(params):
             tria.v = evecs[:, 1:4]
 
             # write
-            lpio.export_fssurf(tria, os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".preinflated"))
+            TriaMesh.write_fssurf(tria, os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".preinflated"))
 
             # inflate
             cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_inflate") + " -n 10 " \
@@ -208,7 +206,7 @@ def createSurface(params):
             subprocess.run(cmd.split())
 
             # load
-            tria = lpio.import_fssurf(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated"))
+            tria = TriaMesh.read_fssurf(os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".inflated"))
 
             # use simple normalization instead of mris_sphere
             tria.v[:,0] = tria.v[:,0] - np.min(tria.v[:,0])
@@ -219,7 +217,7 @@ def createSurface(params):
             tria.v[:,2] = tria.v[:,2] / np.max(tria.v[:,2]) - 0.5
 
             # write
-            lpio.export_fssurf(tria, os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".sphere"))
+            TriaMesh.write_fssurf(tria, os.path.join(params.OUTDIR, TMPSUBJ, "surf", params.HEMI + "." + params.internal.HSFLABEL_04 + ".sphere"))
 
         # copy files
 
@@ -392,7 +390,7 @@ def createSurface(params):
 
             # restrict to largest connected component
 
-            triaMesh = lp.TriaMesh(v=vr, t=trSortRmBnd)
+            triaMesh = TriaMesh(v=vr, t=trSortRmBnd)
             comps = sp.csgraph.connected_components(triaMesh.adj_sym, directed=False)
             if comps[0]>1:
                 compsLargest = np.argmax(np.unique(comps[1], return_counts=True)[1])
@@ -404,7 +402,7 @@ def createSurface(params):
 
             # remove free vertices and re-orient mesh
 
-            triaMesh = lp.TriaMesh(v=vr, t=trSortRmBndRmComps)
+            triaMesh = TriaMesh(v=vr, t=trSortRmBndRmComps)
             triaMesh.rm_free_vertices_()
             triaMesh.orient_()
 
@@ -425,7 +423,7 @@ def createSurface(params):
 
             # remove free vertices and re-orient mesh
 
-            triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+            triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
             triaMesh.rm_free_vertices_()
             triaMesh.orient_()
 
@@ -433,21 +431,21 @@ def createSurface(params):
 
         # remove free vertices and re-orient mesh
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
         triaMesh.rm_free_vertices_()
         triaMesh.orient_()
 
     # save
 
-    lpio.export_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+    TriaMesh.write_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
 
     # smoothing
 
-    triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+    triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
 
     triaMesh.smooth_(n=params.internal.SMO)
 
-    lpio.export_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rs." + params.internal.HSFLABEL_05 + ".vtk"))
+    TriaMesh.write_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rs." + params.internal.HSFLABEL_05 + ".vtk"))
 
     # update HSFLABEL 6
 

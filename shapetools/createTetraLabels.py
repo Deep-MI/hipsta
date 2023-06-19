@@ -79,10 +79,7 @@ def createTetraLabels(params):
     import numpy as np
     import nibabel as nb
 
-    import lapy as lp
-    from lapy import TriaIO as lpio
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TriaMesh, TetMesh, io
 
     from shapetools.createVertexLabels import createVertexLabels
 
@@ -188,7 +185,7 @@ def createTetraLabels(params):
 
     # create vertex labels 2
 
-    tetMesh = lptio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_07 + ".vtk"))
+    tetMesh = TetMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_07 + ".vtk"))
 
     with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".label"), "w") as f:
 
@@ -222,9 +219,9 @@ def createTetraLabels(params):
 
     tetMeshBnd.orient_()
 
-    lpio.export_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
+    io.write_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
 
-    lpfio.export_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), np.array([ float(x) for x in asc ])[vRmBndKeep])
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), np.array([ float(x) for x in asc ])[vRmBndKeep])
 
     nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=np.array([ float(x) for x in asc ])[vRmBndKeep].astype("float32"), affine=None),
         filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".mgh"))

@@ -18,8 +18,7 @@ def createSupplementaryFiles(params):
     import nibabel as nb
     import numpy as np
 
-    import lapy
-    from lapy import TriaIO as lpio
+    from lapy import TriaMesh
 
     from shapetools import triaUtils
 
@@ -101,7 +100,7 @@ def createSupplementaryFiles(params):
 
         # get mid-surface
 
-        triaMidRm = lpio.import_vtk(os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
+        triaMidRm = TriaMesh.import_vtk(os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
 
         #
 
@@ -119,8 +118,8 @@ def createSupplementaryFiles(params):
         # output
 
         if len(vBnd)>0:
-            outBnd = lapy.TriaMesh(v=vBnd, t=tBnd.astype('int'))
-            lpio.export_vtk(tria=outBnd, outfile=os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf-bnd.vtk'))
+            outBnd = TriaMesh(v=vBnd, t=tBnd.astype('int'))
+            TriaMesh.write_vtk(tria=outBnd, outfile=os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf-bnd.vtk'))
         else:
             logging.info("Could not create boundary overlays.")
 

@@ -146,7 +146,7 @@ def _parse_arguments():
     optional.add_argument('--interp', dest='INTERP', help=h_interp, default='nearest', required=False, metavar= '<nearest|cubic>')
     optional.add_argument('--writePSOL', dest='writePSOL', help=h_writePSOL, default=False, action="store_true", required=False)
     optional.add_argument('--writeMGH', dest='writeMGH', help=h_writeMGH, default=False, action="store_true", required=False)
-    optional.add_argument('--writeANNOT', dest='writeANNOT', help=argparse.SUPPRESS, default=False, action="store_true", required=False) # help=h_writeANNOT, currently hidden might  be added later
+    optional.add_argument('--writeANNOT', dest='writeANNOT', help=argparse.SUPPRESS, default=False, action="store_true", required=False) # help=h_writeANNOT # currently hidden, might be added later
 
     # define help
     help = parser.add_argument_group('getting help')
@@ -238,9 +238,9 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
     import nibabel as nb
     import numpy as np
     import pandas as pd
-    import lapy as lp
-    from lapy import TriaIO as lpio
-    from lapy import FuncIO as lpfio
+
+    from lapy import TriaMesh, io
+
     from scipy import spatial as sp
     from scipy import stats as st
 
@@ -310,7 +310,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
     else:
         vol = nb.freesurfer.load(IN_VOL)
 
-    surf = lpio.import_vtk(IN_SURF)
+    surf = TriaMesh.read_vtk(IN_SURF)
 
     # get data
     mat = vol.header.get_vox2ras_tkr()
@@ -374,10 +374,10 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
     if writePSOL is True:
         if INTEGRATE=="mean" or INTEGRATE=="median" or INTEGRATE=="mode" or INTEGRATE=="max" or INTEGRATE=="min":
             OUT_PSOL_INTEGR = IN_SURF.replace('.vtk', '_'+IN_SUFFIX+'-integrated.psol')
-            lpfio.export_vfunc(OUT_PSOL_INTEGR, np.asarray(integr)[:,2])
+            io.write_vfunc(OUT_PSOL_INTEGR, np.asarray(integr)[:,2])
         else:
             OUT_PSOL = IN_SURF.replace('.vtk', '_'+IN_SUFFIX+'.psol')
-            lpfio.export_vfunc(OUT_PSOL, lookup)
+            io.write_vfunc(OUT_PSOL, lookup)
 
     if writeMGH is True:
         if INTEGRATE=="mean" or INTEGRATE=="median" or INTEGRATE=="mode" or INTEGRATE=="max" or INTEGRATE=="min":

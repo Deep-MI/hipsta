@@ -114,14 +114,13 @@ def importData(tetraFile, tetraIdxFile):
 
     import numpy as np
 
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TetMesh, io
 
-    tetMesh = lptio.import_vtk(tetraFile)
+    tetMesh = TetMesh.read_vtk(tetraFile)
     v4 = tetMesh.v
     t4 = tetMesh.t
 
-    l4 = lpfio.import_vfunc(tetraIdxFile)
+    l4 = io.read_vfunc(tetraIdxFile)
     l4 = np.array(l4)
 
     return v4, t4, l4
@@ -138,19 +137,15 @@ def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, 
 
     import numpy as np
 
-    import lapy as lp
-
-    from lapy import TriaIO as lpio
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TriaMesh, TetMesh, io
 
     # write out cut mesh and overlay
 
-    tetMesh = lp.TetMesh(v=v4c, t=t4c)
+    tetMesh = TetMesh(v=v4c, t=t4c)
 
-    lptio.export_vtk(tetMesh, tetraCutOutFile)
+    TetMesh.write_vtk(tetMesh, tetraCutOutFile)
 
-    lpfio.export_vfunc(tetraCutOutFileFunc, i4c)
+    io.write_vfunc(tetraCutOutFileFunc, i4c)
 
     # create boundary mesh and output
 
@@ -158,30 +153,30 @@ def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, 
 
     triaMesh4cBnd.orient_()
 
-    lpio.export_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.bnd.cut.tetra.vtk'))
 
     # remove all trias that share a vertex at the cut planes, because we want
     # to have an open boundary mesh; also remove free vertices
 
     t4cBndOpen = triaMesh4cBnd.t[np.sum(i4c[triaMesh4cBnd.t]==1, axis=1)>=1, :]
 
-    triaMesh4cBndOpen = lp.TriaMesh(v=v4c, t=t4cBndOpen)
+    triaMesh4cBndOpen = TriaMesh(v=v4c, t=t4cBndOpen)
 
     triaMesh4cBndOpen.orient_()
 
-    lpio.export_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.open.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.open.bnd.cut.tetra.vtk'))
 
     # remove free vertices from boundary mesh and output
 
     triaMesh4cBnd.rm_free_vertices_()
 
-    lpio.export_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.rm.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.rm.bnd.cut.tetra.vtk'))
 
     # remove free vertices from open mesh and output ...
 
     triaMesh4cBndOpen.rm_free_vertices_()
 
-    lpio.export_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.tetra.vtk'))
 
     # write out mapping between open bnd and v4c
 
@@ -197,11 +192,11 @@ def preprocessData(v4, t4, l4):
 
     import numpy as np
 
-    import lapy as lp
+    from lapy import TetMesh, Solver
 
-    tetMesh = lp.TetMesh(v=v4, t=t4)
+    tetMesh = TetMesh(v=v4, t=t4)
 
-    tetMeshSolver = lp.Solver(tetMesh)
+    tetMeshSolver = Solver(tetMesh)
 
     A = tetMeshSolver.stiffness
 

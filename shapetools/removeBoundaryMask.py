@@ -85,10 +85,7 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
 
     import numpy as np
 
-    import lapy as lp
-    from lapy import TriaIO as lpio
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TriaMesh, TetMesh, io
 
     # -------------------------------------------------------------------------
     # message
@@ -119,9 +116,9 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
     # -------------------------------------------------------------------------
     # load data
 
-    tetMesh = lptio.import_vtk(VTKFile)
+    tetMesh = TetMesh.read_vtk(VTKFile)
 
-    l = lpfio.import_vfunc(PSOLFile)
+    l = io.read_vfunc(PSOLFile)
     l = np.array(l)
 
     vTail = tetMesh.v[l==labelBndTail, ]
@@ -235,7 +232,7 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
     vIdx[vcutIdxHead] = labelBndTail
     vIdx[vcutIdxTail] = labelBndHead
 
-    lpfio.export_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + "." + params.internal.HSFLABEL_07 + "_tetra-remove" + ".psol"), vIdx)
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + "." + params.internal.HSFLABEL_07 + "_tetra-remove" + ".psol"), vIdx)
 
     # for visualization
 
@@ -245,9 +242,9 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
 
     tetMeshBnd.orient_()
 
-    lpio.export_vtk(tria=tetMeshBnd, outfile=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
+    TriaMesh.write_vtk(tria=tetMeshBnd, outfile=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
 
-    lpfio.export_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), vIdx)
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), vIdx)
 
     # -------------------------------------------------------------------------
     # update params

@@ -14,8 +14,8 @@ def checkSurface(params, stage=None):
     import os
     import sys
     import logging
-    import lapy as lp
-    from lapy import TriaIO as lpio
+
+    from lapy import TriaMesh
 
     # message
 
@@ -29,7 +29,7 @@ def checkSurface(params, stage=None):
 
     if params.internal.CHECKSURFACE is not None and stage=="check_surface":
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
 
         euler = triaMesh.euler()
 
@@ -46,7 +46,7 @@ def checkSurface(params, stage=None):
 
     elif params.internal.CHECKBOUNDARIES is not None and stage=="check_boundaries":
 
-        triaMesh = lpio.import_vtk(os.path.join(os.path.join(params.OUTDIR, "tetra-cut"), params.HEMI + '.rm.open.bnd.cut.tetra.vtk'))
+        triaMesh = TriaMesh.read_vtk(os.path.join(os.path.join(params.OUTDIR, "tetra-cut"), params.HEMI + '.rm.open.bnd.cut.tetra.vtk'))
 
         bnd_loops = triaMesh.boundary_loops()
 

@@ -375,12 +375,9 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     import os
     import sys
 
-    import lapy as lp
     import numpy as np
 
-    from lapy import TriaIO as lpio
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TriaMesh, TesMesh, io
 
     from scipy import sparse as sp
     from scipy import stats as st
@@ -415,9 +412,9 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
         zeroTetraIdx.extend(np.where(np.sum(np.isin(t4c, i), axis=1)==2)[0].tolist())
     zeroTetraIdx = np.unique(np.array(zeroTetraIdx))
 
-    # from lapy import Plot as lpp
+    # from lapy import plot as lpp
     #
-    # tetMesh = lp.TetMesh(v4c, t4c)
+    # tetMesh = TetMesh(v4c, t4c)
     #
     # vfunc = np.zeros(np.shape(v4c)[0])
     # vfunc[np.unique(t4c[zeroTetraIdx])] = 1
@@ -629,14 +626,10 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     import os, sys
     import logging
 
-    import lapy as lp
     import numpy as np
     import nibabel as nb
 
-    from lapy import DiffGeo
-    from lapy import TriaIO as lpio
-    from lapy import TetIO as lptio
-    from lapy import FuncIO as lpfio
+    from lapy import TriaMesh, TetMesh, Solver, io, diffgeo
 
     from sklearn.decomposition import PCA
     from scipy.sparse.linalg import LinearOperator, eigsh, splu
@@ -681,18 +674,18 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # load cut tetra mesh
 
-    tetMeshCut = lptio.import_vtk(cutTetraMeshFile)
+    tetMeshCut = TetMesh.read_vtk(cutTetraMeshFile)
     v4c = tetMeshCut.v
     t4c = tetMeshCut.t
 
     # load indices of cutting planes
 
-    i4c = lpfio.import_vfunc(cutTetraIndexFile)
+    i4c = io.read_vfunc(cutTetraIndexFile)
     i4c = np.array(i4c)
 
     # load subfields indices
 
-    j4c = lpfio.import_vfunc(tetraIndexFile)
+    j4c = io.read_vfunc(tetraIndexFile)
     j4c = np.array(j4c)
 
     # append subfield indices
@@ -703,7 +696,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     # get a tria mesh that is cut open at its ends, but still consistent with
     # the tetra mesh
 
-    triaMesh4cBndOpen = lpio.import_vtk(openBndCutTetraMeshFile)
+    triaMesh4cBndOpen = TriaMesh.read_vtk(openBndCutTetraMeshFile)
 
     v4cBndOpen = triaMesh4cBndOpen.v
     t4cBndOpen = triaMesh4cBndOpen.t
@@ -712,7 +705,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     v4cBndOpenKeep, v4cBndOpenDel = triaMesh4cBndOpen.rm_free_vertices_()
 
-    triaMesh4cBndOpenRm = lp.TriaMesh(v=triaMesh4cBndOpen.v, t=triaMesh4cBndOpen.t)
+    triaMesh4cBndOpenRm = TriaMesh(v=triaMesh4cBndOpen.v, t=triaMesh4cBndOpen.t)
 
     triaMesh4cBndOpenRm.orient_()
 
@@ -724,7 +717,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # compute first eigenfunction
 
-    fem = lp.Solver(triaMesh4cBndOpenRm, lump=True, aniso=paramAnisoAlpha, aniso_smooth=paramAnisoSmooth)
+    fem = Solver(triaMesh4cBndOpenRm, lump=True, aniso=paramAnisoAlpha, aniso_smooth=paramAnisoSmooth)
 
     anisoLaplEval, anisoLaplEvec = fem.eigs(k=3)
 
@@ -737,7 +730,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     hsfList = np.array(hsfList).astype(int)
 
-    lpfio.export_vfunc(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.tetra.psol'), k4c[hsfList])
+    io.write_vfunc(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.tetra.psol'), k4c[hsfList])
 
     # --------------------------------------------------------------------------
     # post-process eigenfunction (order, flipping)
@@ -784,8 +777,8 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
         print("Inconsistency detected for EV2, exiting.")
         sys.exit(1)
 
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])
 
     # --------------------------------------------------------------------------
     # define boundary conditions (note that we changed dimensions and directions!)
@@ -860,14 +853,14 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # first, need to remove free vtcs
 
-    tetMesh4c = lp.TetMesh(v4c, t4c)
+    tetMesh4c = TetMesh(v4c, t4c)
 
     v4cRmKeep, v4cRmDel = tetMesh4c.rm_free_vertices_()
 
     v4cRm = tetMesh4c.v
     t4cRm = tetMesh4c.t
 
-    lptio.export_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, hemi + '.seam.rm.cut.tetra.vtk'))
+    TetMesh.write_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, hemi + '.seam.rm.cut.tetra.vtk'))
 
     #
 
@@ -883,9 +876,9 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     #
 
-    tetMesh4cRm = lp.TetMesh(v4cRm, t4cRm)
+    tetMesh4cRm = TetMesh(v4cRm, t4cRm)
 
-    fem = lp.Solver(tetMesh4cRm)
+    fem = Solver(tetMesh4cRm)
 
     P0 = fem.poisson(dtup=bndXRm)
     P1 = fem.poisson(dtup=bndYRm)
@@ -896,13 +889,13 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # write out functions
 
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.seam.rm.cut.tetra.psol'), vfuncXRm)
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.seam.rm.cut.tetra.psol'), vfuncYRm)
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.seam.rm.cut.tetra.psol'), vfuncZRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.seam.rm.cut.tetra.psol'), vfuncXRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.seam.rm.cut.tetra.psol'), vfuncYRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.seam.rm.cut.tetra.psol'), vfuncZRm)
 
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.seam.rm.cut.tetra.psol'), P0)
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.seam.rm.cut.tetra.psol'), P1)
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.seam.rm.cut.tetra.psol'), P2)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.seam.rm.cut.tetra.psol'), P0)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.seam.rm.cut.tetra.psol'), P1)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.seam.rm.cut.tetra.psol'), P2)
 
     # also write out boundary files for visualization
 
@@ -913,21 +906,21 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     v4cRmBndRm = tetMesh4cRmBnd.v
     t4cRmBndRm = tetMesh4cRmBnd.t
 
-    lpio.export_vtk(tetMesh4cRmBnd, outfile=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'))
+    TriaMesh.write_vtk(tetMesh4cRmBnd, outfile=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'))
 
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.tetra.psol'), vfuncXRm[v4cRmBndRmKeep])
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.tetra.psol'), vfuncYRm[v4cRmBndRmKeep])
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.rm.bnd.seam.rm.cut.tetra.psol'), vfuncZRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.tetra.psol'), vfuncXRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.tetra.psol'), vfuncYRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.rm.bnd.seam.rm.cut.tetra.psol'), vfuncZRm[v4cRmBndRmKeep])
 
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.rm.bnd.seam.rm.cut.tetra.psol'), P0[v4cRmBndRmKeep])
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.rm.bnd.seam.rm.cut.tetra.psol'), P1[v4cRmBndRmKeep])
-    lpfio.export_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.rm.bnd.seam.rm.cut.tetra.psol'), P2[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.rm.bnd.seam.rm.cut.tetra.psol'), P0[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.rm.bnd.seam.rm.cut.tetra.psol'), P1[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.rm.bnd.seam.rm.cut.tetra.psol'), P2[v4cRmBndRmKeep])
 
     # write out cube
 
     w4cRm = np.vstack((P0,P1,P2)).transpose()
 
-    lptio.export_vtk(lp.TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, hemi + '.uvw.seam.rm.cut.tetra.vtk'))
+    TetMesh.write_vtk(TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, hemi + '.uvw.seam.rm.cut.tetra.vtk'))
 
     #
 

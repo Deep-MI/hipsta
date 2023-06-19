@@ -77,17 +77,18 @@ def qcPlots(params, stage=None):
     import pandas as pd
     import plotly.express as px
     import plotly.graph_objects as go
+    
     from plotly.subplots import make_subplots
-    import lapy as lp
-    from lapy import TriaIO as lpio
-    from lapy import FuncIO as lpfio
+
+    from lapy import TriaMesh, io
     from lapy import Plot as lpp
+
     from shapetools.triaUtils import levelsetsTria
 
     # mesh
     if params.internal.noqc is False and stage=="mesh":
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
 
         if params.HEMI =="lh":
             camera = dict(
@@ -105,9 +106,9 @@ def qcPlots(params, stage=None):
     # profile
     if params.internal.noqc is False and stage=="profile":
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.tetra.vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.tetra.vtk"))
 
-        triaFunc = np.array(lpfio.import_vfunc(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.tetra.psol")))
+        triaFunc = np.array(io.read_vfunc(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.tetra.psol")))
 
         #
 
@@ -146,7 +147,7 @@ def qcPlots(params, stage=None):
     # hull
     if stage=="hull":
 
-        triaMesh = lpio.import_vtk(os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk"))
 
         if params.HEMI =="lh":
             camera = dict(
