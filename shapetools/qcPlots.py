@@ -81,7 +81,7 @@ def qcPlots(params, stage=None):
     from plotly.subplots import make_subplots
 
     from lapy import TriaMesh, io
-    from lapy import Plot as lpp
+    from lapy import plot as lpp
 
     from shapetools.triaUtils import levelsetsTria
 
