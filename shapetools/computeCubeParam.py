@@ -377,7 +377,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 
     import numpy as np
 
-    from lapy import TriaMesh, TesMesh, io
+    from lapy import TriaMesh, TetMesh, io
 
     from scipy import sparse as sp
     from scipy import stats as st
