@@ -100,7 +100,7 @@ def createSupplementaryFiles(params):
 
         # get mid-surface
 
-        triaMidRm = TriaMesh.import_vtk(os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
+        triaMidRm = TriaMesh.read_vtk(os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
 
         #
 
