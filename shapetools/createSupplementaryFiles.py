@@ -118,8 +118,7 @@ def createSupplementaryFiles(params):
         # output
 
         if len(vBnd)>0:
-            outBnd = TriaMesh(v=vBnd, t=tBnd.astype('int'))
-            TriaMesh.write_vtk(tria=outBnd, outfile=os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf-bnd.vtk'))
+            TriaMesh(v=vBnd, t=tBnd.astype('int')).write_vtk(outBndoutfile=os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf-bnd.vtk'))
         else:
             logging.info("Could not create boundary overlays.")
 
