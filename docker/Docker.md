@@ -44,18 +44,18 @@ An analysis can be performed by adding several options to the above command (and
 docker run \
     --rm \
     --user XXXX:YYYY \
-    -v /path/to/filename:/path_to_filename_inside_docker \
+    -v /path/to/my/input/directory:/path_to_input_directory_inside_docker \
     -v /path/to/my/output/directory:/path_to_output_directory_inside_docker \
     -v /path/to/my/freesurfer/installation/.license:/opt/freesurfer/.license    
     hipsta \
-    --filename /path_to_filename_inside_docker/my_filename.mgz \
+    --filename /path_to_input_directory_inside_docker/my_filename.mgz \
     --outputdir /path_to_output_directory_inside_docker \
     --hemi HEMISPHERE \
     --lut LOOKUP-TABLE \
     --logfiledir /path_to_output_directory_inside_docker
 ```
 
-* The first two `-v` arguments mount your data directory and output directories into the Docker image (note that full, not relative, pathnames should be given). Inside the image, they are visible under the name following the colon (in this case `/path_to_filename_inside_docker` and `/path_to_output_directory_inside_docker`, but these can be different). From within the docker image / container, there will be read and write access to the directories that are mounted into the image (unless specified otherwise; for example, use `-v /path/to/filename:/path_to_filename_inside_docker:ro` for read-only access to your input directory).
+* The first two `-v` arguments mount your data directory and output directories into the Docker image (note that full, not relative, pathnames should be given). Inside the image, they are visible under the name following the colon (in this case `/path_to_input_directory_inside_docker` and `/path_to_output_directory_inside_docker`, but these can be different). From within the docker image / container, there will be read and write access to the directories that are mounted into the image (unless specified otherwise; for example, use `-v /path/to/my/input/directory:/path_to_input_directory_inside_docker:ro` for read-only access to your input directory).
 * The third `-v` argument mounts your freesurfer license to the FreeSurfer directory within the Docker image (`/opt/freesurfer`). You can use a `.license` or a `license.txt` file, which can, but does not need to, be present in your local FreeSurfer directory on your system.
 * The next part of the Docker command is the name of the Docker image, which is `hipsta`.
 * After that, all other flags are identical to the ones that are used for the `shapetools.py` program (which are explained on the main page and the help message of the program). Note that, in addition to the `--filename`, `--hemi`, `--lut` arguments, which are mandatory, additional arguments such as `--outputdir` can be specified - in the same way as for non-dockerized version of the program. Also note that file- and pathnames need to correspond to the targets of the file / directory mappings within the Docker image, not to the local system. Finally, `HEMISPHERE` should either be `lh` or `rh`, and `LOOKUP-TABLE` should be `fs711` or `ashs`.

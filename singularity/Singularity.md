@@ -30,19 +30,19 @@ To run the shape and thickness analysis on a given subject using the Singularity
 
 ```bash
 singularity exec \
-    -B /path/to/filename:/path_to_filename_inside_container \
+    -B /path/to/my/input/directory:/path_to_input_directory_inside_container \
     -B /path/to/my/output/directory:/path_to_output_directory_inside_container \
     -B /path/to/my/freesurfer/installation/.license:/opt/freesurfer/.license
     /home/user/my_singularity_images/hipsta.sif \
     python3 /app/hipsta/shapetools.py \
-    --filename /path_to_filename_inside_container/my_filename.mgz \
+    --filename /path_to_input_directory_inside_container/my_filename.mgz \
     --outputdir /path_to_output_directory_inside_container \
     --hemi HEMISPHERE \
     --lut LOOKUP-TABLE \
     --logfiledir /path_to_output_directory_inside_container
 ```
 
-* The first two `-B` arguments mount your data directory and output directories into the singularity image (note that full, not relative, pathnames should be given). Inside the image, they are visible under the name following the colon (in this case `/path_to_filename_inside_container` and `/path_to_output_directory_inside_container`, but these can be different). From within the singularity image / container, there will be read and write access to the directories that are mounted into the image (unless specified otherwise).
+* The first two `-B` arguments mount your data directory and output directories into the singularity image (note that full, not relative, pathnames should be given). Inside the image, they are visible under the name following the colon (in this case `/path_to_input_directory_inside_container` and `/path_to_output_directory_inside_container`, but these can be different). From within the singularity image / container, there will be read and write access to the directories that are mounted into the image (unless specified otherwise).
 * The third `-B` argument mounts your freesurfer license to the FreeSurfer directory within the singularity image (`/opt/freesurfer`). You can use a `.license` or a `license.txt` file, which can, but does not need to, be present in your local FreeSurfer directory on your system.
 * The next part of the command is the name of the Singularity image, which is `hipsta.sif`. In this example it is located in `/home/user/my_singularity_images`, but the specific path will likely be different on your local system.
 * For the Singularity image, we also have to excplicitly specify the command that we want run, i.e. `python3 /app/hipsta/shapetools.py`.
