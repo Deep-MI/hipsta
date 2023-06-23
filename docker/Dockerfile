@@ -41,7 +41,7 @@ RUN wget -qO- https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz | tar zxv --no
 RUN git clone https://github.com/Deep-MI/Hipsta.git /app/hipsta
 
 # install additional python packages
-RUN python3 -m pip install `cat /app/hipsta/requirements.txt`
+RUN python3 -m pip install -r /app/hipsta/requirements.txt
 
 # Add FreeSurfer environment variables (.license file needed, alternatively export FS_LICENSE=path/to/license)
 ENV FREESURFER_HOME=/opt/freesurfer
