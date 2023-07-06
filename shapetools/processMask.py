@@ -253,7 +253,6 @@ def longFilter(params):
     # imports
 
     import os
-    import subprocess
     from scipy import ndimage
     import nibabel as nb
     import numpy as np
@@ -277,22 +276,12 @@ def longFilter(params):
         img = nb.load(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz"))
         dat = img.get_fdata()
 
-        #k = np.zeros((3,3,3))
-        #k[1,1,:] = 1
-        #k[:,1,1] = 1
-
         k = np.zeros(params.internal.LONGFILTER_SIZE)
         k[2,2,:] = 1
 
         dat_filtered = ndimage.convolve(dat, k, mode="constant", cval=0.0)
 
         dat_filtered = dat_filtered>0
-
-        # opening
-        #dat_filtered = ndimage.binary_opening(dat_filtered)
-
-        # closing
-        #dat_filtered = ndimage.binary_closing(dat_filtered)
 
         nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.get_affine()), filename=os.path.join(params.OUTDIR, params.HEMI + ".lf." + params.internal.HSFLABEL_02 + ".mgz"))
 
@@ -313,10 +302,8 @@ def closeMask(params):
     # imports
 
     import os
-    import subprocess
     from scipy import ndimage
     import nibabel as nb
-    import numpy as np
 
     #
 
@@ -339,7 +326,6 @@ def closeMask(params):
             img = nb.load(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz"))
             dat = img.get_fdata()
 
-            #dat_filtered = ndimage.binary_closing(dat, iterations=1)
             dat_filtered = ndimage.binary_closing(dat, structure=ndimage.iterate_structure(ndimage.generate_binary_structure(rank=3, connectivity=1), iterations=1).astype(int), iterations=1)
 
             dat_filtered = dat_filtered>0
