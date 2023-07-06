@@ -22,7 +22,18 @@ RUN apt-get install -y --no-install-recommends \
     python3-pip
 
 # download FreeSurfer
-RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_x86_64-7.4.1.tar.gz | tar zxv --no-same-owner -C /opt \
+#RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_x86_64-7.4.1.tar.gz | tar zxv --no-same-owner -C /opt \
+#    --exclude='freesurfer/trctrain' \
+#    --exclude='freesurfer/subjects/fsaverage_sym' \
+#    --exclude='freesurfer/subjects/fsaverage3' \
+#    --exclude='freesurfer/subjects/fsaverage4' \
+#    --exclude='freesurfer/subjects/fsaverage5' \
+#    --exclude='freesurfer/subjects/fsaverage6' \
+#    --exclude='freesurfer/subjects/cvs_avg35' \
+#    --exclude='freesurfer/subjects/cvs_avg35_inMNI152' \
+#    --exclude='freesurfer/subjects/V1_average' \
+#    --exclude='freesurfer/average/mult-comp-cor'
+RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.2.0/freesurfer-linux-ubuntu18_amd64-7.2.0.tar.gz | tar zxv --no-same-owner -C /opt \
     --exclude='freesurfer/trctrain' \
     --exclude='freesurfer/subjects/fsaverage_sym' \
     --exclude='freesurfer/subjects/fsaverage3' \
