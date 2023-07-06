@@ -20,13 +20,16 @@ def createSurface(params):
     import uuid
     import shutil
     import subprocess
-
     import pyacvd
-    import pyvista as pv
+
     import numpy as np
+    import nibabel as nb
+    import pyvista as pv
 
     from lapy import TriaMesh
     from scipy import sparse as sp
+    from scipy import ndimage as nd
+    from skimage import measure as skm
 
     # message
 
@@ -85,6 +88,18 @@ def createSurface(params):
         print(cmd)
 
         subprocess.run(cmd.split())
+
+    elif params.internal.MCA == "skimage":
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz"))
+        dat = img.get_fdata()
+
+        msh = skm.marching_cubes(dat)
+
+        v = np.matmul(img.header.get_vox2ras_tkr(), np.concatenate((msh[0], np.ones((msh[0].shape[0],1))), axis=1).T).T[:, 0:3]
+        t = msh[1]
+
+        TriaMesh(v, t).write_vtk(os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".vtk"))
 
     # update params
 
