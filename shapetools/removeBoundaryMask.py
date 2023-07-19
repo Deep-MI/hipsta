@@ -3,80 +3,10 @@ This module provides a function to remove boundary tetras from tetrahedral meshe
 
 """
 
-# ------------------------------------------------------------------------------
-# AUXILIARY FUNCTIONS
-
-# options_parse()
-
-def options_parse():
-    """
-    Command Line Options Parser:
-    initiate the option parser and return the parsed object
-    """
-
-    # imports
-
-    import optparse
-    import sys
-
-    # define helptext
-
-    HELPTEXT = """
-    SUMMARY
-
-    This is an auxiliary script for the shapetools.py script and is usually
-    called from within that script.
-
-    The script requires two arguments:
-
-    --vtk   <file>
-    --psol  <file>
-
-    """
-
-    # initialize
-    parser = optparse.OptionParser(usage=HELPTEXT)
-
-    # help text
-    h_vtk = 'vtk file'
-    h_psol = 'psol file'
-
-    # specify inputs
-    group = optparse.OptionGroup(parser, "Required Options:", "...")
-    group.add_option('--vtk', dest='vtk', help=h_vtk)
-    group.add_option('--psol', dest='psol', help=h_psol)
-    parser.add_option_group(group)
-
-    # parse arguments
-    (options, args) = parser.parse_args()
-
-    # check if there are any inputs
-    if len(sys.argv)==1:
-        print(HELPTEXT)
-        sys.exit(0)
-
-    # check if vtk file is given
-    if options.vtk is None:
-        print('\nERROR: Specify --vtk\n')
-        sys.exit(1)
-    else:
-        print('... Found vtk file '+options.vtk)
-
-    # check if psol file is given
-    if options.psol is None:
-        print('\nERROR: Specify --psol\n')
-        sys.exit(1)
-    else:
-        print('... Found psol file '+options.psol)
-
-    # return
-    return options
-
-
 # -----------------------------------------------------------------------------
 # MAIN FUNCTION
 
-def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, labelBndTail=2260):
+def removeBoundaryMask(params):
 
     # -------------------------------------------------------------------------
     # imports
@@ -85,7 +15,7 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
 
     import numpy as np
 
-    from lapy import TriaMesh, TetMesh, io
+    from lapy import TetMesh, io
 
     # -------------------------------------------------------------------------
     # message
@@ -101,17 +31,11 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
     # -------------------------------------------------------------------------
     # evaluate input
 
-    if params is not None:
-        VTKFile = os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_07 + ".vtk")
-        PSOLFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".psol")
+    VTKFile = os.path.join(params.OUTDIR, params.HEMI + ".tetra.vtk")
+    PSOLFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.psol")
 
-    # -------------------------------------------------------------------------
-    # determine values
-
-    if params is not None:
-
-        labelBndHead = params.LUTDICT['bndhead']
-        labelBndTail = params.LUTDICT['bndtail']
+    labelBndHead = params.LUTDICT['bndhead']
+    labelBndTail = params.LUTDICT['bndtail']
 
     # -------------------------------------------------------------------------
     # load data
@@ -136,9 +60,6 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
     vHeadc = vHeadc[:, np.flip(np.argsort(vHeade), axis=0)]
     vTaile = np.flip(np.sort(vTaile), axis=0)
     vHeade = np.flip(np.sort(vHeade), axis=0)
-
-    vTails = np.linalg.solve(vTailc, (vTail - np.mean(vTail, axis=0)).T).T
-    vHeads = np.linalg.solve(vHeadc, (vHead - np.mean(vHead, axis=0)).T).T
 
     # -------------------------------------------------------------------------
     # determine on which side of the plane a given point is
@@ -220,19 +141,13 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
         vcutIdxHead = np.where(dHead  > 0)[0]
 
     # -------------------------------------------------------------------------
-    # remove empty vertices
-
-    fcutRenum = np.digitize(tcut, np.unique(tcut), right=True)
-    vcutRenum = tetMesh.v[np.unique(tcut), ]
-
-    # -------------------------------------------------------------------------
     # write PSOL
 
     vIdx = np.zeros(np.shape(tetMesh.v)[0])
     vIdx[vcutIdxHead] = labelBndTail
     vIdx[vcutIdxTail] = labelBndHead
 
-    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + "." + params.internal.HSFLABEL_07 + "_tetra-remove" + ".psol"), vIdx)
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".tetra-remove_bnd.psol"), vIdx)
 
     # for visualization
 
@@ -242,30 +157,11 @@ def removeBoundaryMask(params, VTKFile=None, PSOLFile=None, labelBndHead=2320, l
 
     tetMeshBnd.orient_()
 
-    tetMeshBnd.write_vtk(filename=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
+    tetMeshBnd.write_vtk(filename=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd.tetra.vtk"))
 
-    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), vIdx)
-
-    # -------------------------------------------------------------------------
-    # update params
-
-    params.internal.HSFLABEL_08 = "rm." + params.internal.HSFLABEL_07
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd.tetra.psol"), vIdx)
 
     # -------------------------------------------------------------------------
     # return
 
     return params
-
-
-# -----------------------------------------------------------------------------
-# CLI
-
-if __name__=="__main__":
-
-    # command-line options and error checking
-
-    options = options_parse()
-
-    # run main function
-
-    removeBoundaryMask(params=None, VTKFile=options.vtk, PSOLFile=options.psol)

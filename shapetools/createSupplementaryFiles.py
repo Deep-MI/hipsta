@@ -12,7 +12,6 @@ def createSupplementaryFiles(params):
     # imports
 
     import os
-    import sys
     import logging
 
     import nibabel as nb
@@ -44,9 +43,9 @@ def createSupplementaryFiles(params):
 
     # list of boundary values:
 
-    if LUT == "fs711":
+    if LUT == "freesurfer":
 
-        logging.info("Found internal, modified look-up table for FreeSurfer 7.11.")
+        logging.info("Found internal, modified look-up table for FreeSurfer")
 
         # get labels
 
@@ -61,10 +60,6 @@ def createSupplementaryFiles(params):
         hsfBnd[hsfBnd==240] = 4
 
         lstBnd = [ 1.5, 2.5, 3.5 ] # note that this implicitly also accounts for 246 labels if present
-
-        #
-
-        cont = True
 
     elif LUT == "ashs":
 
@@ -86,39 +81,32 @@ def createSupplementaryFiles(params):
 
         #
 
-        cont = True
-
     else:
 
-        logging.info("Creation of subfield boundary overlays is only supported for the fs711 and ashs look-up tables.")
+        logging.info("Creation of subfield boundary overlays is only supported for the freesurfer and ashs look-up tables.")
+        raise ValueError()
 
-        cont = False
+    # get mid-surface
+
+    triaMidRm = TriaMesh.read_vtk(os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
 
     #
 
-    if cont is True:
+    vBnd = np.empty((0, 3))
+    tBnd = np.empty((0, 3))
 
-        # get mid-surface
+    for i in lstBnd:
+        lvlBnd = triaUtils.levelsetsTria(triaMidRm.v, triaMidRm.t, hsfBnd, i)
+        if len(lvlBnd[0][0]) > 0:
+            vBnd_lvl = np.array(lvlBnd[0][0])
+            tBnd_lvl = np.array(lvlBnd[1][0])[:,[0,1,1]] - 1
+            tBnd = np.concatenate((tBnd, tBnd_lvl + len(vBnd)), axis=0)
+            vBnd = np.concatenate((vBnd, vBnd_lvl), axis=0)
 
-        triaMidRm = TriaMesh.read_vtk(os.path.join(OUT_DIR, HEMI + '.mid-surface.vtk'))
+    # output
 
-        #
-
-        vBnd = np.empty((0, 3))
-        tBnd = np.empty((0, 3))
-
-        for i in lstBnd:
-            lvlBnd = triaUtils.levelsetsTria(triaMidRm.v, triaMidRm.t, hsfBnd, i)
-            if len(lvlBnd[0][0]) > 0:
-                vBnd_lvl = np.array(lvlBnd[0][0])
-                tBnd_lvl = np.array(lvlBnd[1][0])[:,[0,1,1]] - 1
-                tBnd = np.concatenate((tBnd, tBnd_lvl + len(vBnd)), axis=0)
-                vBnd = np.concatenate((vBnd, vBnd_lvl), axis=0)
-
-        # output
-
-        if len(vBnd)>0:
-            TriaMesh(v=vBnd, t=tBnd.astype('int')).write_vtk(filename=os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf-bnd.vtk'))
-        else:
-            logging.info("Could not create boundary overlays.")
+    if len(vBnd)>0:
+        TriaMesh(v=vBnd, t=tBnd.astype('int')).write_vtk(filename=os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf-bnd.vtk'))
+    else:
+        logging.info("Could not create boundary overlays.")
 

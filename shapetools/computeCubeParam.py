@@ -497,128 +497,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 # ------------------------------------------------------------------------------
 # computeCubeParam
 
-def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
-    cutTetraIndexFile=None, openBndCutTetraMeshFile=None, tetraIndexFile=None,
-    hemi=None, outputDir=None, paramLegacy=True, paramAnisoSmooth=3,
-    paramAnisoAlpha=None, labelPrsbc=234, labelSbc=236,labelCA1=238,
-    labelCA3=240, labelBndCA4=2420, labelTail=226, labelHead=232):
-
-    # --------------------------------------------------------------------------
-    # computeCubeParam subfunctions
-    # --------------------------------------------------------------------------
-
-    # --------------------------------------------------------------------------
-    # options_parse()
-
-    def options_parse():
-        """
-        Command Line Options Parser:
-        initiate the option parser and return the parsed object
-        """
-
-        # imports
-
-        import sys
-        import optparse
-
-        # define helptext
-        HELPTEXT = """
-        SUMMARY
-
-        This is an auxiliary script for the shapetools.py script and is usually
-        called from within that script.
-
-        The script requires four arguments:
-
-        --cutTetraMeshDir <cutTetraMeshDir>
-        --cutTetraMeshFile <cutTetraMeshFile>
-        --cutTetraIndexFile <cutTetraIndexFile>
-        --openBndCutTetraMeshFile <openBndCutTetraMeshFile>
-        --tetraIndexFile <tetraIndexFile>
-        --hemi <lh|rh>
-
-        """
-
-        # message
-        print("\nReading input options ...")
-
-        # initialize
-        parser = optparse.OptionParser(usage=HELPTEXT)
-
-        # help text
-        h_cutTetraMeshDir = 'cutTetraMeshDir'
-        h_cutTetraMeshFile = 'cutTetraMeshFile'
-        h_cutTetraIndexFile = 'cutTetraIndexFile'
-        h_openBndCutTetraMeshFile = 'openBndCutTetraMeshFile'
-        h_tetraIndexFile = 'tetraIndexFile'
-        h_hemi = 'hemisphere'
-
-        # specify inputs
-        group = optparse.OptionGroup(parser, "Required Options:", "...")
-        group.add_option('--cutTetraMeshDir', dest='cutTetraMeshDir', help=h_cutTetraMeshDir)
-        group.add_option('--cutTetraMeshFile', dest='cutTetraMeshFile', help=h_cutTetraMeshFile)
-        group.add_option('--cutTetraIndexFile', dest='cutTetraIndexFile', help=h_cutTetraIndexFile)
-        group.add_option('--openBndCutTetraMeshFile', dest='openBndCutTetraMeshFile', help=h_openBndCutTetraMeshFile)
-        group.add_option('--tetraIndexFile', dest='tetraIndexFile', help=h_tetraIndexFile)
-        group.add_option('--hemi', dest='hemi', help=h_hemi)
-        parser.add_option_group(group)
-
-        # parse arguments
-        (options, args) = parser.parse_args()
-
-        # check if there are any inputs
-        if len(sys.argv) != 13:
-            print(HELPTEXT)
-            sys.exit(0)
-
-        # check if cutTetraMeshDir file is given
-        if options.cutTetraMeshDir is None:
-            print('\nERROR: Specify --cutTetraMeshDir\n')
-            sys.exit(1)
-        else:
-            print('... Found cutTetraMeshDir file ' + options.cutTetraMeshDir)
-
-        # check if cutTetraMeshFile file is given
-        if options.cutTetraMeshFile is None:
-            print('\nERROR: Specify --cutTetraMeshFile\n')
-            sys.exit(1)
-        else:
-            print('... Found cutTetraMeshFile file ' + options.cutTetraMeshFile)
-
-        # check if cutTetraIndexFile file is given
-        if options.cutTetraIndexFile is None:
-            print('\nERROR: Specify --cutTetraIndexFile\n')
-            sys.exit(1)
-        else:
-            print('... Found cutTetraIndexFile file ' + options.cutTetraIndexFile)
-
-        # check if openBndCutTetraMeshFile file is given
-        if options.openBndCutTetraMeshFile is None:
-            print('\nERROR: Specify --openBndCutTetraMeshFile\n')
-            sys.exit(1)
-        else:
-            print('... Found openBndCutTetraMeshFile file ' + options.openBndCutTetraMeshFile)
-
-        # check if tetraIndexFile file is given
-        if options.tetraIndexFile is None:
-            print('\nERROR: Specify --tetraIndexFile\n')
-            sys.exit(1)
-        else:
-            print('... Found tetraIndexFile file ' + options.tetraIndexFile)
-
-        # check if hemi is given
-        if options.hemi is None:
-            print('\nERROR: Specify --hemi\n')
-            sys.exit(1)
-        else:
-            print('... Found hemisphere ' + options.hemi)
-
-        # return
-        return options
-
-    # --------------------------------------------------------------------------
-    # main function part
-    # --------------------------------------------------------------------------
+def computeCubeParam(params):
 
     # --------------------------------------------------------------------------
     # import
@@ -650,27 +529,25 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # evaluate params
 
-    if params is not None:
+    cutTetraMeshDir = os.path.join(params.OUTDIR, 'tetra-cube')
+    cutTetraMeshFile = os.path.join(params.OUTDIR, params.HEMI + ".cut.vtk")
+    cutTetraIndexFile = os.path.join(params.OUTDIR, 'tetra-cut', params.HEMI + ".cut.psol")
+    openBndCutTetraMeshFile = os.path.join(params.OUTDIR, 'tetra-cut', params.HEMI + ".open.bnd.cut.vtk")
+    tetraIndexFile = os.path.join(params.OUTDIR, 'tetra-labels', params.HEMI + ".tetra.psol")
 
-        cutTetraMeshDir = os.path.join(params.OUTDIR, 'tetra-cube')
-        cutTetraMeshFile = os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_09 + ".vtk")
-        cutTetraIndexFile = os.path.join(params.OUTDIR, 'tetra-cut', params.HEMI + "." + params.internal.HSFLABEL_09 + ".psol")
-        openBndCutTetraMeshFile = os.path.join(params.OUTDIR, 'tetra-cut', params.HEMI + ".open.bnd.cut.tetra.vtk")
-        tetraIndexFile = os.path.join(params.OUTDIR, 'tetra-labels', params.HEMI + "." + params.internal.HSFLABEL_07 + ".psol")
+    hemi = params.HEMI
 
-        hemi = params.HEMI
+    paramAnisoAlpha = params.internal.anisoAlpha
+    paramAnisoSmooth = params.internal.anisoSmooth
+    paramLegacy = params.internal.cubeWriteLegacyVTK
 
-        paramAnisoAlpha = params.internal.anisoAlpha
-        paramAnisoSmooth = params.internal.anisoSmooth
-        paramLegacy = params.internal.cubeWriteLegacyVTK
-
-        labelPrsbc = params.LUTDICT['presubiculum']
-        labelSbc = params.LUTDICT['subiculum']
-        labelCA1 = params.LUTDICT['ca1']
-        labelCA3 = params.LUTDICT['ca3']
-        labelBndCA4 = params.LUTDICT['bndca4']
-        labelTail = params.LUTDICT['jointtail']
-        labelHead = params.LUTDICT['jointhead']
+    labelPrsbc = params.LUTDICT['presubiculum']
+    labelSbc = params.LUTDICT['subiculum']
+    labelCA1 = params.LUTDICT['ca1']
+    labelCA3 = params.LUTDICT['ca3']
+    labelBndCA4 = params.LUTDICT['bndca4']
+    labelTail = params.LUTDICT['jointtail']
+    labelHead = params.LUTDICT['jointhead']
 
     # load cut tetra mesh
 
@@ -724,13 +601,13 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     # --------------------------------------------------------------------------
     # get mapping of open boundary vertices to subfields
 
-    with open(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.rm.open.bnd.cut.tetra.lst'), "r") as f:
+    with open(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.rm.open.bnd.cut.lst'), "r") as f:
 
         hsfList = f.read().splitlines()
 
     hsfList = np.array(hsfList).astype(int)
 
-    io.write_vfunc(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.tetra.psol'), k4c[hsfList])
+    io.write_vfunc(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + '.hsf.rm.open.bnd.cut.psol'), k4c[hsfList])
 
     # --------------------------------------------------------------------------
     # post-process eigenfunction (order, flipping)
@@ -826,7 +703,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # determine left / right
 
-    img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".hsf.mgz"))
+    img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
     mat = np.linalg.inv(img.header.get_vox2ras_tkr())
     pts = np.concatenate((v4c, np.ones((v4c.shape[0], 1))), axis=1)
     ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
@@ -860,7 +737,7 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     v4cRm = tetMesh4c.v
     t4cRm = tetMesh4c.t
 
-    TetMesh.write_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, hemi + '.seam.rm.cut.tetra.vtk'))
+    TetMesh.write_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, hemi + '.seam.rm.cut.vtk'))
 
     #
 
@@ -889,13 +766,13 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
 
     # write out functions
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.seam.rm.cut.tetra.psol'), vfuncXRm)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.seam.rm.cut.tetra.psol'), vfuncYRm)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.seam.rm.cut.tetra.psol'), vfuncZRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.seam.rm.cut.psol'), vfuncXRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.seam.rm.cut.psol'), vfuncYRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.seam.rm.cut.psol'), vfuncZRm)
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.seam.rm.cut.tetra.psol'), P0)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.seam.rm.cut.tetra.psol'), P1)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.seam.rm.cut.tetra.psol'), P2)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.seam.rm.cut.psol'), P0)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.seam.rm.cut.psol'), P1)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.seam.rm.cut.psol'), P2)
 
     # also write out boundary files for visualization
 
@@ -906,47 +783,22 @@ def computeCubeParam(params, cutTetraMeshDir=None, cutTetraMeshFile=None,
     v4cRmBndRm = tetMesh4cRmBnd.v
     t4cRmBndRm = tetMesh4cRmBnd.t
 
-    TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.tetra.vtk'))
+    TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, hemi + '.rm.bnd.seam.rm.cut.vtk'))
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.tetra.psol'), vfuncXRm[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.tetra.psol'), vfuncYRm[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.rm.bnd.seam.rm.cut.tetra.psol'), vfuncZRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncX.rm.bnd.seam.rm.cut.psol'), vfuncXRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncY.rm.bnd.seam.rm.cut.psol'), vfuncYRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.vfuncZ.rm.bnd.seam.rm.cut.psol'), vfuncZRm[v4cRmBndRmKeep])
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.rm.bnd.seam.rm.cut.tetra.psol'), P0[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.rm.bnd.seam.rm.cut.tetra.psol'), P1[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.rm.bnd.seam.rm.cut.tetra.psol'), P2[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson0.rm.bnd.seam.rm.cut.psol'), P0[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson1.rm.bnd.seam.rm.cut.psol'), P1[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.poisson2.rm.bnd.seam.rm.cut.psol'), P2[v4cRmBndRmKeep])
 
     # write out cube
 
     w4cRm = np.vstack((P0,P1,P2)).transpose()
 
-    TetMesh.write_vtk(TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, hemi + '.uvw.seam.rm.cut.tetra.vtk'))
+    TetMesh.write_vtk(TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, hemi + '.uvw.seam.rm.cut.vtk'))
 
     #
 
     return(params)
-
-
-# ------------------------------------------------------------------------------
-# CLI
-# ------------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# MAIN PART
-
-if __name__ == "__main__":
-
-    # Command line options and error checking
-
-    options = options_parse()
-
-    # Run analysis
-
-    computeCubeParam(params=None,
-        cutTetraMeshDir=options.cutTetraMeshDir,
-        cutTetraMeshFile=options.cutTetraMeshFile,
-        cutTetraIndexFile=options.cutTetraIndexFile,
-        openBndCutTetraMeshFile=options.openBndCutTetraMeshFile,
-        tetraIndexFile=options.tetraIndexFile, hemi=options.hemi,
-        outputDir=options.outputdir, paramAnisoSmooth=options.anisoSmooth,
-        paramAnisoAlpha=options.anisoAlpha, paramLegacy=False)

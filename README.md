@@ -54,7 +54,7 @@ In the near future, we anticipate the following changes and additions:
 ---------------------------|----------------------------------------------------
 `--filename`               | A segmentation file.
 `--hemi`                   | Hemisphere. Either 'lh' or 'rh'.
-`--lut`                    | Look-up table. A valid filename or one of the following: 'fs711', 'ashs'.
+`--lut`                    | Look-up table. A valid filename or one of the following: 'freesurfer', 'ashs'.
 
 **Optional arguments:**    | **Description**
 ---------------------------|----------------------------------------------------
@@ -102,7 +102,7 @@ In the near future, we anticipate the following changes and additions:
 The most straigthforward way of running the shape and thickness analysis is from 
 the command line:
 
-`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut fs711  --outputdir /my/output/directory`
+`python3 shapetools.py --filename /my/segmentation/file --hemi lh --lut freesurfer  --outputdir /my/output/directory`
 
 However, this requires that some additional settings are made and that some external 
 software packages are installed. See the sections on [installation](#installation) 

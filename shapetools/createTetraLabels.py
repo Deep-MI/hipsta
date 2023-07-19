@@ -8,7 +8,7 @@ This module provides a function to create a label files for a tetrahedral mesh
 
 # createBoundaryMask()
 
-def createBoundaryMask(hbtFile, mskFile, suffix="bnd", label=[226, 232], bndlabel=[2260, 2320]):
+def createBoundaryMask(hbtFile, mskFile, outFile, label, bndlabel):
     """
     createBoundaryMask(hbtFile, mskFile)
 
@@ -56,9 +56,8 @@ def createBoundaryMask(hbtFile, mskFile, suffix="bnd", label=[226, 232], bndlabe
 
     # write boundary mask; since we have used 'caching='fill'' while loading
     # the data, the contents of bnd will be automatically updated via bnd_data
-    print('... Writing ' + mskFile.replace('.mgz', '-' + suffix + '.mgz'))
     out = nb.MGHImage(bnd_data, affine=bnd.affine, header=bnd.header)
-    nb.freesurfer.save(out, mskFile.replace('.mgz', '-' + suffix + '.mgz'))
+    nb.freesurfer.save(out, outFile)
 
 
 # ------------------------------------------------------------------------------
@@ -81,7 +80,94 @@ def createTetraLabels(params):
 
     from lapy import TriaMesh, TetMesh, io
 
-    from shapetools.createVertexLabels import createVertexLabels
+    # message
+
+    print()
+    print("-------------------------------------------------------------------")
+    print()
+    print("Creating label files for tetrahedral meshes")
+    print()
+    print("-------------------------------------------------------------------")
+    print()
+
+    # determine files
+
+    MSKFILE = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
+
+    if params.internal.AUTOMASK_HEAD is True or params.internal.AUTOMASK_TAIL is True:
+        HBTFILE = os.path.join(params.OUTDIR, "labels", params.HEMI + ".automask_image.mgz")
+    else:
+        HBTFILE = os.path.join(params.OUTDIR, params.HEMI + ".image.mgz")
+
+    # create new masks that includes boundary labels to head and tail, and to CA4
+
+    createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz"), label=[params.LUTDICT['tail'], params.LUTDICT['head']], bndlabel=[params.LUTDICT["bndtail"], params.LUTDICT["bndhead"]])
+    createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz"), label=[params.LUTDICT['ca4']], bndlabel=[params.LUTDICT["bndca4"]])
+
+    # merge bnd and ca4 masks (add ca4 to bnd)
+
+    cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_calc") + " " \
+        + "--output " \
+        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz") + " " \
+        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz") + " " \
+        + "lowerlimit " \
+        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz")
+
+    print(cmd)
+
+    subprocess.run(cmd.split())
+
+    # load bnd image
+    
+    bndImage = nb.freesurfer.load(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".labels-bnd.mgz"))
+
+    # load tet mesh
+
+    tetMesh = TetMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".tetra.vtk"))    
+
+    # convert vertex indices to voxel indices
+
+    vtxVxIdx = np.round(np.matmul(np.linalg.inv(bndImage.header.get_vox2ras_tkr()), np.concatenate((tetMesh.v, np.ones((tetMesh.v.shape[0], 1))), axis=1).T).T).astype(int)[:, 0:3]
+
+    # lookup labels of converted vertex indices in bnd image
+
+    vtxLabels = bndImage.get_fdata()[vtxVxIdx[:, 0], vtxVxIdx[:, 1], vtxVxIdx[:, 2]]
+                       
+    # write out psol file
+ 
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.psol"), "w") as f:
+
+        print("Solution:", file=f)
+        [ print(str(int(x)), file=f) for x in vtxLabels ]
+
+    # write out visualization files
+
+    tetMeshBnd = tetMesh.boundary_tria()
+    vRmBndKeep, vBndRmDel = tetMeshBnd.rm_free_vertices_()
+    tetMeshBnd.orient_()
+    TriaMesh.write_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.tetra.vtk"))
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.tetra.psol"), np.array([ float(x) for x in vtxLabels ])[vRmBndKeep])
+    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=np.array([ float(x) for x in vtxLabels ])[vRmBndKeep].astype("float32"), affine=None), filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.label.mgh"))
+
+    # return
+
+    return(params)
+
+
+def createTetraLabelsRemove(params):
+    """
+
+    """
+
+    # imports
+
+    import os
+    import subprocess
+
+    import numpy as np
+    import nibabel as nb
+
+    from lapy import TetMesh, io
 
     # message
 
@@ -103,56 +189,53 @@ def createTetraLabels(params):
 
     # determine files
 
-    MSKFILE = os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02.replace("filt.", "").replace("lf.", "").replace("cm.", "") + "_assigned.mgz")
+    MSKFILE = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
+    HBTFILE = os.path.join(params.OUTDIR, params.HEMI + ".image.mgz")
 
-    print("Using " + params.FILENAME + " as head-body-tail file.")
-    print("Using " + MSKFILE + " as mask file.")
-    print()
+    # create vertex labels 0a: create new masks that includes boundary labels to head and tail, and to CA4
 
-    # create vertex labels 0a: create new mask that includes boundary labels
+    createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz"), label=[params.LUTDICT['tail'], params.LUTDICT['head']], bndlabel=[bndtail, bndhead])
+    createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz"), label=[params.LUTDICT['ca4']], bndlabel=[bndca4])
 
-    createBoundaryMask(hbtFile=params.FILENAME, mskFile=MSKFILE, suffix="bnd", label=[params.LUTDICT['tail'], params.LUTDICT['head']], bndlabel=[bndtail, bndhead])
-    createBoundaryMask(hbtFile=params.FILENAME, mskFile=MSKFILE, suffix="ca4", label=[params.LUTDICT['ca4']], bndlabel=[bndca4])
-
-    # create vertex labels 0b:
+    # create vertex labels 0b: merge bnd and ca4 masks (add ca4 to bnd)
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_calc") + " " \
         + "--output " \
-        + MSKFILE.replace('.mgz', '-bnd.mgz') + " " \
-        + MSKFILE.replace('.mgz', '-bnd.mgz') + " " \
+        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz") + " " \
+        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz") + " " \
         + "lowerlimit " \
-        + MSKFILE.replace('.mgz', '-ca4.mgz')
+        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz")
 
     print(cmd)
 
     subprocess.run(cmd.split())
 
-    # create vertex labels 1a:
+    # create vertex labels 1a: create label file from mask file
 
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_vol2label") + " " \
-        + "--i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02.replace("filt.", "").replace("lf.", "").replace("cm.", "") + ".mgz")  + " " \
+        + "--i " + os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz")  + " " \
         + "--id 1 " \
-        + "--l " + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.tmp.label")
+        + "--l " + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".mask.label")
 
     print(cmd)
 
     subprocess.run(cmd.split())
 
-    # create vertex labels 1b:
+    # create vertex labels 1b: rewrite label file (update header line)
 
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.tmp.label")) as g:
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".mask.label")) as g:
 
         lab = g.readlines()
 
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.label"), "w") as f:
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".mask.label"), "w") as f:
 
-        print("#!ascii label " + params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.label", file=f)
+        print("#!ascii label " + params.HEMI + ".mask.label", file=f)
 
         [ print(x.strip(), file=f) for x in lab[1:] ]
 
-    # create vertex labels 1c
+    # create vertex labels 1c: create intermediate label file from bnd image file (uses voxel coordinates)
 
-    assigned_bnd = nb.freesurfer.load(os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02.replace("filt.", "").replace("lf.", "").replace("cm.", "") + "_assigned-bnd.mgz"))
+    assigned_bnd = nb.freesurfer.load(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".labels-bnd.mgz"))
     assigned_bnd_v2r_tkr = assigned_bnd.header.get_vox2ras_tkr()
     assigned_bnd_data = assigned_bnd.get_fdata()
 
@@ -165,48 +248,54 @@ def createTetraLabels(params):
     assigned_bnd_labels = np.array(assigned_bnd_data[labMatXYZ[:,0],labMatXYZ[:,1],labMatXYZ[:,2]], ndmin=2).transpose()
     labMatList = np.concatenate((labMatXYZ, assigned_bnd_labels), axis=1).astype(int)
 
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.list"), "w") as f:
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".labels-bnd.list"), "w") as f:
 
         [ print(str(x[0])+" "+str(x[1])+" "+str(x[2])+" "+str(x[3]), file=f) for x in labMatList ]
 
-    # create vertex labels 1d:
+    # create vertex labels 2: create label file from tetra file (does not include labels yet)
 
-    cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_info") + " " \
-        + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02.replace("filt.", "").replace("lf.", "").replace("cm.", "") + "_assigned-bnd.mgz") + " " \
-        + "--vox2ras-tkr "
+    tetMesh = TetMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".tetra.vtk"))
 
-    print(cmd)
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.label"), "w") as f:
 
-    vox2ras = subprocess.check_output(cmd.split(), universal_newlines=True)
-
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.vox2ras"), "w") as f:
-
-        print(vox2ras.strip(), file=f)
-
-    # create vertex labels 2
-
-    tetMesh = TetMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_07 + ".vtk"))
-
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".label"), "w") as f:
-
-        print("#!ascii label " + params.HEMI + "." + params.internal.HSFLABEL_07 + ".label", file=f)
+        print("#!ascii label " + params.HEMI + ".tetra.label", file=f)
         print(str(np.shape(tetMesh.v)[0]), file=f)
         [ print("-1\t" + str(x).replace("[","").replace("]","") + "\t0", file=f) for x in tetMesh.v ]
 
-    # create vertex labels 3a
+    # create vertex labels 3a: 
 
-    createVertexLabels(
-        labFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".label"),
-        matFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.vox2ras"),
-        lstFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.list"))
+    labFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.label")
+    lstFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.list")
+
+    lst = np.loadtxt(lstFile, dtype="float")
+    lab = np.loadtxt(labFile, dtype="float", skiprows=2)
+
+    crs = np.array(lst)  # to avoid mere referencing
+    crs[:, 3] = 1
+
+    ras = np.matmul(assigned_bnd_v2r_tkr, crs.transpose()).transpose()
+    ras = np.append(ras[:, 0:3], lst[:, 3:4], axis=1)
+
+    vtx = np.zeros(shape=np.shape(lab)[0])
+    for i in range(np.shape(vtx)[0]):
+        tmp = np.linalg.norm(ras[:, 0:3] - np.repeat(lab[i:(i + 1), 1:4], np.shape(ras)[0], axis=0), ord=2, axis=1)
+        vtx[i] = lst[np.where(tmp == tmp.min())[0][0], 3]  # note: we added [0][0] here
+
+    # the following lines will produce zero-mean, step-one labels
+    # key = np.array(range(0, len(np.unique(vtx)))) - np.mean(range(0, len(np.unique(vtx))))
+    # index = np.digitize(vtx, np.unique(vtx), right=True)
+    # np.savetxt(fname=labFile.replace(".label", ".asc"), X=key[index])
+
+    # the following line will keep original labels
+    np.savetxt(fname=labFile.replace(".label", ".asc"), X=vtx)
 
     # create vertex labels 3b: create psol overlay file
 
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".asc"), "r") as g:
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.asc"), "r") as g:
 
         asc = g.read().splitlines()
 
-    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".psol"), "w") as f:
+    with open(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.psol"), "w") as f:
 
         print("Solution:", file=f)
         [ print(str(float(x.strip())).replace("[","(").replace("]",")"), file=f) for x in asc ]
@@ -214,34 +303,19 @@ def createTetraLabels(params):
     # write out visualization files
 
     tetMeshBnd = tetMesh.boundary_tria()
-
     vRmBndKeep, vBndRmDel = tetMeshBnd.rm_free_vertices_()
-
     tetMeshBnd.orient_()
-
-    TetMesh.write_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".vtk"))
-
-    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".psol"), np.array([ float(x) for x in asc ])[vRmBndKeep])
-
+    TetMesh.write_vtk(tetMeshBnd, os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.tetra.vtk"))
+    io.write_vfunc(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.tetra.psol"), np.array([ float(x) for x in asc ])[vRmBndKeep])
     nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=np.array([ float(x) for x in asc ])[vRmBndKeep].astype("float32"), affine=None),
-        filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd." + params.internal.HSFLABEL_07 + ".mgh"))
+        filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.label.mgh"))
 
     # clean up
 
     if params.skipCLEANUP is False:
 
-        os.remove(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.tmp.label"))
-        os.remove(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.list"))
-        os.remove(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_02 + "_assigned-bnd.vox2ras"))
-        os.remove(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + params.internal.HSFLABEL_07 + ".asc"))
-
-    # update params
-
-    params.LUTDICT['jointtail'] = jointtail
-    params.LUTDICT['jointhead'] = jointhead
-    params.LUTDICT['bndtail'] = bndtail
-    params.LUTDICT['bndhead'] = bndhead
-    params.LUTDICT['bndca4'] = bndca4
+        os.remove(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.list"))
+        os.remove(os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.asc"))
 
     # return
 

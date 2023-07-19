@@ -1,3 +1,8 @@
+"""
+This module provides a function to create QC plots
+
+"""
+
 def qcPlots(params, stage=None):
 
     def sortLevelSets(LVL, dims, tol=1e-16):
@@ -74,8 +79,6 @@ def qcPlots(params, stage=None):
     #
     import os
     import numpy as np
-    import pandas as pd
-    import plotly.express as px
     import plotly.graph_objects as go
     
     from plotly.subplots import make_subplots
@@ -88,7 +91,7 @@ def qcPlots(params, stage=None):
     # mesh
     if params.internal.noqc is False and stage=="mesh":
 
-        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_06 + ".vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
         if params.HEMI =="lh":
             camera = dict(
@@ -106,9 +109,9 @@ def qcPlots(params, stage=None):
     # profile
     if params.internal.noqc is False and stage=="profile":
 
-        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.tetra.vtk"))
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
-        triaFunc = np.array(io.read_vfunc(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.tetra.psol")))
+        triaFunc = np.array(io.read_vfunc(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol")))
 
         #
 

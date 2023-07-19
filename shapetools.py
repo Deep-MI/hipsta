@@ -1,6 +1,6 @@
 """
-This module provides the main functionality of the hippocampal shape tools
-package.
+This module provides the main functionality of the hippocampal shape and
+thickness analysis package.
 
 """
 
@@ -13,7 +13,7 @@ package.
 
 def get_version():
 
-    VERSION = "v0.7.0-beta"
+    VERSION = "v0.8.0-beta"
 
     return VERSION
 
@@ -40,25 +40,31 @@ def get_help(print_help=True, return_help=False):
 
     This script performs the following major processing steps:
 
-      1. create labels
-         1. extract subfield labels from label image
-         2. merge individual labels
-      2. attach molecular layer to neighboring regions
-      3. create mask
-         1. fill holes using dilation and erosion
-         2. create final mask
+      1. process image
+         1. conversion
+         2. upsampling (optional)
+         3. cropping
+      2. process labels
+         1. extract and merge subfield labels
+         2. run automask (optional)
+         3. merge molecular layer (optional)
+      3. process mask
+         1. binarize
+         2. apply filter operations (optional)
+         3. fill holes using dilation and erosion (optional)
       4. create surface
-         1. create initial surface using marching cube algorithm
-         2. topology fixing (optional)
-         3. smooth (fixed) surface
+         1. extract initial surface using marching cube algorithm
+         2. remesh surface (optional)
+         3. smooth surface
       5. create tetrahedral mesh from triangular surface
       6. create label files for tetra mesh
-      7. remove boundary mask (preprocessing for mesh cutting)
-      8. cut open tetrahedral mesh at anterior and posterior ends
-      9. create cube parametrization
-      10. compute thickness and curvature
-      11. map subfield values (and other volume-based data, optional)
-      12. create supplementary files for visualization
+      7. cut open tetrahedral mesh at anterior and posterior ends
+         1. remove boundary mask
+         2. mesh cutting
+      8. create cube parametrization
+      9. compute thickness and curvature
+      10. map subfield values (and other volume-based data, optional)
+      11. create supplementary files for visualization
 
 
     Usage:
@@ -72,7 +78,7 @@ def get_help(print_help=True, return_help=False):
       --filename  A segmentation file.
       --hemi      Hemisphere. Either 'lh' or 'rh'.
       --lut       A valid look-up table for hippocampal subfield segmentation.
-                  Either 'fs711' or 'ashs' or a valid filename.
+                  Either 'freesurfer' or 'ashs' or a valid filename.
 
     Optional input arguments:
 
@@ -94,7 +100,7 @@ def get_help(print_help=True, return_help=False):
 
     Example:
 
-      python3 shapetools.py --filename <filename> --hemi lh --lut fs711
+      python3 shapetools.py --filename <filename> --hemi lh --lut freesurfer
           --outputdir /my/output/directory
 
 
@@ -104,41 +110,18 @@ def get_help(print_help=True, return_help=False):
          PSOL overlay files within the 'tickness' folder. These can be overlaid onto
          the mid-surface vtk file that is also found within the 'thickness' folder.
 
-      2. Intermediate volume and surface files, each prefixed with the particular
-         operation performed. The basic pattern for the filenames is:
+      2. Intermediate volume and surface files.
 
-         <hemisphere>.<prefixes>.<hsf-labels>.<suffixes>
+      3. An 'image' folder with intermediate results, primarily from basic image
+         procesing.
 
-         Hemisphere:
-         - lh : left hemisphere
-         - rh : right hemisphere
-
-         Prefixes:
-         - ml : merged molecular layer
-         - de : dilation and erosion
-         - mc : marching cube algorithm
-         - tf : topological fixing
-         - sm : smoothing
-         - rs : remeshing
-
-         HSF-Labels:
-         - several numerics corresponding to the hippocampal subfield
-           segmentation look-up table
-
-         Suffixes:
-         - assigned : molecular layer split into subregions
-         - merged   : molecular layer subregions merged with other regions
-
-      3. A 'labels' folder with intermediate results, primarily label files.
-
-      4. A 'merge-ml' folder with intermediate results, primarily files created
-         during the merging of the molecular layer.
+      4. A 'labels' folder with intermediate results, primarily label files.
 
       5. A 'mask' folder with intermediate results, primarily files created
          during creation and post-processing of binary masks.
 
-      6. A 'fixed-surface' folder with intermediate results, primarily files
-         created during topological fixing (optional).
+      6. A 'surface' folder with intermediate results, primarily files
+         created during surface construction
 
       7. A 'tetra-labels' folder with intermediate results, primarily files
          created during tetrahedral mesh construction.
@@ -146,7 +129,7 @@ def get_help(print_help=True, return_help=False):
       8. A 'tetra-cut' folder with intermediate results, primarily files
          created during mesh cutting.
 
-      8. A 'tetra-cube' folder with intermediate results, primarily files
+      9. A 'tetra-cube' folder with intermediate results, primarily files
          created during cube parametrization.
 
       10. A 'thickness' folder with thickness overlays and mid-surfaces.
@@ -156,10 +139,6 @@ def get_help(print_help=True, return_help=False):
 
     - If using the `ashs` segmentation, additional labels for the hippocampal head
       (label value: 20) and tail (label value: 5) labels are required. Use `--lut ashs`.
-    - Topological fixing (`--topological-fixing <filename1> <filename2>`) should
-      not be used unless working with FreeSurfer-processed data. `<filename1>` is
-      the `brain.mgz` file and `<filename2>` is the `wm.mgz` file, both found within
-      the `mri` subdirectory of an individual FreeSurfer output directory.
     - If using a custom look-up table (`--lut <filename>`), the expected format for
       the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are
       numerical values for RGB colors and transparency (alpha) and will be ignored.
@@ -192,9 +171,6 @@ def get_help(print_help=True, return_help=False):
        downloaded from e.g. https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz
        or https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg. The 'gmsh' binary
        must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
-
-
-
 
     5. The PYTHONPATH environment variable should include the toolbox directory,
        e.g. `export PYTHONPATH=${PYTHONPATH}:/path/to/hipsta-package`.
@@ -306,8 +282,8 @@ def _parse_arguments():
         default=None, metavar="<filename>", required=False)
     required.add_argument('--hemi', dest="hemi", help="Specify hemisphere, either \'lh\' or \'rh\'.",
         default=None, metavar="<lh|rh>", required=False)
-    required.add_argument('--lut', dest="lut", help="Look-up table: a text file with numeric and verbal segmentation labels. \'fs711\' and \'ashs\' are keywords for built-in tables.",
-        default=None, metavar="<fs711|ashs|filename>", required=False)
+    required.add_argument('--lut', dest="lut", help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\' and \'ashs\' are keywords for built-in tables.",
+        default=None, metavar="<freesurfer|ashs|filename>", required=False)
 
     # optional arguments
     optional = parser.add_argument_group('Optional arguments')
@@ -324,32 +300,32 @@ def _parse_arguments():
         default=False, action="store_true", required=False) # help="Do not crop image.",
     expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
         default=None, metavar="<factor x> <factor y> <factor z>", nargs='*', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
-    expert.add_argument('--automated-head', dest='bndHead', help=argparse.SUPPRESS,
+    expert.add_argument('--no-merge-molecular-layer', dest='noml', help=argparse.SUPPRESS, 
+        default=False, action="store_true", required=False) # help="Do not merge molecular layer."
+    expert.add_argument('--automated-head', dest='automaskhead', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="",
-    expert.add_argument('--automated-tail', dest='bndTail', help=argparse.SUPPRESS,
+    expert.add_argument('--automated-tail', dest='automasktail', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="",
-    expert.add_argument('--margin-head', dest="bndHeadMargin", help=argparse.SUPPRESS,
-        default=[0], metavar="<params>", nargs=1, required=False)
-    expert.add_argument('--margin-tail', dest="bndTailMargin", help=argparse.SUPPRESS,
-        default=[0], metavar="<params>", nargs=1, required=False)
-    expert.add_argument('--dilation-erosion', dest="dilero", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='+', required=False) # help="A list of parameters to fine-tune the surface creation.",
+    expert.add_argument('--margin-head', dest="automaskheadmargin", help=argparse.SUPPRESS,
+        default=[0], metavar="<params>", nargs=1, required=False) # help="",
+    expert.add_argument('--margin-tail', dest="automasktailmargin", help=argparse.SUPPRESS,
+        default=[0], metavar="<params>", nargs=1, required=False) # help="",
     expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not filter image.",
-    expert.add_argument('--filter', dest='filter', help=argparse.SUPPRESS,
-        default=[0.5, 50], metavar="<kernel width> <threshold>", nargs=2, required=False, type=float) #  help="A list of parameters to fine-tune image filtering.",
+    expert.add_argument('--no-gauss-filter', dest='nogaussfilter', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Filter image.",
+    expert.add_argument('--gauss-filter-size', dest='gaussfilter_size', help=argparse.SUPPRESS,
+        default=[1, 50], metavar="<params>", nargs=2, required=False)
     expert.add_argument('--long-filter', dest='longfilter', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Filter image along longitudinal axis.",
     expert.add_argument('--long-filter-size', dest='longfilter_size', help=argparse.SUPPRESS,
         default=[5], metavar="<params>", nargs=1, required=False)
-    expert.add_argument('--close-mask', dest='closemask', help=argparse.SUPPRESS,
-        default=None, metavar="regular|experimental", nargs="*", required=False) # help="Apply closing opreation to mask.",
+    expert.add_argument('--no-close-mask', dest='noclosemask', help=argparse.SUPPRESS,
+        default=False, action="store_true", required=False) # help="Apply closing operation to mask.",
     expert.add_argument('--mca', dest="mca", help=argparse.SUPPRESS,
         default=None, metavar="<params>", required=False) # help="Marching-cube algorithm.",
     expert.add_argument('--mcc', dest="mcc", help=argparse.SUPPRESS,
         default=None, metavar="<params>", required=False) # help="Marching-cube connectivity.",
-    optional.add_argument('--topological-fixing', dest='tfx', help=argparse.SUPPRESS,
-        default=None, metavar="<filename>", nargs=2, required=False) # help="Enable topological fixing algorithm for surfaces. Can only be used with FreeSurfer-processed data. Expects two files as input, brain.mgz and wm.mgz, from FreeSurfer\'s `mri` subdirectory.",
     expert.add_argument('--smooth', dest="smooth", help=argparse.SUPPRESS,
         default=None, metavar="<params>", required=False) # help="Mesh smoothing iterations.",
     expert.add_argument('--remesh', dest='remesh', help=argparse.SUPPRESS,
@@ -357,7 +333,7 @@ def _parse_arguments():
     expert.add_argument('--no-check-surface', dest='nochecksurface', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not check surface.",
     expert.add_argument('--no-check-boundaries', dest='nocheckboundaries', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not boundaries.",
+        default=False, action="store_true", required=False) # help="Do not check boundaries.",
     expert.add_argument('--no-qc', dest='noqc', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Skip QC",
     expert.add_argument('--cut-params', dest="cutrange", help=argparse.SUPPRESS,
@@ -376,8 +352,6 @@ def _parse_arguments():
         default=None, metavar="<directory>", required=False) # help="Where to store temporary logfile. Default: current working directory.",
 
     # Deprecated options
-    expert.add_argument('--spherically-project', dest='spherically_project',  help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Use eigenvalue-based spherical projection for topology fixing."
     expert.add_argument('--skip-orient', dest='skiporient', help=argparse.SUPPRESS,
         default=False, action="store_true", required=False) # help="Do not check surface.",
 
@@ -458,52 +432,78 @@ def _evaluate_args(args):
 
     logging.info("Using " + OUTDIR + " as output directory")
 
-    # preprocessImage
+    # processImage
 
     settings.CROP = not(args.nocrop)
-
-    # processMask
 
     if args.upsample is None:
         settings.UPSAMPLE = None
     else:
         settings.UPSAMPLE = args.upsample
 
-    if args.dilero is None:
-        settings.DIL = 0 # was 2
-        settings.ERO = 0 # was 2
-    else:
-        settings.DIL = int(args.dilero[0])
-        settings.ERO = int(args.dilero[1])
+    # processLabels
 
-    if args.nofilter is True:
-        settings.FILTERMASK = None
-    else:
-        settings.FILTERMASK = args.filter
+    ## mergeMolecularLayer
 
-    if args.longfilter is False:
-        settings.LONGFILTER = None
+    if args.lut == "freesurfer" and args.noml is False:
+        settings.MERGE_MOLECULAR_LAYER = True
+    elif args.lut == "freesurfer" and args.noml is True:
+        settings.MERGE_MOLECULAR_LAYER = False
     else:
-        settings.LONGFILTER = args.longfilter
+        settings.MERGE_MOLECULAR_LAYER = False
+
+    ## automask
+
+    settings.AUTOMASK_HEAD = args.automaskhead
+    settings.AUTOMASK_TAIL = args.automasktail
+    settings.AUTOMASK_HEAD_MARGIN = int(args.automaskheadmargin[0])
+    settings.AUTOMASK_TAIL_MARGIN = int(args.automasktailmargin[0])
+
+    # processMask
+
+    settings.GAUSSFILTER = not(args.nofilter)
+
+    settings.GAUSSFILTER_SIZE = [ float(x) for x in args.gaussfilter_size ]
+    
+    settings.LONGFILTER = args.longfilter
 
     settings.LONGFILTER_SIZE = (int(args.longfilter_size[0]), int(args.longfilter_size[0]), int(args.longfilter_size[0]))
 
-    if args.closemask is None:
-        settings.CLOSEMASK = args.closemask
+    settings.CLOSEMASK = not(args.noclosemask)
+
+    # createSurface
+
+    ## marching cube algorithm
+
+    if args.mca is None:
+        settings.MCA = "mri_mc"
     else:
-        if len(args.closemask) == 0:
-            settings.CLOSEMASK = "regular"
-        elif len(args.closemask) == 1:
-            if args.closemask[0] != "regular" and args.closemask[0] != "experimental" and args.closemask[0] != "experimental_v2":
-                logging.error("The --close-mask argument can be either 'regular' or 'experimental'")
-                print("Program exited with ERRORS.")
-                sys.exit(1)
-            else:
-                settings.CLOSEMASK = args.closemask[0]
-        else:
-            logging.error("The --close-mask argument can take only 0 or 1 options, but " + str(len(args.closemask)) + " were specified")
-            print("Program exited with ERRORS.")
-            sys.exit(1)
+        settings.MCA = args.mca
+
+    ## marching cube connectivity; 1=6+, 2=18, 3=6, 4=26
+
+    if args.mcc is None:
+        settings.MCC = 1
+    else:
+        settings.MCC = int(args.mcc)
+
+    ## remeshing
+
+    if args.remesh is None:
+        settings.REMESH = None
+    elif not args.remesh:
+        settings.REMESH = 0
+    else:
+        settings.REMESH = int(args.remesh[0])
+
+    ## smoothing iterations
+
+    if args.smooth is None:
+        settings.SMO = 5
+    else:
+        settings.SMO = int(args.smooth)
+
+    # checkSurface
 
     if args.nochecksurface is True:
         settings.CHECKSURFACE = None
@@ -514,52 +514,6 @@ def _evaluate_args(args):
         settings.CHECKBOUNDARIES = None
     else:
         settings.CHECKBOUNDARIES = args.nocheckboundaries
-
-    settings.BNDHEAD = args.bndHead
-    settings.BNDTAIL = args.bndTail
-    settings.BNDHEADMARGIN = int(args.bndHeadMargin[0])
-    settings.BNDTAILMARGIN = int(args.bndTailMargin[0])
-
-    # marching cube algorithm
-
-    if args.mca is None:
-        settings.MCA = "mri_mc" # was mri_tesselate
-    else:
-        settings.MCA = args.mca
-
-    # marching cube connectivity; 1=6+, 2=18, 3=6, 4=26
-
-    if args.mcc is None:
-        settings.MCC = 1 # was 3
-    else:
-        settings.MCC = int(args.mcc)
-
-    # smoothing iterations
-
-    if args.smooth is None:
-        settings.SMO = 5
-    else:
-        settings.SMO = int(args.smooth)
-
-    # remeshing
-
-    if args.remesh is None:
-        settings.REMESH = None
-    elif not args.remesh:
-        settings.REMESH = 0
-    else:
-        settings.REMESH = int(args.remesh[0])
-
-    # topology fixing
-
-    settings.tfx = args.tfx
-
-    settings.spherically_project = args.spherically_project
-
-    if args.tfx is None:
-        args.skipTFX = True
-    else:
-        args.skipTFX = False
 
     # qc
 
@@ -641,7 +595,6 @@ def _evaluate_args(args):
 
     params.HEMI = args.hemi
     params.LUT = args.lut
-    params.skipTFX = args.skipTFX
     params.skipCLEANUP = args.cleanup
     params.LOGFILE = args.logfile
 
@@ -668,7 +621,6 @@ def _check_arguments(params):
     import pandas
     import logging
     import tempfile
-    import importlib
 
     import  numpy as np
 
@@ -706,36 +658,9 @@ def _check_arguments(params):
         print("Program exited with ERRORS.")
         sys.exit(1)
 
-    # check for topological fixing files if given
-
-    if params.internal.tfx is not None:
-        if len(params.internal.tfx) != 2:
-            logging.error('Topology-fixing requires two input files.')
-            print("Program exited with ERRORS.")
-            sys.exit(1)
-        else:
-            if params.internal.tfx[0] == "custom_brain":
-                logging.info("Using custom brain file")
-            else:
-                if os.path.isfile(params.internal.tfx[0]):
-                    logging.info("Found " + params.internal.tfx[0])
-                else:
-                    logging.error("Could not find " + params.internal.tfx[0])
-                    print("Program exited with ERRORS.")
-                    sys.exit(1)
-            if params.internal.tfx[1] == "custom_wm":
-                logging.info("Using custom wm file")
-            else:
-                if os.path.isfile(params.internal.tfx[1]):
-                    logging.info("Found " + params.internal.tfx[1])
-                else:
-                    logging.error("Could not find " + params.internal.tfx[1])
-                    print("Program exited with ERRORS.")
-                    sys.exit(1)
-
     # check MC algorithm
 
-    if params.internal.MCA != "mri_mc" and params.internal.MCA != "mri_tessellate":
+    if params.internal.MCA != "mri_mc" and params.internal.MCA != "mri_tessellate" and params.internal.MCA != "skimage":
         print("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
         sys.exit(1)
 
@@ -747,31 +672,33 @@ def _check_arguments(params):
             print("Program exited with ERRORS.")
             sys.exit(1)
 
+    # check ML
+
+    if args.noml is True and params.LUT != "freesurfer":
+        print("Cannot use --no-merge-molecular-layer with " + params.LUT + ".")
+        sys.exit(1)    
+
     # create the LUT
 
-    if params.LUT == "fs711":
+    if params.LUT == "freesurfer":
 
-        logging.info("Found internal, modified look-up table for FreeSurfer 7.11.")
+        logging.info("Found internal, modified look-up table for FreeSurfer.")
 
-        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2",
-            "ca3", "ca4", "dg", "ml" ]
+        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml" ]
 
-        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240,
-            242, 244, 246 ]
+        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246 ]
 
         lutDict = dict(zip(LUTLABEL, LUTINDEX))
 
         hsflist = [ 234, 236, 238, 240, 246 ]
 
-    elif params.LUT == "fs711-noml":
+    elif params.LUT == "freesurfer-noml":
 
-        logging.info("Found internal, modified look-up table for FreeSurfer 7.11.")
+        logging.info("Found internal, modified look-up table for FreeSurfer.")
 
-        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2",
-            "ca3", "ca4", "dg" ]
+        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg" ]
 
-        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240,
-            242, 244 ]
+        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244 ]
 
         lutDict = dict(zip(LUTLABEL, LUTINDEX))
 
@@ -812,9 +739,19 @@ def _check_arguments(params):
 
     else:
 
-        logging.error("Look-up table can only be \'fs711\', \'ashs\', or an existing file, but not " + params.LUT)
+        logging.error("Look-up table can only be \'freesurfer\', \'ashs\', or an existing file, but not " + params.LUT)
         print("Program exited with ERRORS.")
         sys.exit(1)
+
+    # add entries for tetra-labels
+
+    lutDict['jointtail'] = 226
+    lutDict['jointhead'] = 232
+    lutDict['bndtail'] = 2260
+    lutDict['bndhead'] = 2320
+    lutDict['bndca4'] = 2420
+
+    #
 
     params.LUTDICT = lutDict
     params.HSFLIST = hsflist
@@ -825,10 +762,11 @@ def _check_arguments(params):
     # define list of directories
 
     list_of_directories = [
+        os.path.join(params.OUTDIR, "image"),
         os.path.join(params.OUTDIR, "labels"),
-        os.path.join(params.OUTDIR, "merge-ml"),
         os.path.join(params.OUTDIR, "mask"),
-        os.path.join(params.OUTDIR, "fixed-surface"),
+        os.path.join(params.OUTDIR, "surface"),
+        os.path.join(params.OUTDIR, "tetra-mesh"),
         os.path.join(params.OUTDIR, "tetra-labels"),
         os.path.join(params.OUTDIR, "tetra-cut"),
         os.path.join(params.OUTDIR, "tetra-cube"),
@@ -856,7 +794,7 @@ def _check_arguments(params):
 
 
 # ------------------------------------------------------------------------------
-# run analysis
+# run analysis (internal)
 
 def _run_analysis(params):
     """
@@ -865,23 +803,14 @@ def _run_analysis(params):
 
     # imports
 
-    import os
     import time
     import logging
 
-    from shapetools.preprocessImage import convertFormat
-    from shapetools.preprocessImage import cropImage
-    from shapetools.preprocessImage import upsampleImage
-    from shapetools.preprocessImage import autoMask
-    from shapetools.createLabels import createLabels
-    from shapetools.mergeMolecularLayer import mergeMolecularLayer
-    from shapetools.processMask import fillHoles
-    from shapetools.processMask import createMask
-    from shapetools.processMask import filterMask
-    from shapetools.processMask import longFilter
-    from shapetools.processMask import closeMask
+    from shapetools.processImage import convertFormat, cropImage, upsampleImage, copy_image_to_main
+    from shapetools.processLabels import createLabels, mergeMolecularLayer, autoMask, copy_labels_to_main
+    from shapetools.processMask import binarizeMask, gaussFilter, longFilter, closeMask, copy_mask_to_main
+    from shapetools.createSurface import extractSurface, remeshSurface, smoothSurface
     from shapetools.checkSurface import checkSurface
-    from shapetools.createSurface import createSurface
     from shapetools.createTetraMesh import createTetraMesh
     from shapetools.createTetraLabels import createTetraLabels
     from shapetools.removeBoundaryMask import removeBoundaryMask
@@ -892,7 +821,7 @@ def _run_analysis(params):
     from shapetools.createSupplementaryFiles import createSupplementaryFiles
     from shapetools.qcPlots import qcPlots
 
-    # convert format (0)
+    # process image (1)
 
     logging.info("Starting convertFormat() ...")
     params = convertFormat(params)
@@ -903,26 +832,30 @@ def _run_analysis(params):
     logging.info("Starting upsampleImage() ...")
     params = upsampleImage(params)
 
+    logging.info("Starting copy_image_to_main() ...")
+    params = copy_image_to_main(params)
+
+    # process labels (2)
+
     logging.info("Starting autoMask() ...")
     params = autoMask(params)
-
-    # create labels (1)
 
     logging.info("Starting createLabels() ...")
     params = createLabels(params)
 
-    # merge molecular layer (2)
-
     logging.info("Starting mergeMolecularLayer() ...")
     params = mergeMolecularLayer(params)
 
-    # create mask (3)
+    logging.info("Starting copy_labels_to_main() ...")
+    params = copy_labels_to_main(params)
 
-    logging.info("Starting fillHoles() ...")
-    params = fillHoles(params)
+    # process mask (3)
 
-    logging.info("Starting createMask() ...")
-    params = createMask(params)
+    logging.info("Starting binarizeMask() ...")
+    params = binarizeMask(params)
+
+    logging.info("Starting gaussFilter() ...")
+    params = gaussFilter(params)
 
     logging.info("Starting longFilter() ...")
     params = longFilter(params)
@@ -930,85 +863,86 @@ def _run_analysis(params):
     logging.info("Starting closeMask() ...")
     params = closeMask(params)
 
-    logging.info("Starting filterMask() ...")
-    params = filterMask(params)
+    logging.info("Starting copy_mask_to_main() ...")
+    params = copy_mask_to_main(params)
 
     # create surface (4)
 
-    logging.info("Starting createSurface() ...")
-    params = createSurface(params)
+    logging.info("Starting extractSurface() ...")
+    params = extractSurface(params)
+
+    logging.info("Starting remeshSurface() ...")
+    params = remeshSurface(params)
+
+    logging.info("Starting smoothSurface() ...")
+    params = smoothSurface(params)
 
     logging.info("Starting qcPlots() ...")
     params = qcPlots(params, stage="mesh")
 
     logging.info("Starting checkSurface() ...")
-    cont, params = checkSurface(params, stage="check_surface")
+    params = checkSurface(params, stage="check_surface")
 
-    #
+    if params.internal.continue_program is False:
+        logging.info("Hippocampal shapetools finished WITH ERRORS.")
+        raise AssertionError()
 
-    if cont is True:
+    # create tetra mesh for whole hippocampal body (5)
 
-        # create tetra mesh for whole hippocampal body (5)
+    logging.info("Starting createTetraMesh() ...")
+    params = createTetraMesh(params)
 
-        logging.info("Starting createTetraMesh() ...")
-        params = createTetraMesh(params)
+    # create label files for tetra mesh (6)
 
-        # create label files for tetra mesh (6)
+    logging.info("Starting createTetraLabels() ...")
+    params = createTetraLabels(params)
 
-        logging.info("Starting createTetraLabels() ...")
-        params = createTetraLabels(params)
+    # cut hippocampal body (7)
 
-        # remove boundary mask (7)
+    logging.info("Starting removeBoundaryMask() ...")
+    params = removeBoundaryMask(params)
 
-        logging.info("Starting removeBoundaryMask() ...")
-        params = removeBoundaryMask(params)
+    logging.info("Starting cutTetra() ...")
+    params = cutTetra(params)
 
-        # create tetra mesh for cut hippocampal body (8)
+    logging.info("Starting checkSurface() ...")
+    params = checkSurface(params, stage="check_boundaries")
 
-        logging.info("Starting cutTetra() ...")
-        params = cutTetra(params)
+    if params.internal.continue_program is False:
+        logging.info("Hippocampal shapetools finished WITH ERRORS.")
+        raise AssertionError()
 
+    # compute cube parametrization (8)
 
-        logging.info("Starting checkSurface() ...")
-        cont, params = checkSurface(params, stage="check_boundaries")
+    logging.info("Starting computeCubeParam() ...")
+    params = computeCubeParam(params)
 
-        #
+    logging.info("Starting qcPlots() ...")
+    params = qcPlots(params, stage="profile")
 
-        if cont is True:
+    # compute thickness (9)
 
-            # compute cube parametrization (9)
+    logging.info("Starting computeThickness() ...")
+    params = computeThickness(params)
 
-            logging.info("Starting computeCubeParam() ...")
-            params = computeCubeParam(params)
+    logging.info("Starting qcPlots() ...")
+    params = qcPlots(params, stage="hull")
 
-            logging.info("Starting qcPlots() ...")
-            params = qcPlots(params, stage="profile")
+    # map subfield mapValues (10)
 
-            # compute thickness (10)
+    logging.info("Starting mapValues() ...")
+    params = mapValues(params)
 
-            logging.info("Starting computeThickness() ...")
-            params = computeThickness(params)
+    # create supplementary files (11)
 
-            logging.info("Starting qcPlots() ...")
-            params = qcPlots(params, stage="hull")
-
-            # map subfield mapValues (11)
-
-            logging.info("Starting mapValues() ...")
-            params = mapValues(params)
-
-            # map subfield mapValues (12)
-
-            logging.info("Starting createSupplementaryFiles() ...")
-            params = createSupplementaryFiles(params)
+    logging.info("Starting createSupplementaryFiles() ...")
+    params = createSupplementaryFiles(params)
 
     # all done
 
     logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
-    if cont is True:
-        logging.info("Hippocampal shapetools finished without errors.")
-    else:
-        logging.info("Hippocampal shapetools finished WITH ERRORS.")
+    logging.info("Hippocampal shapetools finished without errors.")
+
 
 # ------------------------------------------------------------------------------
 # start logging

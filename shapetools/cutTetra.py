@@ -8,106 +8,6 @@ This module provides a function to cut tetrahedral meshes
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# options_parse()
-
-def options_parse():
-    """
-    Command Line Options Parser:
-    initiate the option parser and return the parsed object
-    """
-
-    # imports
-
-    import sys
-    import optparse
-
-    # define helptext
-    HELPTEXT = """
-    SUMMARY
-
-    This is an auxiliary script for the shapetools.py script and is usually
-    called from within that script.
-
-    The script requires four arguments:
-
-    --tetraFile  <tetra infile>
-    --tetraIdxFile <tetraIdx infile>
-    --tetraCutOutFile   <tetraCut outfile>
-    --tetraCutOutFileFunc <tetraCutOutFunc outfile>
-    --tetraCutOutDir <tetraCutOutDir outdir>
-
-    """
-
-    # message
-    print("\nReading input options ...")
-
-    # initialize
-    parser = optparse.OptionParser(usage=HELPTEXT)
-
-    # help text
-    h_tetraFile = 'tetra infile'
-    h_tetraIdxFile = 'tetraIdx infile'
-    h_tetraCutOutFile = 'tetraCut outfile'
-    h_tetraCutOutFileFunc = 'tetraCutOutFunc outfile'
-    h_tetraCutOutDir = 'tetraCutOutDir outdir'
-
-    # specify inputs
-    group = optparse.OptionGroup(parser, "Required Options:", "...")
-    group.add_option('--tetraFile', dest='tetraFile', help=h_tetraFile)
-    group.add_option('--tetraIdxFile', dest='tetraIdxFile', help=h_tetraIdxFile)
-    group.add_option('--tetraCutOutFile', dest='tetraCutOutFile', help=h_tetraCutOutFile)
-    group.add_option('--tetraCutOutFileFunc', dest='tetraCutOutFileFunc', help=h_tetraCutOutFileFunc)
-    group.add_option('--tetraCutOutDir', dest='tetraCutOutDir', help=h_tetraCutOutDir)
-    parser.add_option_group(group)
-
-    # parse arguments
-    (options, args) = parser.parse_args()
-
-    # check if there are any inputs
-    if len(sys.argv) != 11:
-        print(HELPTEXT)
-        sys.exit(0)
-
-    # check if tetraFile file is given
-    if options.tetraFile is None:
-        print('\nERROR: Specify --tetraFile\n')
-        sys.exit(1)
-    else:
-        print('... Found tetraFile file ' + options.tetraFile)
-
-    # check if tetraIdxFile file is given
-    if options.tetraIdxFile is None:
-        print('\nERROR: Specify --tetraIdxFile\n')
-        sys.exit(1)
-    else:
-        print('... Found tetraIdxFile file ' + options.tetraIdxFile)
-
-    # check if tetraCutOutFile file is given
-    if options.tetraCutOutFile is None:
-        print('\nERROR: Specify --tetraCutOutFile\n')
-        sys.exit(1)
-    else:
-        print('... Found tetraCutOutFile file ' + options.tetraCutOutFile)
-
-    # check if tetraCutOutFileFunc file is given
-    if options.tetraCutOutFileFunc is None:
-        print('\nERROR: Specify --tetraCutOutFileFunc\n')
-        sys.exit(1)
-    else:
-        print('... Found tetraCutOutFileFunc file ' + options.tetraCutOutFileFunc)
-
-    # check if tetraCutOutDir file is given
-    if options.tetraCutOutDir is None:
-        print('\nERROR: Specify --tetraCutOutDir\n')
-        sys.exit(1)
-    else:
-        print('... Found tetraCutOutDir directory ' + options.tetraCutOutDir)
-
-    # return
-    return options
-
-
-# ------------------------------------------------------------------------------
 # importData()
 
 def importData(tetraFile, tetraIdxFile):
@@ -153,7 +53,7 @@ def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, 
 
     triaMesh4cBnd.orient_()
 
-    TriaMesh.write_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.bnd.cut.vtk'))
 
     # remove all trias that share a vertex at the cut planes, because we want
     # to have an open boundary mesh; also remove free vertices
@@ -164,23 +64,23 @@ def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, 
 
     triaMesh4cBndOpen.orient_()
 
-    TriaMesh.write_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.open.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.open.bnd.cut.vtk'))
 
     # remove free vertices from boundary mesh and output
 
     triaMesh4cBnd.rm_free_vertices_()
 
-    TriaMesh.write_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.rm.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBnd, os.path.join(tetraCutOutDir, hemi + '.rm.bnd.cut.vtk'))
 
     # remove free vertices from open mesh and output ...
 
     triaMesh4cBndOpen.rm_free_vertices_()
 
-    TriaMesh.write_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.tetra.vtk'))
+    TriaMesh.write_vtk(triaMesh4cBndOpen, os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.vtk'))
 
     # write out mapping between open bnd and v4c
 
-    with open(os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.tetra.lst'), "w") as f:
+    with open(os.path.join(tetraCutOutDir, hemi + '.rm.open.bnd.cut.lst'), "w") as f:
 
         [ print(str(x), file=f) for x in np.unique(t4cBndOpen) ]
 
@@ -381,7 +281,7 @@ def tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
 # ------------------------------------------------------------------------------
 # cutTetra()
 
-def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=None, tetraCutOutFileFunc=None, tetraCutOutDir=None, labelHead=232, labelTail=226, labelBndHead=2320, labelBndTail=2260, labelBndCA4=2420, cutRange=[-0.975, 0.975]):
+def cutTetra(params):
     """
     This is a function to cut tetrahedral meshes
 
@@ -414,27 +314,25 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
     # evaluate input
     # -------------------------------------------------------------------------
 
-    if params is not None:
+    tetraFile = os.path.join(params.OUTDIR, params.HEMI + ".tetra.vtk")
 
-        tetraFile = os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_07 + ".vtk")
+    tetraIdxFile = os.path.join(params.OUTDIR, 'tetra-cut', params.HEMI + ".tetra-remove_bnd.psol")
 
-        tetraIdxFile = os.path.join(params.OUTDIR, 'tetra-cut', params.HEMI + "." + params.internal.HSFLABEL_07 + "_tetra-remove.psol")
+    tetraCutOutFile = os.path.join(params.OUTDIR, params.HEMI + ".cut.vtk")
 
-        tetraCutOutFile = os.path.join(params.OUTDIR, params.HEMI + ".cut." + params.internal.HSFLABEL_07 + ".vtk")
+    tetraCutOutFileFunc = os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".cut.psol")
 
-        tetraCutOutFileFunc = os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".cut." + params.internal.HSFLABEL_07 + ".psol")
+    tetraCutOutDir = os.path.join(params.OUTDIR, "tetra-cut")
 
-        tetraCutOutDir = os.path.join(params.OUTDIR, "tetra-cut")
+    labelHead = params.LUTDICT['jointhead']
+    labelTail = params.LUTDICT['jointtail']
+    labelBndHead = params.LUTDICT['bndhead']
+    labelBndTail = params.LUTDICT['bndtail']
+    labelBndCA4 = params.LUTDICT['bndca4']
 
-        labelHead = params.LUTDICT['jointhead']
-        labelTail = params.LUTDICT['jointtail']
-        labelBndHead = params.LUTDICT['bndhead']
-        labelBndTail = params.LUTDICT['bndtail']
-        labelBndCA4 = params.LUTDICT['bndca4']
+    cutRange = params.internal.cutrange
 
-        cutRange = params.internal.cutrange
-
-        hemi = params.HEMI
+    hemi = params.HEMI
 
     # -------------------------------------------------------------------------
     # get data
@@ -446,8 +344,6 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
     l4idx[np.where(l4idx==labelBndCA4)[0]] = 0
     l4idx[np.where(l4idx==labelBndHead)[0]] = -1
     l4idx[np.where(l4idx==labelBndTail)[0]] = 1
-
-    #cutRange = [ -0.975, 0.975 ]
 
     # -------------------------------------------------------------------------
     # preprocess data
@@ -788,37 +684,7 @@ def cutTetra(params=None, tetraFile=None, tetraIdxFile=None, tetraCutOutFile=Non
     exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, t4c, i4c)
 
     # -------------------------------------------------------------------------
-    # update params
-    # -------------------------------------------------------------------------
-
-    if params is not None:
-        params.internal.HSFLABEL_09 = "cut." + params.internal.HSFLABEL_07
-
-    # -------------------------------------------------------------------------
     # return
     # -------------------------------------------------------------------------
 
     return params
-
-
-# ------------------------------------------------------------------------------
-# CLI
-# ------------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------
-# MAIN PART
-
-if __name__ == "__main__":
-
-    # Command line options and error checking
-
-    options = options_parse()
-
-    # Run analysis
-
-    cutTetra(params=None,
-             tetraFile=options.tetraFile,
-             tetraIdxFile=options.tetraIdxFile,
-             tetraCutOutFile=options.tetraCutOutFile,
-             tetraCutOutFileFunc=options.tetraCutOutFileFunc,
-             tetraCutOutDir=options.tetraCutOutDir)

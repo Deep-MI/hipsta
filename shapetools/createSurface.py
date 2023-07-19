@@ -1,13 +1,13 @@
 """
 This module provides a function to create surfaces, which includes the marching
-cube algorithm, optional topology fixing, and remeshing and smoothing.
+cube algorithm, remeshing and smoothing.
 
 """
 
 # ------------------------------------------------------------------------------
 # main function
 
-def createSurface(params):
+def extractSurface(params):
 
     """
 
@@ -16,18 +16,12 @@ def createSurface(params):
     # imports
 
     import os
-    import sys
-    import shutil
     import subprocess
-    import pyacvd
 
     import numpy as np
     import nibabel as nb
-    import pyvista as pv
 
     from lapy import TriaMesh
-    from scipy import sparse as sp
-    from scipy import ndimage as nd
     from skimage import measure as skm
 
     # message
@@ -45,9 +39,9 @@ def createSurface(params):
     if params.internal.MCA == "mri_mc":
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_mc") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz") \
+            + os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz") \
             + " 1 " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".vtk") + " " \
+            + os.path.join(params.OUTDIR, "surface", params.HEMI + ".initial_surf.vtk") + " " \
             + str(params.internal.MCC)
 
         print(cmd)
@@ -57,20 +51,20 @@ def createSurface(params):
     elif params.internal.MCA == "mri_tessellate":
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_pretess") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz") \
+            + os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz") \
             + " xyz " \
-            + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz") \
+            + os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz") \
             + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".pt." + params.internal.HSFLABEL_02 + ".mgz")
+            + os.path.join(params.OUTDIR, "surface", params.HEMI + ".pretess.mgz")
 
         print(cmd)
 
         subprocess.run(cmd.split())
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_tessellate") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".pt." + params.internal.HSFLABEL_02 + ".mgz") \
+            + os.path.join(params.OUTDIR, "surface", params.HEMI + ".pretess.mgz") \
             + " 1 " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".fsmesh")
+            + os.path.join(params.OUTDIR, "surface", params.HEMI + ".surf.vtk")
 
         print(cmd)
 
@@ -79,8 +73,8 @@ def createSurface(params):
         # convert from freesurfer binary surface format to vtk
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_convert") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".fsmesh") + " " \
-            + os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".vtk")
+            + os.path.join(params.OUTDIR, "surface", params.HEMI + ".surf.vtk") + " " \
+            + os.path.join(params.OUTDIR, "surface", params.HEMI + ".initial_surf.vtk")
 
         print(cmd)
 
@@ -88,7 +82,7 @@ def createSurface(params):
 
     elif params.internal.MCA == "skimage":
 
-        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz"))
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz"))
         dat = img.get_fdata()
 
         msh = skm.marching_cubes(dat)
@@ -96,31 +90,48 @@ def createSurface(params):
         v = np.matmul(img.header.get_vox2ras_tkr(), np.concatenate((msh[0], np.ones((msh[0].shape[0],1))), axis=1).T).T[:, 0:3]
         t = msh[1]
 
-        TriaMesh(v, t).write_vtk(os.path.join(params.OUTDIR, params.HEMI + ".mc." + params.internal.HSFLABEL_02 + ".vtk"))
+        TriaMesh(v, t).write_vtk(os.path.join(params.OUTDIR, "surface", params.HEMI + ".initial_surf.vtk"))
 
     # update params
 
-    params.internal.HSFLABEL_03 = "mc."+params.internal.HSFLABEL_02
-    params.internal.HSFLABEL_04 = params.internal.HSFLABEL_03
-    params.internal.HSFLABEL_05 = params.internal.HSFLABEL_04
+    params.SURFNAME = os.path.join(params.OUTDIR, "surface", params.HEMI + ".initial_surf.vtk")
 
-    # message
+    # return
 
-    print()
-    print("-------------------------------------------------------------------------")
-    print()
-    print("Smooth surface")
-    print()
-    print("-------------------------------------------------------------------------")
-    print()
+    return(params)
 
-    # remesh
+
+def remeshSurface(params):
 
     if params.internal.REMESH is not None:
 
+        # imports
+
+        import os
+        import sys
+        import shutil
+        import subprocess
+        import pyacvd
+
+        import numpy as np
+        import pyvista as pv
+
+        from lapy import TriaMesh
+        from scipy import sparse as sp
+
+        # message
+
+        print()
+        print("-------------------------------------------------------------------------")
+        print()
+        print("Remesh surface")
+        print()
+        print("-------------------------------------------------------------------------")
+        print()
+
         if shutil.which("mris_remesh") is None:
 
-            Mesh = pv.PolyData(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
+            Mesh = pv.PolyData(params.SURFNAME)
 
             clustered = pyacvd.Clustering(Mesh)
             clustered.subdivide(4)
@@ -180,12 +191,12 @@ def createSurface(params):
 
             if params.internal.REMESH == 0:
                 cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
-                    + "--remesh  -i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk") + " " \
-                    + "-o " + os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk")
+                    + "--remesh  -i " + params.SURFNAME + " " \
+                    + "-o " + os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk")
             elif params.internal.REMESH > 0:
                 cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
-                    + "--nvert " + str(params.internal.REMESH) + "  -i " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk") + " " \
-                    + "-o " + os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk")
+                    + "--nvert " + str(params.internal.REMESH) + "  -i " + params.SURFNAME + " " \
+                    + "-o " + os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk")
 
             print(cmd)
 
@@ -193,33 +204,60 @@ def createSurface(params):
 
             # remove free vertices and re-orient mesh
 
-            triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+            triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk"))
             triaMesh.rm_free_vertices_()
             triaMesh.orient_()
 
-    else:
+        # save
 
-        # remove free vertices and re-orient mesh
+        TriaMesh.write_vtk(triaMesh, os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk"))
 
-        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_05 + ".vtk"))
-        triaMesh.rm_free_vertices_()
-        triaMesh.orient_()
+        # update params
 
-    # save
+        params.SURFNAME = os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk")
 
-    TriaMesh.write_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
+    # return
+
+    return(params)
+
+
+def smoothSurface(params):
+
+    # imports
+
+    import os
+    from lapy import TriaMesh
+
+    # message
+
+    print()
+    print("-------------------------------------------------------------------------")
+    print()
+    print("Smooth surface")
+    print()
+    print("-------------------------------------------------------------------------")
+    print()
+
+    # read mesh
+
+    triaMesh = TriaMesh.read_vtk(params.SURFNAME)
+
+    # remove free vertices and re-orient mesh
+
+    triaMesh.rm_free_vertices_()
+    triaMesh.orient_()
 
     # smoothing
 
-    triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".rm." + params.internal.HSFLABEL_05 + ".vtk"))
-
     triaMesh.smooth_(n=params.internal.SMO)
 
-    TriaMesh.write_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".rs." + params.internal.HSFLABEL_05 + ".vtk"))
+    # write mesh
 
-    # update HSFLABEL 6
+    TriaMesh.write_vtk(triaMesh, os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
-    params.internal.HSFLABEL_06 = "rs." + params.internal.HSFLABEL_05
+    # update params
+
+    params.SURFNAME = os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
 
     # return
 

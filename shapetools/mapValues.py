@@ -262,8 +262,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
         # these are the default settings for processing within the hippocampal
         # thickness toolbox; will override any other settings; set 'params=None'
         # for custom processing.
-        IN_VOL = os.path.join(params.OUTDIR, params.HEMI + ".ml." + params.internal.HSFLABEL_00 + ".mgz") # should be identical to the following line
-        #IN_VOL = os.path.join(params.OUTDIR, 'merge-ml', params.HEMI + ".ml.234-236-238-240-246_assigned.mgz")
+        IN_VOL = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
         IN_SURF = os.path.join(params.OUTDIR, 'thickness', params.HEMI + ".mid-surface.vtk") # or: grid-lines-z.vtk
         IN_LABEL = params.FILENAME
         IN_INDICES = os.path.join(params.OUTDIR, 'thickness', params.HEMI + ".mid-surface.csv") # or: grid-lines.csv
@@ -278,6 +277,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
 
     #-------------------------------------------------------
     # check for differences
+    
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_diff") \
         + " " + "--notallow-acq" + " " + "--notallow-prec" + " " \
         + "--notallow-pix" + " " + IN_VOL + " " + IN_LABEL
