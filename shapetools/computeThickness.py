@@ -11,9 +11,8 @@ import pandas as pd
 import nibabel as nb
 
 from lapy import TriaMesh, TetMesh, io
-
-from shapetools.triaUtils import levelsetsTetra
 from scipy.sparse import csgraph as sc
+from shapetools.utils.getLevelsets import levelsetsTetra # TODO: maybe remove if automatically imported
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION

@@ -5,12 +5,10 @@ cube algorithm, remeshing and smoothing.
 """
 
 import os
-import sys
 import subprocess
 
 import shutil
 import pyacvd
-import logging
 
 import numpy as np
 import nibabel as nb
@@ -145,15 +143,13 @@ def remeshSurface(params):
             # assure that any edge occurs exactly two times (duplicates)
             trSortRmBndEdges = np.concatenate((trSortRmBnd[:,[0,1]],  trSortRmBnd[:,[1,2]], trSortRmBnd[:,[0,2]]), axis=0)
             if len(np.where(np.unique(trSortRmBndEdges, axis=0, return_counts=True)[1]!=2)[0])!=0:
-                logging.info("Duplicate edges in mesh, exiting.")
-                sys.exit(1)
+                raise RuntimeError("Duplicate edges in mesh, exiting.")
 
             # assure that every edge must be part of exactly two different triangles (no boundary edges, no duplicates)
             countEdgesInTrias = np.array([ np.sum(np.sum(np.logical_or(trSortRmBnd==trSortRmBndEdges[i,0], trSortRmBnd==trSortRmBndEdges[i,1]), axis=1)==2) for i in range(0, len(trSortRmBndEdges)) ])
             if (countEdgesInTrias!=2).any():
-                logging.info("Boundary or duplicate edges in mesh, exiting.")
-                sys.exit(1)
-
+                raise RuntimeError("Boundary or duplicate edges in mesh, exiting.")
+                
             # restrict to largest connected component
 
             triaMesh = TriaMesh(v=vr, t=trSortRmBnd)

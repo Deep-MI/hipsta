@@ -80,8 +80,7 @@ def autoMask(params):
                 # find instance of CA2/CA3
                 idxHead = np.argwhere(np.logical_or(dat==labelCA2, dat==labelCA3))
             else:
-                logging.info("Insufficient label information, exiting.")
-                sys.exit(1)
+                raise RuntimeError("Insufficient label information, exiting.")
             # get min/max row/col/slice
             if imgDimsAPDir == -1:
                 cutFrom = np.min(idxHead[:, imgDimsAP]) + params.internal.AUTOMASK_HEAD_MARGIN
@@ -122,8 +121,7 @@ def autoMask(params):
                     np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
                     np.argwhere(dat==labelCA3)[:,imgDimsAP])))
             else:
-                logging.info("Insufficient label information, exiting.")
-                sys.exit(1)
+                raise RuntimeError("Insufficient label information, exiting.")
             # get min/max row/col/slice
             if imgDimsAPDir == -1:
                 cutFrom = np.max(idxTail) - params.internal.AUTOMASK_TAIL_MARGIN

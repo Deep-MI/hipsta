@@ -4,7 +4,6 @@ This module provides a function to compute a cube parametrization
 """
 
 import os
-import sys
 import logging
 
 import numpy as np
@@ -91,8 +90,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    logging.info("Inconsistency while creating seam 1, exiting.")
-                    sys.exit(1)
+                    raise RuntimeError("Inconsistency while creating seam 1, exiting.")
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -117,8 +115,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    logging.info("Inconsistency while creating seam 2, exiting.")
-                    sys.exit(1)
+                    raise RuntimeError("Inconsistency while creating seam 2, exiting.")
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos2], t4c[i, idxNeg1]]
 
@@ -188,8 +185,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    plogging.info("Inconsistency while creating seam 3, exiting.")
-                    sys.exit(1)
+                    raise RuntimeError("Inconsistency while creating seam 3, exiting.")
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -214,8 +210,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    logging.info("Inconsistency while creating seam 4, exiting.")
-                    sys.exit(1)
+                    raise RuntimeError("Inconsistency while creating seam 4, exiting.")
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg2]]
 
@@ -229,8 +224,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             newTetra = np.concatenate((newTetra, np.array((idxPt2, t4c[i, idxNeg1], t4c[i, idxNeg2], t4c[i, idxNan1]), ndmin=2)))
 
         else:
-            logging.info("Inconsistency while creating seam (incorrect number of negative values), exiting.")
-            sys.exit(1)
+            raise RuntimeError("Inconsistency while creating seam (incorrect number of negative values), exiting.")
 
         # return
         return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn
@@ -285,8 +279,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
             else:
                 newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                logging.info("Inconsistency while creating seam 5, exiting.")
-                sys.exit(1)
+                raise RuntimeError("Inconsistency while creating seam 5, exiting.")
         else:
             idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -372,8 +365,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             tmpvfuncXEv1[t4c[i, np.setdiff1d((0, 1, 2, 3), ((0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3))[np.intersect1d(numTriaBnd, numTriaCross).item()])]] = np.nan
             v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase1(v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i)
         else:
-            logging.info("Unknown getSeam() case, exiting.")
-            sys.exit(1)
+            raise RuntimeError("Unknown getSeam() case, exiting.")
 
         # return
         return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn
@@ -444,16 +436,14 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                         np.isin(e4cBndOpen, t4c[i, (1, 3)]).all(axis=1).any(),
                         np.isin(e4cBndOpen, t4c[i, (2, 3)]).all(axis=1).any())
                     if len(np.where(tmpEdge)) > 1:
-                        logging.info("Cave: found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
-                        sys.exit(1)
+                        raise RuntimeError("Found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
                     tmpEdgeNot = np.setdiff1d((0, 1, 2, 3),  ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3))[np.where(tmpEdge)[0].item()])
                     tmpvfuncXEv1 = vfuncXEv1.copy()
                     tmpvfuncXEv1[t4c[i, tmpEdgeNot]] = np.nan
                     v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
                     v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i)
                 else:
-                    logging.info("Vtx " + str(i) + " not in triangle or edge, skipping")
-                    sys.exit(1)
+                    raise RuntimeError("Vtx " + str(i) + " not in triangle or edge, skipping")
 
             elif np.sum(np.isnan(vfuncXEv1[t4c[i]])) == 2:
                 # if there are two nans, we need to make sure that they are linked by a surface edge; this should have happenend already.
@@ -465,8 +455,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     np.isin(e4cBndOpen, t4c[i, (1, 3)]).all(axis=1).any(),
                     np.isin(e4cBndOpen, t4c[i, (2, 3)]).all(axis=1).any())
                 if len(np.where(tmpEdge)) > 1:
-                    logging.info("Cave: found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
-                    sys.exit(1)
+                    raise RuntimeError("Found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
                 v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
                 v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i)
 
@@ -477,8 +466,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 
             else:
                 # we should never have four nans
-                logging.info("Inconsistency while creating seam (incorrect number of nans), exiting.")
-                sys.exit(1)
+                raise RuntimeError("Inconsistency while creating seam (incorrect number of nans), exiting.")
 
     # remove tetras
     t4c = np.delete(t4c, zeroTetraIdx, axis=0)
@@ -618,24 +606,22 @@ def computeCubeParam(params):
     #  (i.e., reverse) for 240 as well
 
     if np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]> 0, k4c[hsfList]==labelPrsbc))[0], 2]) > np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]<0, k4c[hsfList]==labelPrsbc))[0], 2]):
-        logging.info("No flip necessary for EV1")
+        pass
     elif np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]> 0, k4c[hsfList]==labelPrsbc))[0], 2]) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]<0, k4c[hsfList]==labelPrsbc))[0], 2]):
         logging.info("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
-        logging.info("Inconsistency detected for EV1, exiting.")
-        sys.exit(1)
+        raise RuntimeError("Inconsistency detected for EV1, exiting.")
 
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
 
     if np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])<0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])>0:
-        logging.info("No flip necessary for EV2")
+        pass
     elif np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])>0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])<0:
         logging.info("Flipping EV2")
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
     else:
-        logging.info("Inconsistency detected for EV2, exiting.")
-        sys.exit(1)
+        raise RuntimeError("Inconsistency detected for EV2, exiting.")
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])
     io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV2.psol'), anisoLaplEvec[:,2])
@@ -697,16 +683,14 @@ def computeCubeParam(params):
             if np.mean(ras[np.where(vfuncX>0)[0],0]) > np.mean(ras[np.where(vfuncX<0)[0],0]):
                 vfuncX = -vfuncX
         else:
-            logging.info("Ambiguous hemisphere info, exiting.")
-            sys.exit(1)
+            raise RuntimeError("Ambiguous hemisphere info, exiting.")
     elif params.HEMI=="rh":
         if (ras[:,0]>0.0).all():
             # lateral (snk, +1) should be more positive than medial (src, -1), otherwise flip
             if np.mean(ras[np.where(vfuncX>0)[0],0]) < np.mean(ras[np.where(vfuncX<0)[0],0]):
                 vfuncX = -vfuncX
         else:
-            logging.info("Ambiguous hemisphere info, exiting.")
-            sys.exit(1)
+            raise RuntimeError("Ambiguous hemisphere info, exiting.")
 
     # --------------------------------------------------------------------------
     # compute ABtetra and Poisson functions

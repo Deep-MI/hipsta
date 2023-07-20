@@ -93,7 +93,7 @@ def createTetraMesh(params):
 
     print(cmd)
 
-    subprocess.run(cmd.split())
+    subprocess.run(cmd.split(), capture_output=True)
 
     # convert vtk2 to vtk1
 

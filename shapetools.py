@@ -27,6 +27,7 @@ def get_version():
 
     return VERSION
 
+
 # ------------------------------------------------------------------------------
 # get_help()
 
@@ -89,11 +90,10 @@ def get_help(print_help=True, return_help=False):
       --hemi      Hemisphere. Either 'lh' or 'rh'.
       --lut       A valid look-up table for hippocampal subfield segmentation.
                   Either 'freesurfer' or 'ashs' or a valid filename.
-
-    Optional input arguments:
-
       --outputdir Directory where the results will be written. If not given, a
                   subfolder within each subject's directory will be created.
+
+    Optional input arguments:
 
       --no-cleanup
                   Do not delete files that may be useful for diagnostic or
@@ -225,27 +225,125 @@ def get_help(print_help=True, return_help=False):
 
 
 # ------------------------------------------------------------------------------
+# start logging
+
+def _start_logging(args):
+    """
+    start logging
+
+    """
+
+    # setup function to log uncaught exceptions
+    def foo(exctype, value, tb):
+        # log
+        logging.error('Error Information:')
+        logging.error('Type: %s', exctype)
+        logging.error('Value: %s', value)
+        for i in traceback.format_list(traceback.extract_tb(tb)):
+            logging.error('Traceback: %s', i)
+        # message
+        logging.error('Program exited with ERRORS.')
+    sys.excepthook = foo
+
+    # check if output directory exists or can be created
+    if os.path.isdir(args.outputdir):
+        logging.info("Found output directory " + args.outputdir)
+    else:
+        try:
+            os.mkdir(args.outputdir)
+        except OSError as e:
+            logging.error("Cannot create output directory " + args.outputdir)
+            logging.error("Reason: " + str(e))
+            raise
+
+    # check if logfile can be written in output directory
+    try:
+        testfile = tempfile.TemporaryFile(dir=args.outputdir)
+        testfile.close()
+    except OSError as e:
+        logging.error(args.outputdir + " not writeable")
+        logging.error("Reason: " + str(e))
+        raise
+
+    # set up logging
+    logfile_format = "[%(levelname)s: %(filename)s] %(message)s"
+    logfile_handlers = [logging.StreamHandler(sys.stdout)]
+    logging.basicConfig(level=logging.INFO, format=logfile_format, handlers=logfile_handlers)    
+
+    # start logging
+    logfile =  os.path.join(args.outputdir, 'logfile.txt')
+    logging.getLogger().addHandler(logging.FileHandler(filename=logfile, mode="w"))
+
+    # intial messages
+    logging.info("Starting logging for hippocampal shapetools ...")
+    logging.info("Logfile: %s", logfile)    
+    logging.info("Version: %s", get_version())
+    logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
+
+    # log args
+    logging.info("Command: " + " ".join(sys.argv))
+
+    # update args
+    args.logfile = logfile
+
+    # return
+    return args
+
+
+# ------------------------------------------------------------------------------
 # check environment and packages
 
 def _check_environment_and_packages():
 
     # check environment variables
     if os.environ.get('FREESURFER_HOME') is None:
-        logging.error('Need to set the FreeSurfer_HOME environment variable')
-        logging.error("Program exited with ERRORS.")
-        sys.exit(1)
+        raise RuntimeError('Need to set the FreeSurfer_HOME environment variable')
 
     # check python version
     if sys.version_info <= (3, 5):
-        logging.error('Python version must be 3.5 or greater')
-        logging.error("Program exited with ERRORS.")
-        sys.exit(1)
+        raise RuntimeError('Python version must be 3.5 or greater')
 
     # check for gmsh
     if shutil.which("gmsh") is None:
-        logging.error('Could not find a \'gmsh\' executable')
-        logging.error("Program exited with ERRORS.")
-        sys.exit(1)
+        raise RuntimeError('Could not find a \'gmsh\' executable')
+
+
+# ------------------------------------------------------------------------------
+# check directories
+
+def _create_directories(args):
+
+    # note that the main output directory has been created during 
+    # _start_logging() already
+
+    # define list of directories
+
+    list_of_directories = [
+        os.path.join(args.outputdir, "image"),
+        os.path.join(args.outputdir, "labels"),
+        os.path.join(args.outputdir, "mask"),
+        os.path.join(args.outputdir, "surface"),
+        os.path.join(args.outputdir, "tetra-mesh"),
+        os.path.join(args.outputdir, "tetra-labels"),
+        os.path.join(args.outputdir, "tetra-cut"),
+        os.path.join(args.outputdir, "tetra-cube"),
+        os.path.join(args.outputdir, "thickness"),
+        os.path.join(args.outputdir, "qc")
+        ]
+
+    # loop over list of directories
+
+    for directory in list_of_directories:
+
+        if not os.path.isdir(directory):
+
+            try:
+                logging.info('Creating output directory ' + directory)
+                os.mkdir(directory)
+            except OSError as e:
+                logging.error("Cannot create output directory " + args.outputdir)
+                logging.error("Reason: " + str(e))
+                raise
 
 
 # ------------------------------------------------------------------------------
@@ -261,7 +359,7 @@ def _parse_arguments():
     parser = argparse.ArgumentParser(description="This program conducts a thickness analysis of the hippocampus, based on a FreeSurfer, ASHS, or custom hippocampal subfield segmentation.",
         add_help=False)
 
-    # required arguments
+    # required arguments (set to required=False, because not required when using --more-help)
     required = parser.add_argument_group('Required arguments')
 
     required.add_argument('--filename', dest="filename", help="Filename of a segmentation file.",
@@ -270,12 +368,12 @@ def _parse_arguments():
         default=None, metavar="<lh|rh>", required=False)
     required.add_argument('--lut', dest="lut", help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\' and \'ashs\' are keywords for built-in tables.",
         default=None, metavar="<freesurfer|ashs|filename>", required=False)
+    required.add_argument('--outputdir', dest="outputdir", help="Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.",
+        default=None, metavar="<directory>", required=False)    
 
     # optional arguments
     optional = parser.add_argument_group('Optional arguments')
 
-    optional.add_argument('--outputdir', dest="outputdir", help="Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.",
-        default=None, metavar="<directory>", required=False)
     optional.add_argument('--no-cleanup', dest='cleanup', help="Keep files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.",
         default=False, action="store_true", required=False)
 
@@ -345,33 +443,37 @@ def _parse_arguments():
     help = parser.add_argument_group('Getting help')
 
     help.add_argument('--help', help="Display this help message and exit", action='help')
-    help.add_argument('--more-help', dest='more_help', help="Display extensive help message and exit",
-        default=False, action="store_true", required=False)
+    help.add_argument('--more-help', dest='more_help', help="Display extensive help message and exit", default=False, action="store_true", required=False)
     help.add_argument('--version', help="Display version number and exit", action='version', version='%(prog)s '+get_version())
 
-    # check if there are any inputs; if not, print help and exit
+    # check if there are any inputs; if not, print help
     if len(sys.argv) == 1:
         args = parser.parse_args(['--help'])
     else:
         args = parser.parse_args()
 
-    # return extensive helptext
-    if args.more_help is True:
-        get_help()
-        sys.exit(0)
+    #
+    if args.more_help is False:
+        # check for required arguments print help and exit
+        if args.filename is None:
+            print("ERROR: the --filename argument is required, exiting. Use --help to see details.")
+            print()            
+            sys.exit(1)
 
-    # check for required arguments print help and exit
-    if args.filename is None:
-        logging.error("ERROR: the --filename argument is required, exiting. Use --help to see details.")
-        sys.exit(1)
+        if args.hemi is None:
+            print("ERROR: the --hemi argument is required, exiting. Use --help to see details.")
+            print()            
+            sys.exit(1)
 
-    if args.hemi is None:
-        logging.error("ERROR: the --hemi argument is required, exiting. Use --help to see details.")
-        sys.exit(1)
+        if args.lut is None:
+            print("ERROR: the --lut argument is required, exiting. Use --help to see details.")
+            print()
+            sys.exit(1)
 
-    if args.lut is None:
-        logging.error("ERROR: the --lut argument is required, exiting. Use --help to see details.")
-        sys.exit(1)
+        if args.outputdir is None:
+            print("ERROR: the --outputdir argument is required, exiting. Use --help to see details.")
+            print()
+            sys.exit(1)            
 
     #
     return args
@@ -395,8 +497,6 @@ def _evaluate_args(args):
     class settings:
         pass
 
-    settings.HSFLABEL_00 = 'hsf'
-
     # filename
 
     FILENAME = os.path.abspath(args.filename)
@@ -405,10 +505,7 @@ def _evaluate_args(args):
 
     # output directory
 
-    if args.outputdir is None:
-        OUTDIR = os.path.join(os.path.dirname(os.path.abspath(args.filename)), "hsf-" + args.hemi)
-    else:
-        OUTDIR = args.outputdir
+    OUTDIR = args.outputdir
 
     logging.info("Using " + OUTDIR + " as output directory")
 
@@ -442,13 +539,9 @@ def _evaluate_args(args):
     # processMask
 
     settings.GAUSSFILTER = not(args.nofilter)
-
     settings.GAUSSFILTER_SIZE = [ float(x) for x in args.gaussfilter_size ]
-    
     settings.LONGFILTER = args.longfilter
-
     settings.LONGFILTER_SIZE = (int(args.longfilter_size[0]), int(args.longfilter_size[0]), int(args.longfilter_size[0]))
-
     settings.CLOSEMASK = not(args.noclosemask)
 
     # createSurface
@@ -506,12 +599,8 @@ def _evaluate_args(args):
     else:
         if len(args.anisoAlpha)==1:
             settings.anisoAlpha = [ float(x) for x in args.anisoAlpha ][0]
-        elif len(args.anisoAlpha)==2:
+        elif len(args.anisoAlpha)>2:
             settings.anisoAlpha = [ float(x) for x in args.anisoAlpha ]
-        else:
-            logging.error("Length of --aniso-alpha must be 1 or 2.")
-            logging.error("Program exited with ERRORS.")
-            sys.exit(1)
 
     if args.anisoSmooth is None:
         settings.anisoSmooth = 3
@@ -565,6 +654,70 @@ def _evaluate_args(args):
     settings.mapValuesWriteMGH = True
     settings.mapValuesWriteANNOT = False
 
+    # create the LUT
+
+    if args.lut == "freesurfer":
+
+        logging.info("Found internal, modified look-up table for FreeSurfer.")
+
+        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml" ]
+
+        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246 ]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [ 234, 236, 238, 240, 246 ]
+
+    elif args.lut == "freesurfer-noml":
+
+        logging.info("Found internal, modified look-up table for FreeSurfer.")
+
+        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg" ]
+
+        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244 ]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [ 234, 236, 238, 240]
+
+    elif args.lut == "ashs":
+
+        logging.info("Found internal, modified look-up table for ASHS atlas.")
+
+        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
+            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
+            "head", "tail" ]
+
+        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [ 8, 1, 2, 4 ]
+
+    elif os.path.isfile(args.lut):
+
+        logging.info("Found look-up table " + args.lut)
+
+        lut = pandas.read_csv(args.lut, sep=' ', comment='#',
+            header=None, skipinitialspace=True, skip_blank_lines=True,
+            error_bad_lines=False, warn_bad_lines=True)
+
+        LUTDICT = dict(zip(lut[0], lut[1]))
+        HSFLIST = list(lut[1])
+
+    else:
+
+        LUTDICT = dict()
+        HSFLIST = []
+
+    # add entries for tetra-labels
+
+    LUTDICT['jointtail'] = 226
+    LUTDICT['jointhead'] = 232
+    LUTDICT['bndtail'] = 2260
+    LUTDICT['bndhead'] = 2320
+    LUTDICT['bndca4'] = 2420
+
     # assemble and return params
 
     class params:
@@ -572,6 +725,8 @@ def _evaluate_args(args):
 
     params.FILENAME = FILENAME
     params.OUTDIR = OUTDIR
+    params.LUTDICT = LUTDICT
+    params.HSFLIST = HSFLIST
 
     params.HEMI = args.hemi
     params.LUT = args.lut
@@ -584,177 +739,47 @@ def _evaluate_args(args):
 
 
 # ------------------------------------------------------------------------------
-# check arguments
+# check params
 
-def _check_arguments(params):
+def _check_params(params):
     """
     an internal function to check input arguments
 
     """
-
-    # --------------------------------------------------------------------------
-    # check arguments
-
-    # check if output directory exists or can be created and is writable
-
-    if os.path.isdir(params.OUTDIR):
-        logging.info("Found output directory " + params.OUTDIR)
-    else:
-        try:
-            os.mkdir(params.OUTDIR)
-        except:
-            logging.error('Cannot create output directory ' + params.OUTDIR)
-            logging.error("Program exited with ERRORS.")
-            sys.exit(1)
-        try:
-            testfile = tempfile.TemporaryFile(dir=params.OUTDIR)
-            testfile.close()
-        except OSError as e:
-            if e.errno != errno.EACCES:  # 13
-                e.filename = params.OUTDIR
-                raise
-            logging.error('Directory ' + params.OUTDIR + ' not writeable')
-            logging.error("Program exited with ERRORS.")
-            sys.exit(1)
 
     # check for subfield segmentation file
 
     if os.path.isfile(params.FILENAME):
         logging.info("Found " + params.FILENAME)
     else:
-        logging.error("Could not find " + params.FILENAME)
-        logging.error("Program exited with ERRORS.")
-        sys.exit(1)
+        raise RuntimeError("Could not find " + params.FILENAME)
 
     # check MC algorithm
 
     if params.internal.MCA != "mri_mc" and params.internal.MCA != "mri_tessellate" and params.internal.MCA != "skimage":
-        logging.error("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
-        sys.exit(1)
+        raise RuntimeError("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
 
     # check upsampling
 
     if params.internal.UPSAMPLE is not None:
         if len(params.internal.UPSAMPLE ) != 0 and len(params.internal.UPSAMPLE ) != 3:
-            logging.error("Incorrect number of --upsampling parameters, must be 0 or 3.")
-            logging.error("Program exited with ERRORS.")
-            sys.exit(1)
+            raise RuntimeError("Incorrect number of --upsampling parameters, must be 0 or 3.")
 
     # check ML
 
     if args.noml is True and params.LUT != "freesurfer":
-        logging.error("Cannot use --no-merge-molecular-layer with " + params.LUT + ".")
-        sys.exit(1)    
+        raise RuntimeError("Cannot use --no-merge-molecular-layer with " + params.LUT + ".")
 
-    # create the LUT
+    # check aniso alpha
 
-    if params.LUT == "freesurfer":
+    if args.anisoAlpha is not None:
+        if len(args.anisoAlpha)>2:
+            raise RuntimeError("Length of --aniso-alpha must be 1 or 2.")
+        
+    # check LUT
 
-        logging.info("Found internal, modified look-up table for FreeSurfer.")
-
-        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml" ]
-
-        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 234, 236, 238, 240, 246 ]
-
-    elif params.LUT == "freesurfer-noml":
-
-        logging.info("Found internal, modified look-up table for FreeSurfer.")
-
-        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg" ]
-
-        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 234, 236, 238, 240]
-
-    elif params.LUT == "ashs":
-
-        logging.info("Found internal, modified look-up table for ASHS atlas.")
-
-        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
-            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
-            "head", "tail" ]
-
-        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
-
-        lutDict = dict(zip(LUTLABEL, LUTINDEX))
-
-        hsflist = [ 8, 1, 2, 4 ]
-
-    elif os.path.isfile(params.LUT):
-
-        try:
-
-            logging.info("Found look-up table " + params.LUT)
-
-            lut = pandas.read_csv(params.LUT, sep=' ', comment='#',
-                header=None, skipinitialspace=True, skip_blank_lines=True,
-                error_bad_lines=False, warn_bad_lines=True)
-
-            lutDict = dict(zip(lut[0], lut[1]))
-            hsflist = list(lut[1])
-
-        except:
-
-            logging.error("Could not read look-up table " + params.LUT)
-            logging.error("Program exited with ERRORS.")
-            sys.exit(1)
-
-    else:
-
-        logging.error("Look-up table can only be \'freesurfer\', \'ashs\', or an existing file, but not " + params.LUT)
-        logging.error("Program exited with ERRORS.")
-        sys.exit(1)
-
-    # add entries for tetra-labels
-
-    lutDict['jointtail'] = 226
-    lutDict['jointhead'] = 232
-    lutDict['bndtail'] = 2260
-    lutDict['bndhead'] = 2320
-    lutDict['bndca4'] = 2420
-
-    #
-
-    params.LUTDICT = lutDict
-    params.HSFLIST = hsflist
-
-    # --------------------------------------------------------------------------
-    # create directories if they don't exist
-
-    # define list of directories
-
-    list_of_directories = [
-        os.path.join(params.OUTDIR, "image"),
-        os.path.join(params.OUTDIR, "labels"),
-        os.path.join(params.OUTDIR, "mask"),
-        os.path.join(params.OUTDIR, "surface"),
-        os.path.join(params.OUTDIR, "tetra-mesh"),
-        os.path.join(params.OUTDIR, "tetra-labels"),
-        os.path.join(params.OUTDIR, "tetra-cut"),
-        os.path.join(params.OUTDIR, "tetra-cube"),
-        os.path.join(params.OUTDIR, "thickness"),
-        os.path.join(params.OUTDIR, "qc")
-        ]
-
-    # loop over list of directories
-
-    for directory in list_of_directories:
-
-        if not os.path.isdir(directory):
-
-            try:
-                logging.info('Creating output directory ' + directory)
-                os.mkdir(directory)
-            except:
-                logging.error('Cannot create output directory ' + directory)
-                logging.error("Program exited with ERRORS.")
-                sys.exit(1)
+    if params.LUT != "freesurfer" and params.LUT != "ashs" and not os.path.isfile(params.LUT):
+        raise RuntimeError("Look-up table can only be \'fs711\', \'ashs\', or an existing file, but not " + params.LUT)
 
     # return
 
@@ -762,7 +787,7 @@ def _check_arguments(params):
 
 
 # ------------------------------------------------------------------------------
-# run analysis (internal)
+# run analysis
 
 def _run_analysis(params):
     """
@@ -775,17 +800,17 @@ def _run_analysis(params):
     from shapetools.processLabels import createLabels, mergeMolecularLayer, autoMask, copy_labels_to_main
     from shapetools.processMask import binarizeMask, gaussFilter, longFilter, closeMask, copy_mask_to_main
     from shapetools.createSurface import extractSurface, remeshSurface, smoothSurface
-    from shapetools.checkSurface import checkSurface
+    from shapetools.utils.checkSurface import checkSurface
     from shapetools.createTetraMesh import createTetraMesh
     from shapetools.createTetraLabels import createTetraLabels
     from shapetools.removeBoundaryMask import removeBoundaryMask
     from shapetools.cutTetra import cutTetra
     from shapetools.computeCubeParam import computeCubeParam
     from shapetools.computeThickness import computeThickness
-    from shapetools.mapValues import mapValues
-    from shapetools.createSupplementaryFiles import createSupplementaryFiles
-    from shapetools.qcPlots import qcPlots
-
+    from shapetools.utils.mapValues import mapValues
+    from shapetools.utils.createSupplementaryFiles import createSupplementaryFiles
+    from shapetools.utils.qcPlots import qcPlots
+    
     # process image (1)
 
     logging.info("Starting convertFormat() ...")
@@ -910,80 +935,9 @@ def _run_analysis(params):
 
 
 # ------------------------------------------------------------------------------
-# start logging
+# run
 
-def _start_logging(args):
-    """
-    start logging
-
-    """
-
-    # setup function to log uncaught exceptions
-    def foo(exctype, value, tb):
-        # log
-        logging.error('Error Information:')
-        logging.error('Type: %s', exctype)
-        logging.error('Value: %s', value)
-        for i in traceback.format_list(traceback.extract_tb(tb)):
-            logging.error('Traceback: %s', i)
-        # message
-        logging.error('Program exited with ERRORS.')
-        sys.exit(1)
-    sys.excepthook = foo
-
-    # set up logging
-    logfile_format = "[%(levelname)s]: %(message)s"
-    logfile_handlers = [logging.StreamHandler(sys.stdout)]
-    logging.basicConfig(
-        level=logging.INFO, format=logfile_format, handlers=logfile_handlers
-    )    
-
-    # check if output directory exists or can be created
-    if os.path.isdir(args.outputdir):
-        logging.info("Found output directory " + args.outputdir)
-    else:
-        try:
-            os.mkdir(args.outputdir)
-        except Exception as e:
-            logging.error(
-                "ERROR: cannot create output directory " + args.outputdir
-            )
-            logging.error("Reason: " + str(e))
-            raise
-
-    # check if logfile can be written in output directory
-    try:
-        testfile = tempfile.TemporaryFile(dir=args.outputdir)
-        testfile.close()
-    except Exception as e:
-        logging.error("ERROR: " + args.outputdir + " not writeable")
-        logging.error("Reason: " + str(e))
-        raise
-
-    # start logging
-    logfile =  os.path.join(args.outputdir, 'logfile.txt')
-    logging.getLogger().addHandler(logging.FileHandler(filename=logfile, mode="w"))
-
-    # intial messages
-    logging.info("Starting logging for hippocampal shapetools ...")
-    logging.info("Logfile: %s", logfile)    
-    logging.info("Version: %s", get_version())
-    logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
-
-    # log args
-    logging.info("Command: " + " ".join(sys.argv))
-
-    # update args
-    args.logfile = logfile
-
-    # return
-    return args
-
-
-# ------------------------------------------------------------------------------
-# run analysis
-
-def run_analysis(args):
+def run(args):
     """
     a function to run the shapetools submodules
 
@@ -995,11 +949,14 @@ def run_analysis(args):
     # check environment and packages
     _check_environment_and_packages()
 
-    # evaluate arguments
+    # create directories
+    _create_directories(args)
+
+    # convert arguments to params
     params = _evaluate_args(args)
 
-    # check arguments
-    _check_arguments(params)
+    # check params
+    _check_params(params)
 
     # run analysis
     _run_analysis(params)
@@ -1022,6 +979,9 @@ if __name__ == "__main__":
 
     args = _parse_arguments()
 
-    # run analysis
+    # return help or run analysis
 
-    run_analysis(args)
+    if args.more_help is True:
+        get_help()
+    else:
+        run(args)

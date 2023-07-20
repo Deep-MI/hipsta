@@ -9,9 +9,9 @@ import logging
 import numpy as np
 import plotly.graph_objects as go
     
-from plotly.subplots import make_subplots
-from shapetools.triaUtils import levelsetsTria
 from lapy import TriaMesh, io, plot as lpp
+from plotly.subplots import make_subplots
+from shapetools.utils.getLevelsets import levelsetsTria # TODO: maybe remove if automatically imported
 
 # ==============================================================================
 # FUNCTIONS
