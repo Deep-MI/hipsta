@@ -3,41 +3,44 @@ This module provides a function to cut tetrahedral meshes
 
 """
 
+import os
+
+import numpy as np
+import scipy.sparse as sp
+import scipy.linalg as la
+import itertools as it
+
+from shapetools.triaUtils import levelsetsTetra
+from lapy import TriaMesh, TetMesh, io, TetMesh, Solver
+
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# importData()
+# _importData()
 
-def importData(tetraFile, tetraIdxFile):
+def _importData(tetraFile, tetraIdxFile):
 
-    import numpy as np
-
-    from lapy import TetMesh, io
+    # read tetra mesh
 
     tetMesh = TetMesh.read_vtk(tetraFile)
     v4 = tetMesh.v
     t4 = tetMesh.t
 
-    l4 = io.read_vfunc(tetraIdxFile)
-    l4 = np.array(l4)
+    # read tetra index file
+
+    l4 = np.array(io.read_vfunc(tetraIdxFile))
+
+    # return
 
     return v4, t4, l4
 
 
 # ------------------------------------------------------------------------------
-# exportData()
+# _exportData()
 
-def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, t4c, i4c):
-
-    # imports
-
-    import os
-
-    import numpy as np
-
-    from lapy import TriaMesh, TetMesh, io
+def _exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, t4c, i4c):
 
     # write out cut mesh and overlay
 
@@ -86,13 +89,9 @@ def exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, 
 
 
 # ------------------------------------------------------------------------------
-# preprocessData()
+# _preprocessData()
 
-def preprocessData(v4, t4, l4):
-
-    import numpy as np
-
-    from lapy import TetMesh, Solver
+def _preprocessData(v4, t4, l4):
 
     tetMesh = TetMesh(v=v4, t=t4)
 
@@ -107,13 +106,10 @@ def preprocessData(v4, t4, l4):
     return A, M, P
 
 
-# -------------------------------------------------------------------------
-# getTetra()
+# ------------------------------------------------------------------------------
+# _getTetra()
 
-def getTetra(aa, ii):
-
-    import numpy as np
-    import itertools as it
+def _getTetra(aa, ii):
 
     # we compute which subset of three of neighbors of x has an adj mtx of
     # ones exclusively
@@ -143,14 +139,10 @@ def getTetra(aa, ii):
     return tt
 
 
-# -------------------------------------------------------------------------
-# tetra26()
+# ------------------------------------------------------------------------------
+# _tetra26()
 
-def tetra26(tmp1,tmp2,tmp12,ind1,ind2,ind3,ind4,casevar):
-
-    # imports
-    import numpy as np
-    import itertools as it
+def _tetra26(tmp1,tmp2,tmp12,ind1,ind2,ind3,ind4,casevar):
 
     # create a local adj matrix: we know that tmp1, tmp2(1,:) and
     # tmp2(2,:) are connected within themselves
@@ -206,21 +198,16 @@ def tetra26(tmp1,tmp2,tmp12,ind1,ind2,ind3,ind4,casevar):
         a[5, 2] = 1
 
     # get tetra
-    tetra = tmp12[getTetra(a, range(0, 6))]
+    tetra = tmp12[_getTetra(a, range(0, 6))]
 
     # return
     return tetra, a
 
 
-# -------------------------------------------------------------------------
-# tetra33()
+# ------------------------------------------------------------------------------
+# _tetra33()
 
-def tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
-
-    # imports
-    import numpy as np
-    import scipy.sparse as sp
-    import scipy.linalg as la
+def _tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
 
     # create a local adj matrix: we know that tmp1 and tmp2 are
     # connected within themselves, and we know from the levelsetsTetra
@@ -238,7 +225,7 @@ def tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
     a[ind3[1], ind3[0]] = 1
 
     # get all tetras
-    tetra = tmp12[getTetra(a, range(0, 6))]
+    tetra = tmp12[_getTetra(a, range(0, 6))]
 
     # need to add a point in two special cases:
     if (ind1[0]==0 and ind1[1]==5 and ind2[0]==2 and ind2[1]==4 and ind3[0]==1 and ind3[1]==3) or (ind1[0]==2 and ind1[1]==3 and ind2[0]==1 and ind2[1]==5 and ind3[0]==0 and ind3[1]==4):
@@ -262,7 +249,7 @@ def tetra33(tmp1,tmp2,tmp12,ind1,ind2,ind3,v,A):
         a = np.hstack((a,np.ones((np.shape(a)[0],1))))
 
         # get tetra
-        tetra = tmp123[getTetra(a, range(0, 7))]
+        tetra = tmp123[_getTetra(a, range(0, 7))]
 
         # add one row/col to A and set diag elem to 1
         A = sp.coo_matrix(
@@ -288,26 +275,12 @@ def cutTetra(params):
     """
 
     # -------------------------------------------------------------------------
-    # imports
-    # -------------------------------------------------------------------------
-
-    import os
-
-    import numpy as np
-    import scipy.sparse as sp
-
-    from shapetools.triaUtils import levelsetsTetra
-
-    # -------------------------------------------------------------------------
     # message
     # -------------------------------------------------------------------------
 
     print()
-    print("-------------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Cutting tetrahedral mesh")
-    print()
-    print("-------------------------------------------------------------------------")
     print()
 
     # -------------------------------------------------------------------------
@@ -338,7 +311,7 @@ def cutTetra(params):
     # get data
     # -------------------------------------------------------------------------
 
-    v4, t4, l4idx = importData(tetraFile, tetraIdxFile)
+    v4, t4, l4idx = _importData(tetraFile, tetraIdxFile)
 
     l4idx[np.where(l4idx<labelBndTail)[0]] = 0
     l4idx[np.where(l4idx==labelBndCA4)[0]] = 0
@@ -349,7 +322,7 @@ def cutTetra(params):
     # preprocess data
     # -------------------------------------------------------------------------
 
-    Ap, Mp, l4 = preprocessData(v4, t4, l4idx)
+    Ap, Mp, l4 = _preprocessData(v4, t4, l4idx)
 
     # -------------------------------------------------------------------------
     # create a smooth boundary
@@ -418,10 +391,10 @@ def cutTetra(params):
 
             # compute tetras and local adjacency matrix for various edge
             # insertion options
-            tetra21, A21 = tetra26(tmp1, tmp2, tmp12, 0, 3, 0, 5, 2)
-            tetra22, A22 = tetra26(tmp1, tmp2, tmp12, 0, 3, 1, 4, 2)
-            tetra23, A23 = tetra26(tmp1, tmp2, tmp12, 1, 2, 0, 5, 2)
-            tetra24, A24 = tetra26(tmp1, tmp2, tmp12, 1, 2, 1, 4, 2)
+            tetra21, A21 = _tetra26(tmp1, tmp2, tmp12, 0, 3, 0, 5, 2)
+            tetra22, A22 = _tetra26(tmp1, tmp2, tmp12, 0, 3, 1, 4, 2)
+            tetra23, A23 = _tetra26(tmp1, tmp2, tmp12, 1, 2, 0, 5, 2)
+            tetra24, A24 = _tetra26(tmp1, tmp2, tmp12, 1, 2, 1, 4, 2)
 
             # check which variant is compatible with A: all edges from the
             # relevant subset of A must be present in the local adj mtx.
@@ -446,14 +419,14 @@ def cutTetra(params):
 
             # compute tetras and local adjacency matrix for various edge
             # insertion options
-            tetra111, a111, v4c111, A111 = tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[0,4],v4c,A)
-            tetra112, a112, v4c112, A112 = tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[1,3],v4c,A)
-            tetra121, a121, v4c121, A121 = tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[0,4],v4c,A)
-            tetra122, a122, v4c122, A122 = tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[1,3],v4c,A)
-            tetra211, a211, v4c211, A211 = tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[0,4],v4c,A)
-            tetra212, a212, v4c212, A212 = tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[1,3],v4c,A)
-            tetra221, a221, v4c221, A221 = tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[0,4],v4c,A)
-            tetra222, a222, v4c222, A222 = tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[1,3],v4c,A)
+            tetra111, a111, v4c111, A111 = _tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[0,4],v4c,A)
+            tetra112, a112, v4c112, A112 = _tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[1,3],v4c,A)
+            tetra121, a121, v4c121, A121 = _tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[0,4],v4c,A)
+            tetra122, a122, v4c122, A122 = _tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[1,3],v4c,A)
+            tetra211, a211, v4c211, A211 = _tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[0,4],v4c,A)
+            tetra212, a212, v4c212, A212 = _tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[1,3],v4c,A)
+            tetra221, a221, v4c221, A221 = _tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[0,4],v4c,A)
+            tetra222, a222, v4c222, A222 = _tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[1,3],v4c,A)
 
             # check which variant is compatible with A: all edges from the
             # relevant subset of A must be present in the local adj mtx.
@@ -561,10 +534,10 @@ def cutTetra(params):
 
             # compute tetras and local adjacency matrix for various edge
             # insertion options
-            tetra11, A11 = tetra26(tmp1, tmp2, tmp12, 0, 4, 0, 5, 1)
-            tetra12, A12 = tetra26(tmp1, tmp2, tmp12, 0, 4, 1, 3, 1)
-            tetra13, A13 = tetra26(tmp1, tmp2, tmp12, 1, 2, 0, 5, 1)
-            tetra14, A14 = tetra26(tmp1, tmp2, tmp12, 1, 2, 1, 3, 1)
+            tetra11, A11 = _tetra26(tmp1, tmp2, tmp12, 0, 4, 0, 5, 1)
+            tetra12, A12 = _tetra26(tmp1, tmp2, tmp12, 0, 4, 1, 3, 1)
+            tetra13, A13 = _tetra26(tmp1, tmp2, tmp12, 1, 2, 0, 5, 1)
+            tetra14, A14 = _tetra26(tmp1, tmp2, tmp12, 1, 2, 1, 3, 1)
 
             # check which variant is compatible with A: all edges from the
             # relevant subset of A must be present in the local adj mtx.
@@ -590,14 +563,14 @@ def cutTetra(params):
 
             # compute tetras and local adjacency matrix for various edge
             # insertion options
-            tetra111, a111, v4c111, A111 = tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[0,4],v4c,A)
-            tetra112, a112, v4c112, A112 = tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[1,3],v4c,A)
-            tetra121, a121, v4c121, A121 = tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[0,4],v4c,A)
-            tetra122, a122, v4c122, A122 = tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[1,3],v4c,A)
-            tetra211, a211, v4c211, A211 = tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[0,4],v4c,A)
-            tetra212, a212, v4c212, A212 = tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[1,3],v4c,A)
-            tetra221, a221, v4c221, A221 = tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[0,4],v4c,A)
-            tetra222, a222, v4c222, A222 = tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[1,3],v4c,A)
+            tetra111, a111, v4c111, A111 = _tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[0,4],v4c,A)
+            tetra112, a112, v4c112, A112 = _tetra33(tmp1,tmp2,tmp12,[0,5],[2,4],[1,3],v4c,A)
+            tetra121, a121, v4c121, A121 = _tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[0,4],v4c,A)
+            tetra122, a122, v4c122, A122 = _tetra33(tmp1,tmp2,tmp12,[0,5],[1,5],[1,3],v4c,A)
+            tetra211, a211, v4c211, A211 = _tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[0,4],v4c,A)
+            tetra212, a212, v4c212, A212 = _tetra33(tmp1,tmp2,tmp12,[2,3],[2,4],[1,3],v4c,A)
+            tetra221, a221, v4c221, A221 = _tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[0,4],v4c,A)
+            tetra222, a222, v4c222, A222 = _tetra33(tmp1,tmp2,tmp12,[2,3],[1,5],[1,3],v4c,A)
 
             # check which variant is compatible with A: all edges from the
             # relevant subset of A must be present in the local adj mtx.
@@ -681,7 +654,7 @@ def cutTetra(params):
     # export data
     # -------------------------------------------------------------------------
 
-    exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, t4c, i4c)
+    _exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, t4c, i4c)
 
     # -------------------------------------------------------------------------
     # return

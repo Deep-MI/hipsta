@@ -3,15 +3,22 @@ This module provides functions for basic image processing operations (conversion
 
 """
 
+import os
+import shutil
+import subprocess
+
+import nibabel as nb
+
+from nilearn import image as nli
+
+# ==============================================================================
+# FUNCTIONS
+
+
 def convertFormat(params):
     """
 
     """
-
-    # imports
-
-    import os
-    import subprocess
 
     # message
 
@@ -45,11 +52,6 @@ def cropImage(params):
     """
 
     if params.internal.CROP is True:
-
-        # imports
-
-        import os
-        import subprocess
 
         # message
 
@@ -86,14 +88,6 @@ def upsampleImage(params):
 
     if params.internal.UPSAMPLE is not None:
 
-        # imports
-
-        import os
-        import subprocess
-
-        import nibabel as nb
-        from nilearn import image as nli        
-
         # message
 
         print()
@@ -105,8 +99,7 @@ def upsampleImage(params):
 
         if len(params.internal.UPSAMPLE) == 3:
 
-            print("Upsampling with custom parameters ...")
-            print()
+            logging.info("Upsampling with custom parameters ...")
 
             cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
                 + " -ds " + str(params.internal.UPSAMPLE[0]) + " " + str(params.internal.UPSAMPLE[1]) + "  " + str(params.internal.UPSAMPLE[2]) + " " \
@@ -121,8 +114,7 @@ def upsampleImage(params):
         elif len(params.internal.UPSAMPLE) == 0:
 
             #
-            print("Upsampling to min voxel size ...")
-            print()
+            logging.info("Upsampling to min voxel size ...")
 
             # get image and info
             img = nb.load(params.FILENAME)
@@ -153,11 +145,6 @@ def copy_image_to_main(params):
     """
     
     """
-
-    # imports
-
-    import os
-    import shutil
 
     # copy to main directory
 

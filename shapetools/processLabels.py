@@ -3,18 +3,22 @@ This module provides functions for processing label images
 
 """
 
+import os
+import shutil
+import subprocess
+
+import numpy as np
+import nibabel as nb
+
+# ==============================================================================
+# FUNCTIONS
+
 def autoMask(params):
     """
 
     """
 
     if params.internal.AUTOMASK_HEAD is True or params.internal.AUTOMASK_TAIL is True:
-
-        # imports
-
-        import os
-        import numpy as np
-        import nibabel as nb
 
         # message
 
@@ -68,7 +72,7 @@ def autoMask(params):
         # head
         if params.internal.AUTOMASK_HEAD is True:
             #
-            print("Using auto-mask for head")
+            logging.info("Using auto-mask for head")
             # remove any potentially existing head labels
             dat[dat==labelHead] = 0
             #
@@ -107,7 +111,7 @@ def autoMask(params):
         # tail
         if params.internal.AUTOMASK_TAIL is True:
             #
-            print("Using auto-mask for tail")
+            logging.info("Using auto-mask for tail")
             # remove any potentially existing tail labels
             dat[dat==labelTail] = 0
             #
@@ -165,11 +169,6 @@ def createLabels(params):
     
     """
     
-    # imports
-
-    import os
-    import subprocess
-
     # message
 
     print()
@@ -214,16 +213,11 @@ def mergeMolecularLayer(params):
 
     if params.internal.MERGE_MOLECULAR_LAYER is True:
 
-        # imports
-        import os
-        import shutil
-
-        import numpy as np
-        import nibabel as nb
-
         # message
+        print()
         print("--------------------------------------------------------------------------------")
         print("Attaching the molecular layer")
+        print()
 
         # 
         if not "ml" in params.LUTDICT.keys():
@@ -293,11 +287,6 @@ def copy_labels_to_main(params):
     """
     
     """
-
-    # imports
-
-    import os
-    import shutil
 
     # copy to main directory
 

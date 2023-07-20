@@ -3,28 +3,27 @@ This module provides a function to check surfaces
 
 """
 
+import os
+import sys
+import logging
+
+from lapy import TriaMesh
+
+# ==============================================================================
+# FUNCTIONS
+
 def checkSurface(params, stage=None):
 
     """
 
     """
 
-    # imports
-
-    import os
-    import sys
-    import logging
-
-    from lapy import TriaMesh
-
     # message
 
     print()
-    print("-------------------------------------------------------------------------")
+    print("--------------------------------------------------------------------------------")
     print()
     print("Check surfaces")
-    print()
-    print("-------------------------------------------------------------------------")
     print()
 
     if params.internal.CHECKSURFACE is not None and stage=="check_surface":

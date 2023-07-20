@@ -3,6 +3,19 @@ This module provides a function to map values from a volume to the midsurface.
 
 """
 
+import os
+import sys
+import subprocess
+import logging
+import argparse
+
+import nibabel as nb
+import numpy as np
+import pandas as pd
+
+from lapy import TriaMesh, io
+from scipy import spatial as sp, stats as st
+
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -106,10 +119,6 @@ def _parse_arguments():
     initiate the option parser and return the parsed object
     """
 
-    # imports
-    import sys
-    import argparse
-
     # message
     print("\nReading input options ...")
 
@@ -171,12 +180,6 @@ def _check_arguments(options):
 
     """
 
-    # imports
-
-    import os
-    import sys
-    import numpy as np
-
     # more help
 
     if options.more_help is True:
@@ -186,29 +189,29 @@ def _check_arguments(options):
     # check environment variables
 
     if os.environ.get('FREESURFER_HOME') is None:
-        print('\nERROR: need to set the FREESURFER_HOME environment variable and to source FREESURFER.\n')
+        logging.info('ERROR: need to set the FREESURFER_HOME environment variable and to source FREESURFER.')
         sys.exit(1)
 
     # required arguments
 
     if options.IN_VOL is None:
-        print("The --volume option is required. See --help for details.")
+        logging.info("The --volume option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_SURF is None:
-        print("The --surface option is required. See --help for details.")
+        logging.info("The --surface option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_LABEL is None:
-        print("The --label option is required. See --help for details.")
+        logging.info("The --label option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_INDICES is None:
-        print("The --table option is required. See --help for details.")
+        logging.info("The --table option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_SUFFIX is None:
-        print("The --suffix option is required. See --help for details.")
+        logging.info("The --suffix option is required. See --help for details.")
         sys.exit(1)
 
     # change formats
@@ -230,28 +233,11 @@ def _check_arguments(options):
 
 def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None, IN_SUFFIX='hsf', INTEGRATE='mode', SELECT=None, INTERP='nearest', writePSOL=False, writeMGH=False, writeANNOT=False):
 
-    # imports
-
-    import os
-    import sys
-    import subprocess
-    import nibabel as nb
-    import numpy as np
-    import pandas as pd
-
-    from lapy import TriaMesh, io
-
-    from scipy import spatial as sp
-    from scipy import stats as st
-
     # message
 
     print()
-    print("-------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Mapping values")
-    print()
-    print("-------------------------------------------------------------------")
     print()
 
     #-------------------------------------------------------
@@ -356,7 +342,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
         integr = np.nanmin(lookup3D[:,:,SELECT], axis=2)
     elif INTEGRATE == "none":
         if len(SELECT)>1:
-            print("Error: cannot use --integrate none with multiple sampling points, exiting.")
+            logging.info("Error: cannot use --integrate none with multiple sampling points, exiting.")
             sys.exit(1)
         else:
             integr = lookup3D[:,:,SELECT]

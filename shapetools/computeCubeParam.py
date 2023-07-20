@@ -3,6 +3,17 @@ This module provides a function to compute a cube parametrization
 
 """
 
+import os
+import sys
+import logging
+
+import numpy as np
+import nibabel as nb
+
+from sklearn.decomposition import PCA
+from scipy import sparse as sp, stats as st
+from lapy import TriaMesh, TetMesh, Solver, io
+
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -80,7 +91,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    print("Inconsistency while creating seam 1, exiting.")
+                    logging.info("Inconsistency while creating seam 1, exiting.")
                     sys.exit(1)
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
@@ -106,7 +117,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    print("Inconsistency while creating seam 2, exiting.")
+                    logging.info("Inconsistency while creating seam 2, exiting.")
                     sys.exit(1)
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos2], t4c[i, idxNeg1]]
@@ -177,7 +188,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    print("Inconsistency while creating seam 3, exiting.")
+                    plogging.info("Inconsistency while creating seam 3, exiting.")
                     sys.exit(1)
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
@@ -203,7 +214,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
                 else:
                     newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    print("Inconsistency while creating seam 4, exiting.")
+                    logging.info("Inconsistency while creating seam 4, exiting.")
                     sys.exit(1)
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg2]]
@@ -218,7 +229,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             newTetra = np.concatenate((newTetra, np.array((idxPt2, t4c[i, idxNeg1], t4c[i, idxNeg2], t4c[i, idxNan1]), ndmin=2)))
 
         else:
-            print("Inconsistency while creating seam (incorrect number of negative values), exiting.")
+            logging.info("Inconsistency while creating seam (incorrect number of negative values), exiting.")
             sys.exit(1)
 
         # return
@@ -274,7 +285,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
             else:
                 newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                print("Inconsistency while creating seam 5, exiting.")
+                logging.info("Inconsistency while creating seam 5, exiting.")
                 sys.exit(1)
         else:
             idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
@@ -361,7 +372,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             tmpvfuncXEv1[t4c[i, np.setdiff1d((0, 1, 2, 3), ((0, 1, 2), (0, 1, 3), (0, 2, 3), (1, 2, 3))[np.intersect1d(numTriaBnd, numTriaCross).item()])]] = np.nan
             v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase1(v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i)
         else:
-            print("Unknown getSeam() case, exiting.")
+            logging.info("Unknown getSeam() case, exiting.")
             sys.exit(1)
 
         # return
@@ -370,17 +381,6 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     # --------------------------------------------------------------------------
     # main part of function
     # --------------------------------------------------------------------------
-
-    # imports
-    import os
-    import sys
-
-    import numpy as np
-
-    from lapy import TriaMesh, TetMesh, io
-
-    from scipy import sparse as sp
-    from scipy import stats as st
 
     # initialize
     newVtcs = np.empty(shape=(0), dtype=int)
@@ -444,7 +444,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                         np.isin(e4cBndOpen, t4c[i, (1, 3)]).all(axis=1).any(),
                         np.isin(e4cBndOpen, t4c[i, (2, 3)]).all(axis=1).any())
                     if len(np.where(tmpEdge)) > 1:
-                        print("Cave: found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
+                        logging.info("Cave: found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
                         sys.exit(1)
                     tmpEdgeNot = np.setdiff1d((0, 1, 2, 3),  ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3))[np.where(tmpEdge)[0].item()])
                     tmpvfuncXEv1 = vfuncXEv1.copy()
@@ -452,7 +452,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
                     v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i)
                 else:
-                    print("Vtx " + str(i) + " not in triangle or edge, skipping")
+                    logging.info("Vtx " + str(i) + " not in triangle or edge, skipping")
                     sys.exit(1)
 
             elif np.sum(np.isnan(vfuncXEv1[t4c[i]])) == 2:
@@ -465,7 +465,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     np.isin(e4cBndOpen, t4c[i, (1, 3)]).all(axis=1).any(),
                     np.isin(e4cBndOpen, t4c[i, (2, 3)]).all(axis=1).any())
                 if len(np.where(tmpEdge)) > 1:
-                    print("Cave: found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
+                    logging.info("Cave: found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
                     sys.exit(1)
                 v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
                 v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i)
@@ -477,7 +477,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 
             else:
                 # we should never have four nans
-                print("Inconsistency while creating seam (incorrect number of nans), exiting.")
+                logging.info("Inconsistency while creating seam (incorrect number of nans), exiting.")
                 sys.exit(1)
 
     # remove tetras
@@ -500,28 +500,11 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 def computeCubeParam(params):
 
     # --------------------------------------------------------------------------
-    # import
-
-    import os, sys
-    import logging
-
-    import numpy as np
-    import nibabel as nb
-
-    from lapy import TriaMesh, TetMesh, Solver, io, diffgeo
-
-    from sklearn.decomposition import PCA
-    from scipy.sparse.linalg import LinearOperator, eigsh, splu
-
-    # --------------------------------------------------------------------------
     # message
 
     print()
-    print("-------------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Computing cube parametrization")
-    print()
-    print("-------------------------------------------------------------------------")
     print()
 
     # --------------------------------------------------------------------------
@@ -635,23 +618,23 @@ def computeCubeParam(params):
     #  (i.e., reverse) for 240 as well
 
     if np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]> 0, k4c[hsfList]==labelPrsbc))[0], 2]) > np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]<0, k4c[hsfList]==labelPrsbc))[0], 2]):
-        print("No flip necessary for EV1")
+        logging.info("No flip necessary for EV1")
     elif np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]> 0, k4c[hsfList]==labelPrsbc))[0], 2]) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:,1]<0, k4c[hsfList]==labelPrsbc))[0], 2]):
-        print("Flipping EV1")
+        logging.info("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
-        print("Inconsistency detected for EV1, exiting.")
+        logging.info("Inconsistency detected for EV1, exiting.")
         sys.exit(1)
 
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
 
     if np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])<0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])>0:
-        print("No flip necessary for EV2")
+        logging.info("No flip necessary for EV2")
     elif np.median(anisoLaplEvec[np.where(k4c[hsfList]==labelPrsbc)[0], 2])>0 and np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList]==labelCA3, k4c[hsfList]==labelBndCA4))[0], 2])<0:
-        print("Flipping EV2")
+        logging.info("Flipping EV2")
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
     else:
-        print("Inconsistency detected for EV2, exiting.")
+        logging.info("Inconsistency detected for EV2, exiting.")
         sys.exit(1)
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + '.lapy.aLBO.EV1.psol'), anisoLaplEvec[:,1])

@@ -3,29 +3,23 @@ This module provides a function to remove boundary tetras from tetrahedral meshe
 
 """
 
+import os
+
+import numpy as np
+
+from lapy import TetMesh, io
+
 # -----------------------------------------------------------------------------
 # MAIN FUNCTION
 
 def removeBoundaryMask(params):
 
     # -------------------------------------------------------------------------
-    # imports
-
-    import os
-
-    import numpy as np
-
-    from lapy import TetMesh, io
-
-    # -------------------------------------------------------------------------
     # message
 
     print()
-    print("-------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Removing boundary tetras from mesh")
-    print()
-    print("-------------------------------------------------------------------")
     print()
 
     # -------------------------------------------------------------------------

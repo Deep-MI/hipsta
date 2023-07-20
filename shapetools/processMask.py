@@ -3,17 +3,22 @@ This module provides functions for image processing operations (such as binariza
 
 """
 
+import os
+import shutil
+
+import nibabel as nb
+import numpy as np
+
+from scipy import ndimage
+
+
+# ==============================================================================
+# FUNCTIONS
+
 def gaussFilter(params):
     """
 
     """
-
-    # imports
-
-    import os
-    import nibabel as nb
-
-    from scipy import ndimage
 
     #
 
@@ -22,11 +27,8 @@ def gaussFilter(params):
         # message
 
         print()
-        print("-------------------------------------------------------------------------")
-        print()
+        print("--------------------------------------------------------------------------------")
         print("Gaussian filtering")
-        print()
-        print("-------------------------------------------------------------------------")
         print()
 
         # gaussian filtering
@@ -52,13 +54,6 @@ def longFilter(params):
 
     """
 
-    # imports
-
-    import os
-    from scipy import ndimage
-    import nibabel as nb
-    import numpy as np
-
     #
 
     if params.internal.LONGFILTER is True:
@@ -66,11 +61,8 @@ def longFilter(params):
         # message
 
         print()
-        print("-------------------------------------------------------------------------")
-        print()
+        print("--------------------------------------------------------------------------------")
         print("Filtering along longitudinal axis")
-        print()
-        print("-------------------------------------------------------------------------")
         print()
 
         # longitudinal filtering
@@ -101,12 +93,6 @@ def closeMask(params):
 
     """
 
-    # imports
-
-    import os
-    from scipy import ndimage
-    import nibabel as nb
-
     #
 
     if params.internal.CLOSEMASK is True:
@@ -114,11 +100,8 @@ def closeMask(params):
         # message
 
         print()
-        print("-------------------------------------------------------------------------")
-        print()
+        print("--------------------------------------------------------------------------------")
         print("Applying closing operation to mask")
-        print()
-        print("-------------------------------------------------------------------------")
         print()
 
         # get data
@@ -143,12 +126,6 @@ def closeMask(params):
 
 def binarizeMask(params):
 
-    # imports
-
-    import os
-
-    import nibabel as nb
-
     # binarize
 
     img = nb.load(params.FILENAME)
@@ -172,11 +149,6 @@ def copy_mask_to_main(params):
 
     """
 
-    #
-
-    import os
-    import shutil
-
     # copy to main directory
 
     shutil.copyfile(
@@ -186,39 +158,6 @@ def copy_mask_to_main(params):
     # update params
 
     params.FILENAME = os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz")
-
-    # return
-
-    return(params)
-    """
-
-    """
-
-    # imports
-
-    import os
-    import subprocess
-
-    # message
-
-    print()
-    print("-------------------------------------------------------------------------")
-    print()
-    print("Create binary mask")
-    print()
-    print("-------------------------------------------------------------------------")
-    print()
-
-    # mri_binarize
-
-    cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_binarize") + " " \
-        + "--i " + os.path.join(params.OUTDIR, "mask", params.HEMI + "." + params.internal.HSFLABEL_02 + "_merged.mgz") + " " \
-        + "--min 1 " \
-        + "--o " + os.path.join(params.OUTDIR, params.HEMI + "." + params.internal.HSFLABEL_02 + ".mgz")
-
-    print(cmd)
-
-    subprocess.run(cmd.split())
 
     # return
 

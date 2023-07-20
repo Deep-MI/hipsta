@@ -3,32 +3,26 @@ This module creates supplementary files, primarily for visualization.
 
 """
 
+import os
+import logging
+
+import nibabel as nb
+import numpy as np
+
+from lapy import TriaMesh
+from shapetools import triaUtils
+
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
 # ------------------------------------------------------------------------------
 
 def createSupplementaryFiles(params):
 
-    # imports
-
-    import os
-    import logging
-
-    import nibabel as nb
-    import numpy as np
-
-    from lapy import TriaMesh
-
-    from shapetools import triaUtils
-
     # message
 
     print()
-    print("-------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Creating supplementary files")
-    print()
-    print("-------------------------------------------------------------------")
     print()
 
     #-------------------------------------------------------
@@ -45,8 +39,6 @@ def createSupplementaryFiles(params):
 
     if LUT == "freesurfer":
 
-        logging.info("Found internal, modified look-up table for FreeSurfer")
-
         # get labels
 
         hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + '.mid-surface_hsf.mgh'))
@@ -62,8 +54,6 @@ def createSupplementaryFiles(params):
         lstBnd = [ 1.5, 2.5, 3.5 ] # note that this implicitly also accounts for 246 labels if present
 
     elif LUT == "ashs":
-
-        logging.info("Found internal, modified look-up table for ASHS atlas.")
 
         # get labels
 

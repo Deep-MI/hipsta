@@ -4,6 +4,16 @@ thickness analysis package.
 
 """
 
+import os
+import sys
+import shutil
+import logging
+import argparse
+import errno
+import pandas
+import tempfile
+import time
+import traceback
 
 # ==============================================================================
 # FUNCTIONS
@@ -219,42 +229,22 @@ def get_help(print_help=True, return_help=False):
 
 def _check_environment_and_packages():
 
-    # imports
-    import os
-    import sys
-    import shutil
-    import logging
-    import importlib.util
-    import packaging.version
-
     # check environment variables
     if os.environ.get('FREESURFER_HOME') is None:
         logging.error('Need to set the FreeSurfer_HOME environment variable')
-        print("Program exited with ERRORS.")
+        logging.error("Program exited with ERRORS.")
         sys.exit(1)
 
     # check python version
     if sys.version_info <= (3, 5):
         logging.error('Python version must be 3.5 or greater')
-        print("Program exited with ERRORS.")
+        logging.error("Program exited with ERRORS.")
         sys.exit(1)
 
     # check for gmsh
     if shutil.which("gmsh") is None:
         logging.error('Could not find a \'gmsh\' executable')
-        print("Program exited with ERRORS.")
-        sys.exit(1)
-
-    # check for LaPy
-    if importlib.util.find_spec("lapy") is not None:
-        import lapy as lp
-        if packaging.version.parse(lp.__version__) < packaging.version.parse("1.0"):
-            logging.error('A version >=1.0 is required for the \'lapy\' package (see README.md for details on installation)')
-            print("Program exited with ERRORS.")
-            sys.exit(1)
-    else:
-        logging.error('Could not find the \'lapy\' package (see README.md for details on installation)')
-        print("Program exited with ERRORS.")
+        logging.error("Program exited with ERRORS.")
         sys.exit(1)
 
 
@@ -266,10 +256,6 @@ def _parse_arguments():
     an internal function to parse input arguments
 
     """
-
-    # imports
-    import sys
-    import argparse
 
     # setup parser
     parser = argparse.ArgumentParser(description="This program conducts a thickness analysis of the hippocampus, based on a FreeSurfer, ASHS, or custom hippocampal subfield segmentation.",
@@ -376,15 +362,15 @@ def _parse_arguments():
 
     # check for required arguments print help and exit
     if args.filename is None:
-        print("ERROR: the --filename argument is required, exiting. Use --help to see details.")
+        logging.error("ERROR: the --filename argument is required, exiting. Use --help to see details.")
         sys.exit(1)
 
     if args.hemi is None:
-        print("ERROR: the --hemi argument is required, exiting. Use --help to see details.")
+        logging.error("ERROR: the --hemi argument is required, exiting. Use --help to see details.")
         sys.exit(1)
 
     if args.lut is None:
-        print("ERROR: the --lut argument is required, exiting. Use --help to see details.")
+        logging.error("ERROR: the --lut argument is required, exiting. Use --help to see details.")
         sys.exit(1)
 
     #
@@ -399,12 +385,6 @@ def _evaluate_args(args):
     an internal function to set and return internal parameters
 
     """
-
-    # import
-
-    import os
-    import sys
-    import logging
 
     # message
 
@@ -530,7 +510,7 @@ def _evaluate_args(args):
             settings.anisoAlpha = [ float(x) for x in args.anisoAlpha ]
         else:
             logging.error("Length of --aniso-alpha must be 1 or 2.")
-            print("Program exited with ERRORS.")
+            logging.error("Program exited with ERRORS.")
             sys.exit(1)
 
     if args.anisoSmooth is None:
@@ -613,18 +593,6 @@ def _check_arguments(params):
     """
 
     # --------------------------------------------------------------------------
-    # imports
-
-    import os
-    import sys
-    import errno
-    import pandas
-    import logging
-    import tempfile
-
-    import  numpy as np
-
-    # --------------------------------------------------------------------------
     # check arguments
 
     # check if output directory exists or can be created and is writable
@@ -636,7 +604,7 @@ def _check_arguments(params):
             os.mkdir(params.OUTDIR)
         except:
             logging.error('Cannot create output directory ' + params.OUTDIR)
-            print("Program exited with ERRORS.")
+            logging.error("Program exited with ERRORS.")
             sys.exit(1)
         try:
             testfile = tempfile.TemporaryFile(dir=params.OUTDIR)
@@ -646,7 +614,7 @@ def _check_arguments(params):
                 e.filename = params.OUTDIR
                 raise
             logging.error('Directory ' + params.OUTDIR + ' not writeable')
-            print("Program exited with ERRORS.")
+            logging.error("Program exited with ERRORS.")
             sys.exit(1)
 
     # check for subfield segmentation file
@@ -655,13 +623,13 @@ def _check_arguments(params):
         logging.info("Found " + params.FILENAME)
     else:
         logging.error("Could not find " + params.FILENAME)
-        print("Program exited with ERRORS.")
+        logging.error("Program exited with ERRORS.")
         sys.exit(1)
 
     # check MC algorithm
 
     if params.internal.MCA != "mri_mc" and params.internal.MCA != "mri_tessellate" and params.internal.MCA != "skimage":
-        print("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
+        logging.error("Could not recognise algorithm " + params.internal.MCA + ", exiting.")
         sys.exit(1)
 
     # check upsampling
@@ -669,13 +637,13 @@ def _check_arguments(params):
     if params.internal.UPSAMPLE is not None:
         if len(params.internal.UPSAMPLE ) != 0 and len(params.internal.UPSAMPLE ) != 3:
             logging.error("Incorrect number of --upsampling parameters, must be 0 or 3.")
-            print("Program exited with ERRORS.")
+            logging.error("Program exited with ERRORS.")
             sys.exit(1)
 
     # check ML
 
     if args.noml is True and params.LUT != "freesurfer":
-        print("Cannot use --no-merge-molecular-layer with " + params.LUT + ".")
+        logging.error("Cannot use --no-merge-molecular-layer with " + params.LUT + ".")
         sys.exit(1)    
 
     # create the LUT
@@ -734,13 +702,13 @@ def _check_arguments(params):
         except:
 
             logging.error("Could not read look-up table " + params.LUT)
-            print("Program exited with ERRORS.")
+            logging.error("Program exited with ERRORS.")
             sys.exit(1)
 
     else:
 
         logging.error("Look-up table can only be \'freesurfer\', \'ashs\', or an existing file, but not " + params.LUT)
-        print("Program exited with ERRORS.")
+        logging.error("Program exited with ERRORS.")
         sys.exit(1)
 
     # add entries for tetra-labels
@@ -785,7 +753,7 @@ def _check_arguments(params):
                 os.mkdir(directory)
             except:
                 logging.error('Cannot create output directory ' + directory)
-                print("Program exited with ERRORS.")
+                logging.error("Program exited with ERRORS.")
                 sys.exit(1)
 
     # return
@@ -801,10 +769,7 @@ def _run_analysis(params):
 
     """
 
-    # imports
-
-    import time
-    import logging
+    # imports (TODO: change this when creating a package)
 
     from shapetools.processImage import convertFormat, cropImage, upsampleImage, copy_image_to_main
     from shapetools.processLabels import createLabels, mergeMolecularLayer, autoMask, copy_labels_to_main
@@ -953,15 +918,6 @@ def _start_logging(args):
 
     """
 
-    # imports
-    import os
-    import sys
-    import uuid
-    import time
-    import logging
-    import tempfile
-    import traceback
-
     # setup function to log uncaught exceptions
     def foo(exctype, value, tb):
         # log
@@ -971,32 +927,46 @@ def _start_logging(args):
         for i in traceback.format_list(traceback.extract_tb(tb)):
             logging.error('Traceback: %s', i)
         # message
-        print('Program exited with ERRORS.')
-        print('')
+        logging.error('Program exited with ERRORS.')
         sys.exit(1)
     sys.excepthook = foo
 
-    # check if logfile can be written in logfiledir
-    if args.logfiledir is not None:
-        logfiledir = args.logfiledir
-    else:
-        logfiledir = os.getcwd()
+    # set up logging
+    logfile_format = "[%(levelname)s]: %(message)s"
+    logfile_handlers = [logging.StreamHandler(sys.stdout)]
+    logging.basicConfig(
+        level=logging.INFO, format=logfile_format, handlers=logfile_handlers
+    )    
 
+    # check if output directory exists or can be created
+    if os.path.isdir(args.outputdir):
+        logging.info("Found output directory " + args.outputdir)
+    else:
+        try:
+            os.mkdir(args.outputdir)
+        except Exception as e:
+            logging.error(
+                "ERROR: cannot create output directory " + args.outputdir
+            )
+            logging.error("Reason: " + str(e))
+            raise
+
+    # check if logfile can be written in output directory
     try:
-        testfile = tempfile.TemporaryFile(dir=logfiledir)
+        testfile = tempfile.TemporaryFile(dir=args.outputdir)
         testfile.close()
-    except OSError as e:
-        print('Directory ' + logfiledir + ' not writeable for temporary logfile.')
-        print("Program exited with ERRORS.")
-        sys.exit(1)
+    except Exception as e:
+        logging.error("ERROR: " + args.outputdir + " not writeable")
+        logging.error("Reason: " + str(e))
+        raise
 
     # start logging
-    logfile =  os.path.join(logfiledir, 'logfile-' + str(uuid.uuid4()) + '.log')
-    logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout)) # this adds output to stdout
+    logfile =  os.path.join(args.outputdir, 'logfile.txt')
+    logging.getLogger().addHandler(logging.FileHandler(filename=logfile, mode="w"))
 
     # intial messages
     logging.info("Starting logging for hippocampal shapetools ...")
+    logging.info("Logfile: %s", logfile)    
     logging.info("Version: %s", get_version())
     logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
 
@@ -1008,22 +978,6 @@ def _start_logging(args):
 
     # return
     return args
-
-
-# ------------------------------------------------------------------------------
-# run analysis
-
-def _stop_logging(params):
-    """
-    stop logging
-
-    """
-
-    # imports
-    import os
-
-    # move logfile to output dir
-    os.replace(params.LOGFILE, os.path.join(params.OUTDIR, "logfile.txt"))
 
 
 # ------------------------------------------------------------------------------
@@ -1049,9 +1003,6 @@ def run_analysis(args):
 
     # run analysis
     _run_analysis(params)
-
-    # stop logging
-    _stop_logging(params)
 
 
 # ------------------------------------------------------------------------------

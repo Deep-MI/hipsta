@@ -3,24 +3,25 @@ This module provides a function to create a label files for a tetrahedral mesh
 
 """
 
+
+import os
+import subprocess
+
+import numpy as np
+import nibabel as nb
+
+from lapy import TriaMesh, TetMesh, io
+
 # -----------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 
 # createBoundaryMask()
 
-def createBoundaryMask(hbtFile, mskFile, outFile, label, bndlabel):
+def _createBoundaryMask(hbtFile, mskFile, outFile, label, bndlabel):
     """
     createBoundaryMask(hbtFile, mskFile)
 
     """
-
-    # imports
-    import numpy as np
-    import nibabel as nb
-
-    # create a new label for boundary voxels
-    print('\nCreating a new label for boundary voxels ...')
-    print('... Reading ' + hbtFile)
 
     # load segmentations
     hbt = nb.load(hbtFile)
@@ -35,7 +36,6 @@ def createBoundaryMask(hbtFile, mskFile, outFile, label, bndlabel):
     mskx, msky, mskz = np.where(msk.get_fdata())
 
     # cycle through each nonzero element of msk
-    print('... Processing mask')
     for i in range(0, len(mskx)):
 
         # create indices xyz of local neighborhood (one more +1 due to python indexing)
@@ -70,24 +70,11 @@ def createTetraLabels(params):
 
     """
 
-    # imports
-
-    import os
-    import subprocess
-
-    import numpy as np
-    import nibabel as nb
-
-    from lapy import TriaMesh, TetMesh, io
-
     # message
 
     print()
-    print("-------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Creating label files for tetrahedral meshes")
-    print()
-    print("-------------------------------------------------------------------")
     print()
 
     # determine files
@@ -101,8 +88,8 @@ def createTetraLabels(params):
 
     # create new masks that includes boundary labels to head and tail, and to CA4
 
-    createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz"), label=[params.LUTDICT['tail'], params.LUTDICT['head']], bndlabel=[params.LUTDICT["bndtail"], params.LUTDICT["bndhead"]])
-    createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz"), label=[params.LUTDICT['ca4']], bndlabel=[params.LUTDICT["bndca4"]])
+    _createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz"), label=[params.LUTDICT['tail'], params.LUTDICT['head']], bndlabel=[params.LUTDICT["bndtail"], params.LUTDICT["bndhead"]])
+    _createBoundaryMask(hbtFile=HBTFILE, mskFile=MSKFILE, outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz"), label=[params.LUTDICT['ca4']], bndlabel=[params.LUTDICT["bndca4"]])
 
     # merge bnd and ca4 masks (add ca4 to bnd)
 

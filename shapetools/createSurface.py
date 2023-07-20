@@ -4,8 +4,24 @@ cube algorithm, remeshing and smoothing.
 
 """
 
-# ------------------------------------------------------------------------------
-# main function
+import os
+import sys
+import subprocess
+
+import shutil
+import pyacvd
+import logging
+
+import numpy as np
+import nibabel as nb
+import pyvista as pv
+
+from lapy import TriaMesh
+from scipy import sparse as sp
+from skimage import measure as skm
+
+# ==============================================================================
+# FUNCTIONS
 
 def extractSurface(params):
 
@@ -13,25 +29,11 @@ def extractSurface(params):
 
     """
 
-    # imports
-
-    import os
-    import subprocess
-
-    import numpy as np
-    import nibabel as nb
-
-    from lapy import TriaMesh
-    from skimage import measure as skm
-
     # message
 
     print()
-    print("-------------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Creating surface via marching cube algorithm")
-    print()
-    print("-------------------------------------------------------------------------")
     print()
 
     # create surface via marching cube algorithm
@@ -105,28 +107,11 @@ def remeshSurface(params):
 
     if params.internal.REMESH is not None:
 
-        # imports
-
-        import os
-        import sys
-        import shutil
-        import subprocess
-        import pyacvd
-
-        import numpy as np
-        import pyvista as pv
-
-        from lapy import TriaMesh
-        from scipy import sparse as sp
-
         # message
 
         print()
-        print("-------------------------------------------------------------------------")
-        print()
+        print("--------------------------------------------------------------------------------")
         print("Remesh surface")
-        print()
-        print("-------------------------------------------------------------------------")
         print()
 
         if shutil.which("mris_remesh") is None:
@@ -160,13 +145,13 @@ def remeshSurface(params):
             # assure that any edge occurs exactly two times (duplicates)
             trSortRmBndEdges = np.concatenate((trSortRmBnd[:,[0,1]],  trSortRmBnd[:,[1,2]], trSortRmBnd[:,[0,2]]), axis=0)
             if len(np.where(np.unique(trSortRmBndEdges, axis=0, return_counts=True)[1]!=2)[0])!=0:
-                print("Duplicate edges in mesh, exiting.")
+                logging.info("Duplicate edges in mesh, exiting.")
                 sys.exit(1)
 
             # assure that every edge must be part of exactly two different triangles (no boundary edges, no duplicates)
             countEdgesInTrias = np.array([ np.sum(np.sum(np.logical_or(trSortRmBnd==trSortRmBndEdges[i,0], trSortRmBnd==trSortRmBndEdges[i,1]), axis=1)==2) for i in range(0, len(trSortRmBndEdges)) ])
             if (countEdgesInTrias!=2).any():
-                print("Boundary or duplicate edges in mesh, exiting.")
+                logging.info("Boundary or duplicate edges in mesh, exiting.")
                 sys.exit(1)
 
             # restrict to largest connected component
@@ -223,19 +208,11 @@ def remeshSurface(params):
 
 def smoothSurface(params):
 
-    # imports
-
-    import os
-    from lapy import TriaMesh
-
     # message
 
     print()
-    print("-------------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Smooth surface")
-    print()
-    print("-------------------------------------------------------------------------")
     print()
 
     # read mesh

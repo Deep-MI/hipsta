@@ -3,39 +3,74 @@ This module provides a function to create a tetrahedral mesh
 
 """
 
+import os
+import shutil
+import subprocess
+
+from lapy import TriaMesh, TetMesh
+
+# ==============================================================================
+# FUNCTIONS
+
 # ------------------------------------------------------------------------------
-# main function
+# _createSTL
+
+def _createSTL(filename, v, t):
+    """
+    createSTL(filename, v, t)
+
+    A function to write STL files
+
+    """
+
+    import numpy as np
+
+    with open(filename, 'w') as f:
+
+        print("solid lap-data", file=f)
+
+        for i in range(0, len(t)):
+
+            v1mv0 = v[t[i, 1],:] - v[t[i, 0],:]
+            v2mv0 = v[t[i, 2],:] - v[t[i, 0],:]
+
+            normal = np.cross(v1mv0, v2mv0) / np.linalg.norm(np.cross(v1mv0, v2mv0))
+
+            print("  facet normal", file=f)
+
+            print("    outer loop", file=f)
+
+            print("      vertex %f %f %f " % (v[t[i, 0], 0], v[t[i, 0], 1],v[t[i, 0], 2]), file=f)
+            print("      vertex %f %f %f " % (v[t[i, 1], 0], v[t[i, 1], 1],v[t[i, 1], 2]), file=f)
+            print("      vertex %f %f %f " % (v[t[i, 2], 0], v[t[i, 2], 1],v[t[i, 2], 2]), file=f)
+
+            print("    endloop", file=f)
+
+            print("  endfacet", file=f)
+
+        print("end solid lap-data", file=f)
+
+
+# ------------------------------------------------------------------------------
+# createTetraMesh
 
 def createTetraMesh(params):
     """
 
     """
 
-    # imports
-
-    import os
-    import shutil
-    import subprocess
-
-    from lapy import TriaMesh, TetMesh
-
-    from shapetools.triaUtils import createSTL
-
     # message
 
     print()
-    print("-------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Create tetrahedral mesh")
-    print()
-    print("-------------------------------------------------------------------")
     print()
 
     # export mesh as STL
 
     triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
-    createSTL(os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra.stl"), v=triaMesh.v, t=triaMesh.t)
+    _createSTL(os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra.stl"), v=triaMesh.v, t=triaMesh.t)
 
     # create geofile (test.geo)
 

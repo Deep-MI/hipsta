@@ -3,90 +3,87 @@ This module provides a function to create QC plots
 
 """
 
-def qcPlots(params, stage=None):
+import os
+import logging
 
-    def sortLevelSets(LVL, dims, tol=1e-16):
-
-        # create array of line segments
-        tmpx = list()
-        tmpy = list()
-
-        for i in range(len(LVL[1][0])):
-            tmpx.append((LVL[0][0][LVL[1][0][i][0] - 1][dims[0]], LVL[0][0][LVL[1][0][i][1] - 1][dims[0]]))
-            tmpy.append((LVL[0][0][LVL[1][0][i][0] - 1][dims[1]], LVL[0][0][LVL[1][0][i][1] - 1][dims[1]]))
-
-        tmpx = np.array(tmpx)
-        tmpy = np.array(tmpy)
-
-        # remove duplicate points
-        tmpxy = np.unique(np.concatenate((tmpx, tmpy), axis=1), axis=0)
-        tmpx = tmpxy[:, 0:2]
-        tmpy = tmpxy[:, 2:4]
-
-        # remove segments which are de-facto points
-        tmpIdx = np.logical_or(np.abs(tmpx[:,0]-tmpx[:,1])>tol, np.abs(tmpy[:,0]-tmpy[:,1])>tol)
-        tmpx = tmpx[tmpIdx, :]
-        tmpy = tmpy[tmpIdx, :]
-
-        # need to order array of line segments; whenever we encounter a
-        # closed loop, we will already plot; otherwise, plot in the end
-        sortIdx = np.array(range(0, len(tmpx)))
-
-        tmpxSort = np.array(tmpx[sortIdx[0], ], ndmin=2)
-        tmpySort = np.array(tmpy[sortIdx[0], ], ndmin=2)
-
-        sortIdx = np.delete(sortIdx, sortIdx[0])
-
-        while len(sortIdx) > 1:
-
-            findIdx = np.array(np.where(np.logical_and(
-                np.abs(tmpx[sortIdx, ] - tmpxSort[tmpxSort.shape[0]-1, 1]) < tol,
-                np.abs(tmpy[sortIdx, ] - tmpySort[tmpySort.shape[0]-1, 1]) < tol)), ndmin=2).T
-
-            # delete existing finds
-            findIdxKeep = list()
-            for k in range(findIdx.shape[0]):
-                if not np.any(np.all(np.logical_or(tmpx[sortIdx[findIdx[k, 0]], 0] == tmpxSort, tmpx[sortIdx[findIdx[k, 0]], 1] == tmpxSort), axis=1)):
-                    findIdxKeep.append(k)
-            findIdx = findIdx[findIdxKeep, ]
-
-            if findIdx.shape[0] == 0:
-                # close loop and plot already
-                print("Loop closed")
-                #axs[axsx,axsy].plot(tmpxSort, tmpySort, color=surfcolor, linewidth=np.round(FIGSIZE/8))
-                # reset (start new loop)
-                tmpxSort = np.array(tmpx[sortIdx[0], ], ndmin=2)
-                tmpySort = np.array(tmpy[sortIdx[0], ], ndmin=2)
-                sortIdx = np.delete(sortIdx, 0)
-            elif findIdx.shape[0] == 1:
-                # add to current set
-                if findIdx[0, 1] == 0:
-                    tmpxSort = np.append(tmpxSort, np.array(tmpx[sortIdx[findIdx[0, 0]], ::1], ndmin=2), axis=0)
-                    tmpySort = np.append(tmpySort, np.array(tmpy[sortIdx[findIdx[0, 0]], ::1], ndmin=2), axis=0)
-                elif findIdx[0, 1] == 1:
-                    tmpxSort = np.append(tmpxSort, np.array(tmpx[sortIdx[findIdx[0, 0]], ::-1], ndmin=2), axis=0)
-                    tmpySort = np.append(tmpySort, np.array(tmpy[sortIdx[findIdx[0, 0]], ::-1], ndmin=2), axis=0)
-                sortIdx = np.delete(sortIdx, findIdx[0, 0])
-            elif findIdx.shape[0] > 1:
-                # error
-                print("A problem occurred with the surface overlays")
-                break
-
-        return tmpxSort, tmpySort
-
-    # --------------------------------------------------------------------------
-
-    #
-    import os
-    import numpy as np
-    import plotly.graph_objects as go
+import numpy as np
+import plotly.graph_objects as go
     
-    from plotly.subplots import make_subplots
+from plotly.subplots import make_subplots
+from shapetools.triaUtils import levelsetsTria
+from lapy import TriaMesh, io, plot as lpp
 
-    from lapy import TriaMesh, io
-    from lapy import plot as lpp
+# ==============================================================================
+# FUNCTIONS
 
-    from shapetools.triaUtils import levelsetsTria
+def _sortLevelSets(LVL, dims, tol=1e-16):
+
+    # create array of line segments
+    tmpx = list()
+    tmpy = list()
+
+    for i in range(len(LVL[1][0])):
+        tmpx.append((LVL[0][0][LVL[1][0][i][0] - 1][dims[0]], LVL[0][0][LVL[1][0][i][1] - 1][dims[0]]))
+        tmpy.append((LVL[0][0][LVL[1][0][i][0] - 1][dims[1]], LVL[0][0][LVL[1][0][i][1] - 1][dims[1]]))
+
+    tmpx = np.array(tmpx)
+    tmpy = np.array(tmpy)
+
+    # remove duplicate points
+    tmpxy = np.unique(np.concatenate((tmpx, tmpy), axis=1), axis=0)
+    tmpx = tmpxy[:, 0:2]
+    tmpy = tmpxy[:, 2:4]
+
+    # remove segments which are de-facto points
+    tmpIdx = np.logical_or(np.abs(tmpx[:,0]-tmpx[:,1])>tol, np.abs(tmpy[:,0]-tmpy[:,1])>tol)
+    tmpx = tmpx[tmpIdx, :]
+    tmpy = tmpy[tmpIdx, :]
+
+    # need to order array of line segments; whenever we encounter a
+    # closed loop, we will already plot; otherwise, plot in the end
+    sortIdx = np.array(range(0, len(tmpx)))
+
+    tmpxSort = np.array(tmpx[sortIdx[0], ], ndmin=2)
+    tmpySort = np.array(tmpy[sortIdx[0], ], ndmin=2)
+
+    sortIdx = np.delete(sortIdx, sortIdx[0])
+
+    while len(sortIdx) > 1:
+
+        findIdx = np.array(np.where(np.logical_and(
+            np.abs(tmpx[sortIdx, ] - tmpxSort[tmpxSort.shape[0]-1, 1]) < tol,
+            np.abs(tmpy[sortIdx, ] - tmpySort[tmpySort.shape[0]-1, 1]) < tol)), ndmin=2).T
+
+        # delete existing finds
+        findIdxKeep = list()
+        for k in range(findIdx.shape[0]):
+            if not np.any(np.all(np.logical_or(tmpx[sortIdx[findIdx[k, 0]], 0] == tmpxSort, tmpx[sortIdx[findIdx[k, 0]], 1] == tmpxSort), axis=1)):
+                findIdxKeep.append(k)
+        findIdx = findIdx[findIdxKeep, ]
+
+        if findIdx.shape[0] == 0:
+            # reset (start new loop)
+            tmpxSort = np.array(tmpx[sortIdx[0], ], ndmin=2)
+            tmpySort = np.array(tmpy[sortIdx[0], ], ndmin=2)
+            sortIdx = np.delete(sortIdx, 0)
+        elif findIdx.shape[0] == 1:
+            # add to current set
+            if findIdx[0, 1] == 0:
+                tmpxSort = np.append(tmpxSort, np.array(tmpx[sortIdx[findIdx[0, 0]], ::1], ndmin=2), axis=0)
+                tmpySort = np.append(tmpySort, np.array(tmpy[sortIdx[findIdx[0, 0]], ::1], ndmin=2), axis=0)
+            elif findIdx[0, 1] == 1:
+                tmpxSort = np.append(tmpxSort, np.array(tmpx[sortIdx[findIdx[0, 0]], ::-1], ndmin=2), axis=0)
+                tmpySort = np.append(tmpySort, np.array(tmpy[sortIdx[findIdx[0, 0]], ::-1], ndmin=2), axis=0)
+            sortIdx = np.delete(sortIdx, findIdx[0, 0])
+        elif findIdx.shape[0] > 1:
+            # warning
+            logging.warning("A problem occurred with the surface overlays")
+            break
+
+    return tmpxSort, tmpySort
+
+
+def qcPlots(params, stage=None):
 
     # mesh
     if params.internal.noqc is False and stage=="mesh":
@@ -123,11 +120,11 @@ def qcPlots(params, stage=None):
 
         #
 
-        tmpxSort0, tmpySort0 = sortLevelSets([lvl2_0, lvl2i_0, lvl2j_0], dims=[0, 2])
-        tmpxSort1, tmpySort1 = sortLevelSets([lvl2_1, lvl2i_1, lvl2j_1], dims=[0, 2])
-        tmpxSort2, tmpySort2 = sortLevelSets([lvl2_2, lvl2i_2, lvl2j_2], dims=[0, 2])
-        tmpxSort3, tmpySort3 = sortLevelSets([lvl2_3, lvl2i_3, lvl2j_3], dims=[0, 2])
-        tmpxSort4, tmpySort4 = sortLevelSets([lvl2_4, lvl2i_4, lvl2j_4], dims=[0, 2])
+        tmpxSort0, tmpySort0 = _sortLevelSets([lvl2_0, lvl2i_0, lvl2j_0], dims=[0, 2])
+        tmpxSort1, tmpySort1 = _sortLevelSets([lvl2_1, lvl2i_1, lvl2j_1], dims=[0, 2])
+        tmpxSort2, tmpySort2 = _sortLevelSets([lvl2_2, lvl2i_2, lvl2j_2], dims=[0, 2])
+        tmpxSort3, tmpySort3 = _sortLevelSets([lvl2_3, lvl2i_3, lvl2j_3], dims=[0, 2])
+        tmpxSort4, tmpySort4 = _sortLevelSets([lvl2_4, lvl2i_4, lvl2j_4], dims=[0, 2])
 
         #
 

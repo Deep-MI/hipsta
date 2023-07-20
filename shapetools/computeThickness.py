@@ -3,98 +3,17 @@ This module provides a function to compute thickness
 
 """
 
-# ------------------------------------------------------------------------------
-# AUXILIARY FUNCTIONS
-# ------------------------------------------------------------------------------
+import os
+import logging
 
-# ------------------------------------------------------------------------------
-# options_parse()
+import numpy as np
+import pandas as pd
+import nibabel as nb
 
-def options_parse():
-    """
-    Command Line Options Parser:
-    initiate the option parser and return the parsed object
-    """
+from lapy import TriaMesh, TetMesh, io
 
-    # imports
-    import sys
-    import optparse
-
-    # define helptext
-    HELPTEXT = """
-    SUMMARY
-
-    This is an auxiliary script for the shapetools.py script and is usually
-    called from within that script.
-
-    The script requires four arguments:
-
-    --IN_MESH <IN_MESH>
-    --IN_FUNC <IN_FUNC>
-    --OUT_DIR <OUT_DIR>
-    --HEMI <lh|rh>
-
-    """
-
-    # message
-    print("\nReading input options ...")
-
-    # initialize
-    parser = optparse.OptionParser(usage=HELPTEXT)
-
-    # help text
-    h_IN_MESH = 'IN_MESH'
-    h_IN_FUNC = 'IN_FUNC'
-    h_OUT_DIR = 'OUT_DIR'
-    h_HEMI = 'HEMI'
-
-    # specify inputs
-    group = optparse.OptionGroup(parser, "Required Options:", "...")
-    group.add_option('--IN_MESH', dest='IN_MESH', help=h_IN_MESH)
-    group.add_option('--IN_FUNC', dest='IN_FUNC', help=h_IN_FUNC)
-    group.add_option('--OUT_DIR', dest='OUT_DIR', help=h_OUT_DIR)
-    group.add_option('--HEMI', dest='HEMI', help=h_HEMI)
-    parser.add_option_group(group)
-
-    # parse arguments
-    (options, args) = parser.parse_args()
-
-    # check if there are any inputs
-    if len(sys.argv) != 9:
-        print(HELPTEXT)
-        sys.exit(0)
-
-    # check if IN_MESH file is given
-    if options.IN_MESH is None:
-        print('\nERROR: Specify --IN_MESH\n')
-        sys.exit(1)
-    else:
-        print('... Found IN_MESH ' + options.IN_MESH)
-
-    # check if IN_FUNC file is given
-    if options.IN_FUNC is None:
-        print('\nERROR: Specify --IN_FUNC\n')
-        sys.exit(1)
-    else:
-        print('... Found IN_FUNC ' + options.IN_FUNC)
-
-    # check if OUT_DIR file is given
-    if options.OUT_DIR is None:
-        print('\nERROR: Specify --OUT_DIR\n')
-        sys.exit(1)
-    else:
-        print('... Found OUT_DIR ' + options.OUT_DIR)
-
-    # check if HEMI is given
-    if options.HEMI is None:
-        print('\nERROR: Specify --HEMI\n')
-        sys.exit(1)
-    else:
-        print('... Found HEMI ' + options.HEMI)
-
-    # return
-    return options
-
+from shapetools.triaUtils import levelsetsTetra
+from scipy.sparse import csgraph as sc
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
@@ -103,73 +22,38 @@ def options_parse():
 # ------------------------------------------------------------------------------
 # computeThickness
 
-def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None, VERBOSE=False):
-
-    # imports
-
-    import os, sys
-
-    import numpy as np
-    import pandas as pd
-    import nibabel as nb
-
-    from lapy import TriaMesh, TetMesh, io
-
-    from shapetools.triaUtils import levelsetsTetra
+def computeThickness(params):
 
     # message
 
     print()
-    print("-------------------------------------------------------------------------")
-    print()
+    print("--------------------------------------------------------------------------------")
     print("Computing thickness")
-    print()
-    print("-------------------------------------------------------------------------")
     print()
 
     # get data
 
-    if params is None:
+    HEMI = params.HEMI
+    VERBOSE = params.skipCLEANUP
+    IN_MESH = os.path.join(params.OUTDIR, 'tetra-cube', HEMI + ".seam.rm.cut.vtk")
+    IN_FUNC = os.path.join(params.OUTDIR, 'tetra-cube', HEMI + ".uvw.seam.rm.cut.vtk")
+    OUT_DIR = os.path.join(params.OUTDIR, 'thickness')
 
-        paramsTHXn = -0.9
-        paramsTHXp = 0.9
-        paramsTHXk = 41
+    paramsTHXn = params.internal.THXn
+    paramsTHXp = params.internal.THXp
+    paramsTHXk = params.internal.THXk
 
-        paramsTHYn = -0.9
-        paramsTHYp = 0.9
-        paramsTHYk = 21
+    paramsTHYn = params.internal.THYn
+    paramsTHYp = params.internal.THYp
+    paramsTHYk = params.internal.THYk
 
-        paramsTHZn = -0.9
-        paramsTHZp = 0.9
-        paramsTHZk = 11
+    paramsTHZn = params.internal.THZn
+    paramsTHZp = params.internal.THZp
+    paramsTHZk = params.internal.THZk
 
-        allowRagged = False
-        allowRaggedTriangles = False
-        skipOrient = False
-
-    else:
-
-        HEMI = params.HEMI
-        VERBOSE = params.skipCLEANUP
-        IN_MESH = os.path.join(params.OUTDIR, 'tetra-cube', HEMI + ".seam.rm.cut.vtk")
-        IN_FUNC = os.path.join(params.OUTDIR, 'tetra-cube', HEMI + ".uvw.seam.rm.cut.vtk")
-        OUT_DIR = os.path.join(params.OUTDIR, 'thickness')
-
-        paramsTHXn = params.internal.THXn
-        paramsTHXp = params.internal.THXp
-        paramsTHXk = params.internal.THXk
-
-        paramsTHYn = params.internal.THYn
-        paramsTHYp = params.internal.THYp
-        paramsTHYk = params.internal.THYk
-
-        paramsTHZn = params.internal.THZn
-        paramsTHZp = params.internal.THZp
-        paramsTHZk = params.internal.THZk
-
-        allowRagged = params.internal.allowRagged
-        allowRaggedTriangles = params.internal.allowRaggedTriangles
-        skipOrient = params.internal.skipOrient
+    allowRagged = params.internal.allowRagged
+    allowRaggedTriangles = params.internal.allowRaggedTriangles
+    skipOrient = params.internal.skipOrient
 
     # load mesh
 
@@ -250,7 +134,6 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
 
                 if len(tmp) == 0:
 
-                    #print('No common tetra found.')
                     msgNoCmTet += 1
 
                     origV4[lx,ly,lz,:] = [np.nan, np.nan, np.nan]
@@ -304,10 +187,8 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
                     tmpi = np.where(np.sum((b>=0)&(b<=1),axis=0)==4)[0]
 
                     if len(tmpi) == 0:
-                        #print('Common tetra, but no intersection.')
                         msgCmTetNoInt += 1
                     elif len(tmpi) > 1:
-                        #print('Common tetra, but too many intersections.')
                         msgCmTetMnInt += 1
                     else:
 
@@ -330,9 +211,9 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     origV4flat = np.array(origV4flat)
     ctrflat = np.array(ctr.flat)
 
-    print('No common tetra found: ' + str(msgNoCmTet))
-    print('Common tetra, but no intersection: ' + str(msgCmTetNoInt))
-    print('Common tetra, but too many intersections: ' + str(msgCmTetMnInt))
+    logging.info('No common tetra found: ' + str(msgNoCmTet))
+    logging.info('Common tetra, but no intersection: ' + str(msgCmTetNoInt))
+    logging.info('Common tetra, but too many intersections: ' + str(msgCmTetMnInt))
 
     # -------------------------------------------------------------------------
     # lines
@@ -642,8 +523,6 @@ def computeThickness(params, IN_MESH=None, IN_FUNC=None, OUT_DIR=None, HEMI=None
     #
 
     if skipOrient is False:
-        import logging
-        from scipy.sparse import csgraph as sc
         if sc.connected_components(triaMinRm._construct_adj_sym())[0]==1:
             triaMinRm.orient_()
             skipOrientMin = False
