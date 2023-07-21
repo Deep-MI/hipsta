@@ -9,7 +9,6 @@ import sys
 import shutil
 import logging
 import argparse
-import errno
 import pandas
 import tempfile
 import time
@@ -935,9 +934,9 @@ def _run_analysis(params):
 
 
 # ------------------------------------------------------------------------------
-# run
+# run_hipsta
 
-def run(args):
+def run_hipsta(args):
     """
     a function to run the shapetools submodules
 
@@ -960,28 +959,3 @@ def run(args):
 
     # run analysis
     _run_analysis(params)
-
-
-# ------------------------------------------------------------------------------
-# main
-
-if __name__ == "__main__":
-
-    # message
-
-    print('')
-    print('----------------------------------------')
-    print('Hippocampal shape and thickness analysis')
-    print('----------------------------------------')
-    print('')
-
-    # parse arguments
-
-    args = _parse_arguments()
-
-    # return help or run analysis
-
-    if args.more_help is True:
-        get_help()
-    else:
-        run(args)
