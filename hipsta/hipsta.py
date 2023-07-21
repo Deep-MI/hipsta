@@ -977,6 +977,8 @@ def run_hipsta(filename, hemisphere, lut, output_directory, **kwargs):
 
     """
 
+    # define class
+
     class Args:
         def __init__(self, dct=None):
 
@@ -1024,10 +1026,6 @@ def run_hipsta(filename, hemisphere, lut, output_directory, **kwargs):
     my_args.hemi = hemisphere
     my_args.lut = lut
     my_args.outputdir = output_directory
-
-
-    #
-    import pdb ; pdb.set_trace()
 
     #
 
