@@ -774,7 +774,7 @@ def _check_params(params):
     
     # check hemisphere
 
-    if params.HEMI != "lh" and params.HEMI != "lr":
+    if params.HEMI != "lh" and params.HEMI != "rh":
         raise RuntimeError("Hemisphere must be either lh or rh, but not " + params.HEMI + ", exiting.")
 
     # check MC algorithm
@@ -1029,3 +1029,7 @@ def run_hipsta(filename, hemisphere, lut, output_directory, **kwargs):
     #
 
     _run_hipsta(my_args)
+
+    #
+
+    return vars(my_args)
