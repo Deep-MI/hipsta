@@ -508,7 +508,7 @@ def computeCubeParam(params):
 
     hemi = params.HEMI
 
-    if len(paramAnisoAlpha) == 1:
+    if len(params.internal.anisoAlpha) == 1:
         paramAnisoAlpha = params.internal.anisoAlpha[0]
     else:
         paramAnisoAlpha = params.internal.anisoAlpha

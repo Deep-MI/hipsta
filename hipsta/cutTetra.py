@@ -12,6 +12,8 @@ import itertools as it
 
 from lapy import TriaMesh, TetMesh, io, TetMesh, Solver
 
+from .utils.getLevelsets import levelsetsTetra
+
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 # ------------------------------------------------------------------------------

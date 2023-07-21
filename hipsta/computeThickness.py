@@ -13,6 +13,8 @@ import nibabel as nb
 from lapy import TriaMesh, TetMesh, io
 from scipy.sparse import csgraph as sc
 
+from .utils.getLevelsets import levelsetsTetra
+
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
 # ------------------------------------------------------------------------------

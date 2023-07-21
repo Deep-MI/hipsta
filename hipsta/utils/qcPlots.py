@@ -12,6 +12,8 @@ import plotly.graph_objects as go
 from lapy import TriaMesh, io, plot as lpp
 from plotly.subplots import make_subplots
 
+from .getLevelsets import levelsetsTria
+
 # ==============================================================================
 # FUNCTIONS
 

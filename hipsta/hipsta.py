@@ -112,8 +112,7 @@ def get_help(print_help=True, return_help=False):
       --hemi      Hemisphere. Either 'lh' or 'rh'.
       --lut       A valid look-up table for hippocampal subfield segmentation.
                   Either 'freesurfer' or 'ashs' or a valid filename.
-      --outputdir Directory where the results will be written. If not given, a
-                  subfolder within each subject's directory will be created.
+      --outputdir Directory where the results will be written. 
 
     Optional input arguments:
 
@@ -390,14 +389,14 @@ def _parse_arguments():
         default=None, metavar="<lh|rh>", required=False)
     required.add_argument('--lut', dest="lut", help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\' and \'ashs\' are keywords for built-in tables.",
         default=None, metavar="<freesurfer|ashs|filename>", required=False)
-    required.add_argument('--outputdir', dest="outputdir", help="Directory where the results will be written. If not given, a subfolder within each subject's directory will be created.",
+    required.add_argument('--outputdir', dest="outputdir", help="Directory where the results will be written.",
         default=None, metavar="<directory>", required=False)    
 
     # optional arguments
     optional = parser.add_argument_group('Optional arguments')
 
     optional.add_argument('--no-cleanup', dest='cleanup', help="Keep files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.",
-        default=get_defaults(), action="store_true", required=False)
+        default=get_defaults("cleanup"), action="store_true", required=False)
 
     # expert options
     expert = parser.add_argument_group('Expert options')
