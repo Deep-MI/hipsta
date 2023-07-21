@@ -14,6 +14,22 @@ import tempfile
 import time
 import traceback
 
+from .processImage import convertFormat, cropImage, upsampleImage, copy_image_to_main
+from .processLabels import createLabels, mergeMolecularLayer, autoMask, copy_labels_to_main
+from .processMask import binarizeMask, gaussFilter, longFilter, closeMask, copy_mask_to_main
+from .createSurface import extractSurface, remeshSurface, smoothSurface
+from .createTetraMesh import createTetraMesh
+from .createTetraLabels import createTetraLabels
+from .removeBoundaryMask import removeBoundaryMask
+from .cutTetra import cutTetra
+from .computeCubeParam import computeCubeParam
+from .computeThickness import computeThickness
+from .utils.checkSurface import checkSurface
+from .utils.mapValues import mapValues
+from .utils.createSupplementaryFiles import createSupplementaryFiles
+from .utils.qcPlots import qcPlots
+from .cfg.config import get_defaults
+
 # ==============================================================================
 # FUNCTIONS
 
@@ -22,9 +38,16 @@ import traceback
 
 def get_version():
 
-    VERSION = "v0.8.0-beta"
+    from importlib import metadata
 
-    return VERSION
+    try:
+        # requires existing installation
+        version = metadata.version("hipsta")
+    except Exception:
+        # fall-back if package is not installed, but run directly
+        version = "unknown"
+
+    return version
 
 
 # ------------------------------------------------------------------------------
@@ -374,76 +397,76 @@ def _parse_arguments():
     optional = parser.add_argument_group('Optional arguments')
 
     optional.add_argument('--no-cleanup', dest='cleanup', help="Keep files that may be useful for diagnostic or debugging purposes, but are not strictly necessary otherwise.",
-        default=False, action="store_true", required=False)
+        default=get_defaults(), action="store_true", required=False)
 
     # expert options
     expert = parser.add_argument_group('Expert options')
 
     expert.add_argument('--no-crop', dest='nocrop', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not crop image.",
+        default=get_defaults("nocrop"), action="store_true", required=False) # help="Do not crop image.",
     expert.add_argument('--upsample', dest='upsample', help=argparse.SUPPRESS,
-        default=None, metavar="<factor x> <factor y> <factor z>", nargs='*', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
+        default=get_defaults("upsample"), metavar="<factor x> <factor y> <factor z>", nargs='*', required=False, type=float) #  help="A list of parameters to fine-tune image upsampling.",
     expert.add_argument('--no-merge-molecular-layer', dest='noml', help=argparse.SUPPRESS, 
-        default=False, action="store_true", required=False) # help="Do not merge molecular layer."
+        default=get_defaults("noml"), action="store_true", required=False) # help="Do not merge molecular layer."
     expert.add_argument('--automated-head', dest='automaskhead', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="",
+        default=get_defaults("automaskhead"), action="store_true", required=False) # help="",
     expert.add_argument('--automated-tail', dest='automasktail', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="",
+        default=get_defaults("automasktail"), action="store_true", required=False) # help="",
     expert.add_argument('--margin-head', dest="automaskheadmargin", help=argparse.SUPPRESS,
-        default=[0], metavar="<params>", nargs=1, required=False) # help="",
+        default=get_defaults("automaskheadmargin"), metavar="<params>", nargs=1, required=False) # help="",
     expert.add_argument('--margin-tail', dest="automasktailmargin", help=argparse.SUPPRESS,
-        default=[0], metavar="<params>", nargs=1, required=False) # help="",
+        default=get_defaults("automasktailmargin"), metavar="<params>", nargs=1, required=False) # help="",
     expert.add_argument('--no-filter', dest='nofilter', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not filter image.",
+        default=get_defaults("nofilter"), action="store_true", required=False) # help="Do not filter image.",
     expert.add_argument('--no-gauss-filter', dest='nogaussfilter', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Filter image.",
+        default=get_defaults("nogaussfilter"), action="store_true", required=False) # help="Filter image.",
     expert.add_argument('--gauss-filter-size', dest='gaussfilter_size', help=argparse.SUPPRESS,
-        default=[1, 50], metavar="<params>", nargs=2, required=False)
+        default=get_defaults("gaussfilter_size"), metavar="<params>", nargs=2, required=False)
     expert.add_argument('--long-filter', dest='longfilter', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Filter image along longitudinal axis.",
+        default=get_defaults("longfilter"), action="store_true", required=False) # help="Filter image along longitudinal axis.",
     expert.add_argument('--long-filter-size', dest='longfilter_size', help=argparse.SUPPRESS,
-        default=[5], metavar="<params>", nargs=1, required=False)
+        default=get_defaults("longfilter_size"), metavar="<params>", nargs=1, required=False)
     expert.add_argument('--no-close-mask', dest='noclosemask', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Apply closing operation to mask.",
+        default=get_defaults("noclosemask"), action="store_true", required=False) # help="Apply closing operation to mask.",
     expert.add_argument('--mca', dest="mca", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Marching-cube algorithm.",
+        default=get_defaults("mca"), metavar="<params>", required=False) # help="Marching-cube algorithm.",
     expert.add_argument('--mcc', dest="mcc", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Marching-cube connectivity.",
+        default=get_defaults("mcc"), metavar="<params>", required=False) # help="Marching-cube connectivity.",
     expert.add_argument('--smooth', dest="smooth", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Mesh smoothing iterations.",
+        default=get_defaults("smooth"), metavar="<params>", required=False) # help="Mesh smoothing iterations.",
     expert.add_argument('--remesh', dest='remesh', help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='*', required=False) # help="Switch on remeshing.",
+        default=get_defaults("remesh"), metavar="<params>", nargs='*', required=False) # help="Switch on remeshing.",
     expert.add_argument('--no-check-surface', dest='nochecksurface', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not check surface.",
+        default=get_defaults("nochecksurface"), action="store_true", required=False) # help="Do not check surface.",
     expert.add_argument('--no-check-boundaries', dest='nocheckboundaries', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not check boundaries.",
+        default=get_defaults("nocheckboundaries"), action="store_true", required=False) # help="Do not check boundaries.",
     expert.add_argument('--no-qc', dest='noqc', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Skip QC",
+        default=get_defaults("noqc"), action="store_true", required=False) # help="Skip QC",
     expert.add_argument('--cut-params', dest="cutrange", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the cut operation.",
+        default=get_defaults("cutrange"), metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the cut operation.",
     expert.add_argument('--aniso-alpha', dest="anisoAlpha", help=argparse.SUPPRESS,
-        default=[40], metavar="<params>", nargs='+', required=False) # help="Anisotropy parameter.",
+        default=get_defaults("anisoAlpha"), metavar="<params>", nargs='+', required=False) # help="Anisotropy parameter.",
     expert.add_argument('--aniso-smooth', dest="anisoSmooth", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", required=False) # help="Anisotropy smoothing.",
+        default=get_defaults("anisoSmooth"), metavar="<params>", required=False) # help="Anisotropy smoothing.",
     expert.add_argument('--thickness-params', dest="thxyz", help=argparse.SUPPRESS,
-        default=None, metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the thickness computation.",
+        default=get_defaults("thxyz"), metavar="<params>", nargs='+', required=False, type=float) #  help="A list of parameters to fine-tune the thickness computation.",
     expert.add_argument('--allow-ragged', dest='allowRagged', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Allow ragged mid-surfaces.",
+        default=get_defaults("allowRagged"), action="store_true", required=False) # help="Allow ragged mid-surfaces.",
     expert.add_argument('--allow-ragged-triangles', dest='allowRaggedTriangles', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
+        default=get_defaults("allowRaggedTriangles"), action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
     expert.add_argument('--logfiledir', dest='logfiledir', help=argparse.SUPPRESS,
-        default=None, metavar="<directory>", required=False) # help="Where to store temporary logfile. Default: current working directory.",
+        default=get_defaults("logfiledir"), metavar="<directory>", required=False) # help="Where to store temporary logfile. Default: current working directory.",
 
     # Deprecated options
     expert.add_argument('--skip-orient', dest='skiporient', help=argparse.SUPPRESS,
-        default=False, action="store_true", required=False) # help="Do not check surface.",
+        default=get_defaults("skiporient"), action="store_true", required=False) # help="Do not check surface.",
 
     # define help
     help = parser.add_argument_group('Getting help')
 
     help.add_argument('--help', help="Display this help message and exit", action='help')
     help.add_argument('--more-help', dest='more_help', help="Display extensive help message and exit", default=False, action="store_true", required=False)
-    help.add_argument('--version', help="Display version number and exit", action='version', version='%(prog)s '+get_version())
+    help.add_argument('--version', help="Display version number and exit", action='version', version='%(prog)s ' + get_version())
 
     # check if there are any inputs; if not, print help
     if len(sys.argv) == 1:
@@ -596,10 +619,7 @@ def _evaluate_args(args):
     if args.anisoAlpha is None:
         settings.anisoAlpha = None
     else:
-        if len(args.anisoAlpha)==1:
-            settings.anisoAlpha = [ float(x) for x in args.anisoAlpha ][0]
-        elif len(args.anisoAlpha)>2:
-            settings.anisoAlpha = [ float(x) for x in args.anisoAlpha ]
+        settings.anisoAlpha = [ float(x) for x in args.anisoAlpha ]
 
     if args.anisoSmooth is None:
         settings.anisoSmooth = 3
@@ -752,6 +772,11 @@ def _check_params(params):
         logging.info("Found " + params.FILENAME)
     else:
         raise RuntimeError("Could not find " + params.FILENAME)
+    
+    # check hemisphere
+
+    if params.HEMI != "lh" and params.HEMI != "lr":
+        raise RuntimeError("Hemisphere must be either lh or rh, but not " + params.HEMI + ", exiting.")
 
     # check MC algorithm
 
@@ -766,13 +791,13 @@ def _check_params(params):
 
     # check ML
 
-    if args.noml is True and params.LUT != "freesurfer":
+    if params.internal.MERGE_MOLECULAR_LAYER is True and params.LUT != "freesurfer":
         raise RuntimeError("Cannot use --no-merge-molecular-layer with " + params.LUT + ".")
 
     # check aniso alpha
 
-    if args.anisoAlpha is not None:
-        if len(args.anisoAlpha)>2:
+    if params.internal.anisoAlpha is not None:
+        if len(params.internal.anisoAlpha)>2:
             raise RuntimeError("Length of --aniso-alpha must be 1 or 2.")
         
     # check LUT
@@ -793,23 +818,6 @@ def _run_analysis(params):
 
     """
 
-    # imports (TODO: change this when creating a package)
-
-    from shapetools.processImage import convertFormat, cropImage, upsampleImage, copy_image_to_main
-    from shapetools.processLabels import createLabels, mergeMolecularLayer, autoMask, copy_labels_to_main
-    from shapetools.processMask import binarizeMask, gaussFilter, longFilter, closeMask, copy_mask_to_main
-    from shapetools.createSurface import extractSurface, remeshSurface, smoothSurface
-    from shapetools.utils.checkSurface import checkSurface
-    from shapetools.createTetraMesh import createTetraMesh
-    from shapetools.createTetraLabels import createTetraLabels
-    from shapetools.removeBoundaryMask import removeBoundaryMask
-    from shapetools.cutTetra import cutTetra
-    from shapetools.computeCubeParam import computeCubeParam
-    from shapetools.computeThickness import computeThickness
-    from shapetools.utils.mapValues import mapValues
-    from shapetools.utils.createSupplementaryFiles import createSupplementaryFiles
-    from shapetools.utils.qcPlots import qcPlots
-    
     # process image (1)
 
     logging.info("Starting convertFormat() ...")
@@ -934,9 +942,9 @@ def _run_analysis(params):
 
 
 # ------------------------------------------------------------------------------
-# run_hipsta
+# _run_hipsta
 
-def run_hipsta(args):
+def _run_hipsta(args):
     """
     a function to run the shapetools submodules
 
@@ -959,3 +967,68 @@ def run_hipsta(args):
 
     # run analysis
     _run_analysis(params)
+
+# ------------------------------------------------------------------------------
+# run_hipsta
+
+def run_hipsta(filename, hemisphere, lut, output_directory, **kwargs):
+    """
+    run the hippocampal shape and thickness analysis
+
+    """
+
+    class Args:
+        def __init__(self, dct=None):
+
+            # get defaults
+            self.cleanup = get_defaults("cleanup")
+            self.nocrop = get_defaults("nocrop")
+            self.upsample = get_defaults("upsample")
+            self.noml = get_defaults("noml")
+            self.automaskhead = get_defaults("automaskhead")
+            self.automasktail = get_defaults("automasktail")
+            self.automaskheadmargin = get_defaults("automaskheadmargin")
+            self.automasktailmargin = get_defaults("automasktailmargin")
+            self.nofilter = get_defaults("nofilter")
+            self.nogaussfilter = get_defaults("nogaussfilter")
+            self.gaussfilter_size = get_defaults("gaussfilter_size")
+            self.longfilter = get_defaults("longfilter")
+            self.longfilter_size = get_defaults("longfilter_size")
+            self.noclosemask = get_defaults("noclosemask")
+            self.mca = get_defaults("mca")
+            self.mcc = get_defaults("mcc")
+            self.smooth = get_defaults("smooth")
+            self.remesh = get_defaults("remesh")
+            self.nochecksurface = get_defaults("nochecksurface")
+            self.nocheckboundaries = get_defaults("nocheckboundaries")
+            self.noqc = get_defaults("noqc")
+            self.cutrange = get_defaults("cutrange")
+            self.anisoAlpha = get_defaults("anisoAlpha")
+            self.anisoSmooth = get_defaults("anisoSmooth")
+            self.thxyz = get_defaults("thxyz")
+            self.allowRagged = get_defaults("allowRagged")
+            self.allowRaggedTriangles = get_defaults("allowRaggedTriangles")
+            self.logfiledir = get_defaults("logfiledir")
+            self.skiporient = get_defaults("skiporient")
+
+            # parse kwargs
+            if dct is not None:
+               for key, value in dct.items():
+                   setattr(self, key, value)
+
+    #
+
+    my_args = Args(kwargs)
+
+    my_args.filename = filename
+    my_args.hemi = hemisphere
+    my_args.lut = lut
+    my_args.outputdir = output_directory
+
+
+    #
+    import pdb ; pdb.set_trace()
+
+    #
+
+    _run_hipsta(my_args)

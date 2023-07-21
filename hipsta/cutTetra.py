@@ -11,7 +11,6 @@ import scipy.linalg as la
 import itertools as it
 
 from lapy import TriaMesh, TetMesh, io, TetMesh, Solver
-from shapetools.utils.getLevelsets import levelsetsTetra # TODO: maybe remove if automatically imported
 
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS

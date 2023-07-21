@@ -2,7 +2,7 @@
 hipsta CLI
 """
 
-from ..hipsta import _parse_arguments, run_hipsta, get_help
+from ..hipsta import _parse_arguments, _run_hipsta, get_help
 
 
 def main():
@@ -24,4 +24,4 @@ def main():
     if args.more_help is True:
         get_help()
     else:
-        run_hipsta(args)
+        _run_hipsta(args)

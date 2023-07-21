@@ -79,7 +79,7 @@ dependencies = {file = 'requirements.txt'}
 #include-package-data = false
 
 [tool.setuptools.packages.find]
-include = ['hipsta', 'hipsta.cli']
+include = ['hipsta', 'hipsta.cli', 'hipsta.utils', 'hipsta.cfg']
 exclude = ['docker', 'singularity']
 
 [tool.black]

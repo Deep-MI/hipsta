@@ -10,7 +10,6 @@ import nibabel as nb
 import numpy as np
 
 from lapy import TriaMesh
-from shapetools.utils.getLevelsets import levelsetsTria # TODO: maybe remove if automatically imported
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION

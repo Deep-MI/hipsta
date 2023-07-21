@@ -508,7 +508,10 @@ def computeCubeParam(params):
 
     hemi = params.HEMI
 
-    paramAnisoAlpha = params.internal.anisoAlpha
+    if len(paramAnisoAlpha) == 1:
+        paramAnisoAlpha = params.internal.anisoAlpha[0]
+    else:
+        paramAnisoAlpha = params.internal.anisoAlpha
     paramAnisoSmooth = params.internal.anisoSmooth
     paramLegacy = params.internal.cubeWriteLegacyVTK
 
