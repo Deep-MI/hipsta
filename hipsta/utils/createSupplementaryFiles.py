@@ -10,6 +10,7 @@ import nibabel as nb
 import numpy as np
 
 from lapy import TriaMesh
+from shapetools.utils.getLevelsets import levelsetsTria # TODO: maybe remove if automatically imported
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
@@ -85,7 +86,7 @@ def createSupplementaryFiles(params):
     tBnd = np.empty((0, 3))
 
     for i in lstBnd:
-        lvlBnd = utils.getLevelsets.levelsetsTria(triaMidRm.v, triaMidRm.t, hsfBnd, i)
+        lvlBnd = levelsetsTria(triaMidRm.v, triaMidRm.t, hsfBnd, i)
         if len(lvlBnd[0][0]) > 0:
             vBnd_lvl = np.array(lvlBnd[0][0])
             tBnd_lvl = np.array(lvlBnd[1][0])[:,[0,1,1]] - 1
