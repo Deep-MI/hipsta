@@ -5,6 +5,7 @@ This module provides functions for processing label images
 
 import os
 import shutil
+import logging
 import subprocess
 
 import numpy as np
@@ -164,9 +165,9 @@ def autoMask(params):
 
 def createLabels(params):
     """
-    
+
     """
-    
+
     # message
 
     print()
@@ -182,7 +183,7 @@ def createLabels(params):
 
     print(cmd)
 
-    subprocess.run(cmd.split())
+    subprocess.run(cmd.split(), capture_output=True)
 
     # multiply original image with mask
     cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "fscalc") + " " \
@@ -194,7 +195,7 @@ def createLabels(params):
 
     print(cmd)
 
-    subprocess.run(cmd.split())    
+    subprocess.run(cmd.split(), capture_output=True)
 
     # update params
     params.FILENAME = os.path.join(params.OUTDIR, "labels", params.HEMI + ".initial_labels.mgz")
@@ -217,7 +218,7 @@ def mergeMolecularLayer(params):
         print("Attaching the molecular layer")
         print()
 
-        # 
+        #
         if not "ml" in params.LUTDICT.keys():
             logging.info("Could not find molecular layer in lookup table.")
             raise AssertionError()
@@ -247,7 +248,7 @@ def mergeMolecularLayer(params):
         vxML=vxML[np.argsort(vxML[:,1],kind='mergesort'),:]
         vxML=vxML[np.argsort(vxML[:,2],kind='mergesort'),:]
 
-        # 
+        #
         for i in range(np.shape(vxML)[0]):
             n=1
             tmpML=np.transpose((np.empty([0]),np.empty([0]),np.empty([0])))
@@ -283,7 +284,7 @@ def mergeMolecularLayer(params):
 
 def copy_labels_to_main(params):
     """
-    
+
     """
 
     # copy to main directory

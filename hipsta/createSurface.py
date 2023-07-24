@@ -46,7 +46,7 @@ def extractSurface(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())
+        subprocess.run(cmd.split(), capture_output=True)
 
     elif params.internal.MCA == "mri_tessellate":
 
@@ -59,7 +59,7 @@ def extractSurface(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())
+        subprocess.run(cmd.split(), capture_output=True)
 
         cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_tessellate") + " " \
             + os.path.join(params.OUTDIR, "surface", params.HEMI + ".pretess.mgz") \
@@ -68,7 +68,7 @@ def extractSurface(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())
+        subprocess.run(cmd.split(), capture_output=True)
 
         # convert from freesurfer binary surface format to vtk
 
@@ -78,7 +78,7 @@ def extractSurface(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())
+        subprocess.run(cmd.split(), capture_output=True)
 
     elif params.internal.MCA == "skimage":
 
@@ -181,7 +181,7 @@ def remeshSurface(params):
 
             print(cmd)
 
-            subprocess.run(cmd.split())
+            subprocess.run(cmd.split(), capture_output=True)
 
             # remove free vertices and re-orient mesh
 

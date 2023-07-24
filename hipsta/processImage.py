@@ -4,6 +4,7 @@ This module provides functions for basic image processing operations (conversion
 """
 
 import os
+import logging
 import shutil
 import subprocess
 
@@ -35,7 +36,7 @@ def convertFormat(params):
 
     print(cmd)
 
-    subprocess.run(cmd.split())
+    subprocess.run(cmd.split(), capture_output=True)
 
     # update params
 
@@ -70,7 +71,7 @@ def cropImage(params):
 
         print(cmd)
 
-        subprocess.run(cmd.split())
+        subprocess.run(cmd.split(), capture_output=True)
 
         # update params
 
@@ -109,7 +110,7 @@ def upsampleImage(params):
 
             print(cmd)
 
-            subprocess.run(cmd.split())
+            subprocess.run(cmd.split(), capture_output=True)
 
         elif len(params.internal.UPSAMPLE) == 0:
 

@@ -129,9 +129,9 @@ minversion = '6.0'
 filterwarnings = []
 addopts = [
     "--import-mode=importlib",
-    "--junit-xml=junit-results.xml",
-    "--durations=20",
-    "--verbose",
+#    "--junit-xml=junit-results.xml",
+#    "--durations=20",
+#    "--verbose",
 ]
 
 [tool.coverage.run]

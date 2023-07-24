@@ -102,7 +102,7 @@ def createTetraLabels(params):
 
     print(cmd)
 
-    subprocess.run(cmd.split())
+    subprocess.run(cmd.split(), capture_output=True)
 
     # load bnd image
     

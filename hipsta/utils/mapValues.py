@@ -271,7 +271,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
 
     print(cmd)
 
-    subproc = subprocess.run(cmd.split())
+    subproc = subprocess.run(cmd.split(), capture_output=True)
 
     print(subproc.returncode)
 
@@ -288,7 +288,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
 
         print(cmd)
 
-        subprocess.run(cmd.split())
+        subprocess.run(cmd.split(), capture_output=True)
 
     # read files
     if subproc.returncode > 100:

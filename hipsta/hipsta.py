@@ -881,7 +881,7 @@ def _run_analysis(params):
 
     if params.internal.continue_program is False:
         logging.info("Hippocampal shapetools finished WITH ERRORS.")
-        raise AssertionError()
+        raise AssertionError("Check surface failed (stage: surface)")
 
     # create tetra mesh for whole hippocampal body (5)
 
@@ -906,7 +906,7 @@ def _run_analysis(params):
 
     if params.internal.continue_program is False:
         logging.info("Hippocampal shapetools finished WITH ERRORS.")
-        raise AssertionError()
+        raise AssertionError("Check surface failed (stage: boundaries)")
 
     # compute cube parametrization (8)
 
@@ -1014,8 +1014,11 @@ def run_hipsta(filename, hemisphere, lut, output_directory, **kwargs):
 
             # parse kwargs
             if dct is not None:
-               for key, value in dct.items():
-                   setattr(self, key, value)
+                for key, value in dct.items():
+                    if key in vars(self).keys():
+                        setattr(self, key, value)
+                    else:
+                        raise AssertionError("Key not included in list of default keys")
 
     #
 
