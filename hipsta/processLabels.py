@@ -260,7 +260,7 @@ def mergeMolecularLayer(params):
                 tmp=vx[np.ix_(range(int((vxML[i,0]-n)),int((vxML[i,0]+n)+1)),range(int((vxML[i,1]-n)),int((vxML[i,1]+n)+1)),range(int((vxML[i,2]-n)),int((vxML[i,2]+n)+1)))]
                 tmpML=np.transpose(np.where((tmp!=0)&(tmp!=246)&(tmp!=245)&(tmp!=214)))
                 if np.shape(tmpML)[0]!=0:
-                    tmp0=np.asmatrix(tmpML[np.where(np.sum(tmpML,axis=1)==min(np.sum(tmpML,axis=1))),:])
+                    tmp0=np.asarray(tmpML[np.where(np.sum(tmpML,axis=1)==min(np.sum(tmpML,axis=1)))[0],:])
                     vxML[i,3]=offset+min(tmp[tmp0[:,0],tmp0[:,1],tmp0[:,2]])
                     tmp0=None
                 else:

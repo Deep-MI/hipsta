@@ -38,7 +38,7 @@ def gaussFilter(params):
 
         dat_filtered = ndimage.gaussian_filter((dat>0)*100, sigma=params.internal.GAUSSFILTER_SIZE[0], mode="constant", cval=0.0)>params.internal.GAUSSFILTER_SIZE[1] # TODO: need to set threshold after testing
 
-        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.get_affine()), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".gaussian_filter.mgz"))
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".gaussian_filter.mgz"))
 
         # update params
 
@@ -77,7 +77,7 @@ def longFilter(params):
 
         dat_filtered = dat_filtered>0
 
-        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.get_affine()), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".longitudinal_filter.mgz"))
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".longitudinal_filter.mgz"))
 
         # update params
 
@@ -113,7 +113,7 @@ def closeMask(params):
 
         dat_filtered = dat_filtered>0
 
-        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.get_affine()), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".close_mask.mgz"))
+        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".close_mask.mgz"))
 
         # update params
 
@@ -133,7 +133,7 @@ def binarizeMask(params):
 
     dat_filtered = dat!=0
 
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.get_affine()), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".initial_mask.mgz"))
+    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".initial_mask.mgz"))
 
     # update params
 

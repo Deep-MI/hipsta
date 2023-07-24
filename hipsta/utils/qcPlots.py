@@ -131,11 +131,11 @@ def qcPlots(params, stage=None):
 
         fig = make_subplots(rows=1, cols=5)
 
-        fig.add_trace(go.Line(x=tmpxSort0[:,0], y=tmpySort0[:,0]), row=1, col=1)
-        fig.add_trace(go.Line(x=tmpxSort1[:,0], y=tmpySort1[:,0]), row=1, col=2)
-        fig.add_trace(go.Line(x=tmpxSort2[:,0], y=tmpySort2[:,0]), row=1, col=3)
-        fig.add_trace(go.Line(x=tmpxSort3[:,0], y=tmpySort3[:,0]), row=1, col=4)
-        fig.add_trace(go.Line(x=tmpxSort4[:,0], y=tmpySort4[:,0]), row=1, col=5)
+        fig.add_trace(go.Scatter(x=tmpxSort0[:,0], y=tmpySort0[:,0], mode="lines"), row=1, col=1)
+        fig.add_trace(go.Scatter(x=tmpxSort1[:,0], y=tmpySort1[:,0], mode="lines"), row=1, col=2)
+        fig.add_trace(go.Scatter(x=tmpxSort2[:,0], y=tmpySort2[:,0], mode="lines"), row=1, col=3)
+        fig.add_trace(go.Scatter(x=tmpxSort3[:,0], y=tmpySort3[:,0], mode="lines"), row=1, col=4)
+        fig.add_trace(go.Scatter(x=tmpxSort4[:,0], y=tmpySort4[:,0], mode="lines"), row=1, col=5)
 
         fig.update_layout(yaxis = dict(scaleanchor = 'x'),
                           yaxis2 = dict(scaleanchor = 'x'),

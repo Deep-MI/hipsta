@@ -638,7 +638,7 @@ def computeCubeParam(params):
 
     # get 2nd principal axis, note that direction may be arbitrary, will
     # possibly be switched below; note that this replaces EV2-based newVtcsSgn,
-    # which we may remove in the future (TODO)
+    # which we may remove in the future
 
     pca = PCA(n_components=3)
     pca_scores = pca.fit_transform(v4c)

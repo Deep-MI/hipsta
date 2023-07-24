@@ -254,6 +254,11 @@ def _start_logging(args):
 
     """
 
+    # TODO: logfile will be empty when attempting to overwrite an existing logfile
+    # TODO: when calling from python, logging behavior will be altered permanently
+    #       for the session, i.e. unrelated error are handled by the logger also.
+    #       maybe the solution is to define a dedicated logger?
+
     # setup function to log uncaught exceptions
     def foo(exctype, value, tb):
         # log

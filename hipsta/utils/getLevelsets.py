@@ -13,7 +13,7 @@ specifically:
 def levelsetsTria(v, t, p, levelsets):
 
     import numpy as np
-    from scipy.sparse import csr_matrix, lil_matrix
+    from scipy.sparse import lil_matrix
 
     vLVL = list()
     lLVL = list()
@@ -121,7 +121,7 @@ def levelsetsTria(v, t, p, levelsets):
 def levelsetsTetra(v, t, p, levelsets):
 
     import numpy as np
-    from scipy.sparse import csr_matrix, lil_matrix
+    from scipy.sparse import lil_matrix
 
     vLVL = list()
     tLVL = list()

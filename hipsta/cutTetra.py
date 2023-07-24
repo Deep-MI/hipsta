@@ -382,7 +382,7 @@ def cutTetra(params):
             # this tetra should always fit.
 
             # concatenate tmp1 and tmp2. this is already the tetra.
-            tetra = np.asmatrix(np.hstack((tmp1, tmp2)))
+            tetra = np.hstack((tmp1, tmp2))[np.newaxis, :]
 
         elif (np.size(tmp1)==2) & (np.size(tmp2)==6):
 
@@ -409,9 +409,6 @@ def cutTetra(params):
                 tetra = tetra23
             elif not ((A24-A[tmp12,:][:,tmp12].todense())<0).any():
                 tetra = tetra24
-
-            #
-            tetra = np.asmatrix(tetra)
 
         elif (np.size(tmp1)==3) & (np.size(tmp2)==3):
 
@@ -465,9 +462,6 @@ def cutTetra(params):
                 tetra = tetra222
                 v4c = v4c222
                 A = A222.tolil()
-
-            #
-            tetra = np.asmatrix(tetra)
 
         # update adjacency matrix
 
@@ -525,7 +519,7 @@ def cutTetra(params):
             # this tetra should always fit.
 
             # concatenate tmp1 and tmp2. this is already the tetra.
-            tetra = np.asmatrix(np.hstack((tmp1, tmp2)))
+            tetra = np.hstack((tmp1, tmp2))[np.newaxis, :]
 
         elif (np.size(tmp1)==2) & (np.size(tmp2)==6):
 
@@ -553,9 +547,6 @@ def cutTetra(params):
                 tetra = tetra13
             elif not ((A14-A[tmp12,:][:,tmp12].todense())<0).any():
                 tetra = tetra14
-
-            #
-            tetra = np.asmatrix(tetra)
 
         elif (np.size(tmp1)==3) & (np.size(tmp2)==3):
 
@@ -610,9 +601,6 @@ def cutTetra(params):
                 tetra = tetra222
                 v4c = v4c222
                 A = A222.tolil()
-
-            #
-            tetra = np.asmatrix(tetra)
 
         # update adjacency matrix
 
