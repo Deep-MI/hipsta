@@ -87,7 +87,7 @@ def upsampleImage(params):
 
     """
 
-    if params.internal.UPSAMPLE is not None:
+    if params.internal.UPSAMPLE is True:
 
         # message
 
