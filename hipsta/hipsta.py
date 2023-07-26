@@ -242,7 +242,7 @@ def _parse_arguments():
     optional.add_argument('--automask-tail', dest='automask_tail', help="Automated boundary detection for hippocampal tail.",
         default=get_defaults("automask_tail"), action="store_true", required=False)
     optional.add_argument('--automask-head-margin', dest="automask_head_margin", help="Margin for automated boundary detection for hippocampal head. Default: 0",
-        default=get_defaults("automask_head_margin"), metavar="<int>", equired=False, type=int)
+        default=get_defaults("automask_head_margin"), metavar="<int>", required=False, type=int)
     optional.add_argument('--automask-tail-margin', dest="automask_tail_margin", help="Margin for automated boundary detection for hippocampal tail. Default: 0",
         default=get_defaults("automask_tail_margin"), metavar="<int>", required=False, type=int)
     optional.add_argument('--no-gauss-filter', dest='no_gauss_filter', help="Do not apply gaussian filter.",
