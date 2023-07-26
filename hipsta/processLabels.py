@@ -218,11 +218,6 @@ def mergeMolecularLayer(params):
         print("Attaching the molecular layer")
         print()
 
-        #
-        if not "ml" in params.LUTDICT.keys():
-            logging.info("Could not find molecular layer in lookup table.")
-            raise AssertionError()
-
         # settings
         offset=0
 

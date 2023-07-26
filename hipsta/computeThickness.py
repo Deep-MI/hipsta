@@ -34,7 +34,7 @@ def computeThickness(params):
     # get data
 
     HEMI = params.HEMI
-    VERBOSE = params.skipCLEANUP
+    VERBOSE = not(params.internal.CLEANUP)
     IN_MESH = os.path.join(params.OUTDIR, 'tetra-cube', HEMI + ".seam.rm.cut.vtk")
     IN_FUNC = os.path.join(params.OUTDIR, 'tetra-cube', HEMI + ".uvw.seam.rm.cut.vtk")
     OUT_DIR = os.path.join(params.OUTDIR, 'thickness')

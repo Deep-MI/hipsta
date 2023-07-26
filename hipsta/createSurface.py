@@ -103,7 +103,7 @@ def extractSurface(params):
 
 def remeshSurface(params):
 
-    if params.internal.REMESH is not None:
+    if params.internal.REMESH is True:
 
         # message
 
@@ -170,13 +170,13 @@ def remeshSurface(params):
 
         else:
 
-            if params.internal.REMESH == 0:
+            if  params.internal.REMESH_SIZE == 0:
                 cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
                     + "--remesh  -i " + params.SURFNAME + " " \
                     + "-o " + os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk")
-            elif params.internal.REMESH > 0:
+            elif params.internal.REMESH_SIZE > 0:
                 cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mris_remesh") + " " \
-                    + "--nvert " + str(params.internal.REMESH) + "  -i " + params.SURFNAME + " " \
+                    + "--nvert " + str(params.internal.REMESH_SIZE) + "  -i " + params.SURFNAME + " " \
                     + "-o " + os.path.join(params.OUTDIR, "surface", params.HEMI + ".remeshed_surf.vtk")
 
             print(cmd)

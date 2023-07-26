@@ -513,7 +513,6 @@ def computeCubeParam(params):
     else:
         paramAnisoAlpha = params.internal.anisoAlpha
     paramAnisoSmooth = params.internal.anisoSmooth
-    paramLegacy = params.internal.cubeWriteLegacyVTK
 
     labelPrsbc = params.LUTDICT['presubiculum']
     labelSbc = params.LUTDICT['subiculum']

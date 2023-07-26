@@ -26,7 +26,7 @@ def checkSurface(params, stage=None):
     print("Check surfaces")
     print()
 
-    if params.internal.CHECKSURFACE is not None and stage=="check_surface":
+    if params.internal.CHECKSURFACE is True and stage=="check_surface":
 
         triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
@@ -43,7 +43,7 @@ def checkSurface(params, stage=None):
 
             continue_program = True
 
-    elif params.internal.CHECKBOUNDARIES is not None and stage=="check_boundaries":
+    elif params.internal.CHECKBOUNDARIES is True and stage=="check_boundaries":
 
         triaMesh = TriaMesh.read_vtk(os.path.join(os.path.join(params.OUTDIR, "tetra-cut"), params.HEMI + '.rm.open.bnd.cut.vtk'))
 
