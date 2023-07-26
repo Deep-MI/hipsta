@@ -5,7 +5,6 @@ thickness analysis package.
 """
 
 # TODO: harmonize arg names within files
-# TODO: remove example docstrings
 
 import os
 import sys
@@ -228,56 +227,56 @@ def _parse_arguments():
     # optional arguments
     optional = parser.add_argument_group('Optional arguments')
 
-    optional.add_argument('--no-cleanup', dest='no_cleanup', help="Keep files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.",
+    optional.add_argument('--no-cleanup', dest='no_cleanup', help="Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.",
         default=get_defaults("no_cleanup"), action="store_true", required=False)
     optional.add_argument('--no-crop', dest='no_crop', help="Do not crop image.",
         default=get_defaults("no_crop"), action="store_true", required=False)
-    optional.add_argument('--upsample', dest='upsample', help="Resample to the smallest voxel size.",
+    optional.add_argument('--upsample', dest='upsample', help="Upsample to the smallest voxel edge length.",
         default=get_defaults("upsample"), action="store_true", required=False)
-    optional.add_argument('--upsample-size', dest='upsample_size', help="Three multiplicative factors to determine the final voxel size. If all zeros, resample to the smallest voxel size. Default: 0 0 0",
-        default=get_defaults("upsample_size"), metavar="<factor x> <factor y> <factor z>", nargs=3, required=False, type=float)
-    optional.add_argument('--no-merge-molecular-layer', dest='no_ml', help="Do not merge molecular layer (only applicable for FreeSurfer segmentations).",
-        default=get_defaults("no_ml"), action="store_true", required=False)
+    optional.add_argument('--upsample-size', dest='upsample_size', help="Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. Default: 0 0 0",
+        default=get_defaults("upsample_size"), metavar="<float>", nargs=3, required=False, type=float)
+    optional.add_argument('--no-merge-molecular-layer', dest='no_merge_molecular_layer', help="Do not merge molecular layer (only applicable for FreeSurfer segmentations).",
+        default=get_defaults("no_merge_molecular_layer"), action="store_true", required=False)
     optional.add_argument('--automask-head', dest='automask_head', help="Automated boundary detection for hippocampal head.",
         default=get_defaults("automask_head"), action="store_true", required=False)
     optional.add_argument('--automask-tail', dest='automask_tail', help="Automated boundary detection for hippocampal tail.",
         default=get_defaults("automask_tail"), action="store_true", required=False)
     optional.add_argument('--automask-head-margin', dest="automask_head_margin", help="Margin for automated boundary detection for hippocampal head. Default: 0",
-        default=get_defaults("automask_head_margin"), metavar="<params>", required=False, type=int)
+        default=get_defaults("automask_head_margin"), metavar="<int>", equired=False, type=int)
     optional.add_argument('--automask-tail-margin', dest="automask_tail_margin", help="Margin for automated boundary detection for hippocampal tail. Default: 0",
-        default=get_defaults("automask_tail_margin"), metavar="<params>", required=False, type=int)
+        default=get_defaults("automask_tail_margin"), metavar="<int>", required=False, type=int)
     optional.add_argument('--no-gauss-filter', dest='no_gauss_filter', help="Do not apply gaussian filter.",
         default=get_defaults("no_gauss_filter"), action="store_true", required=False)
-    optional.add_argument('--gauss-filter-size', dest='gauss_filter_size', help="Parameters to fine-tune gaussian filtering. Specify two numbers for filter width and threshold. Default: 1 50.",
-        default=get_defaults("gauss_filter_size"), metavar="<params>", nargs=2, required=False, type=float)
+    optional.add_argument('--gauss-filter-size', dest='gauss_filter_size', help="Filter width and threshold for gaussian filtering. Default: 1 50.",
+        default=get_defaults("gauss_filter_size"), metavar="<float>", nargs=2, required=False, type=float)
     optional.add_argument('--long-filter', dest='long_filter', help="Apply filter along longitudinal axis, i.e. attempt to create smooth transitions between slices.",
         default=get_defaults("long_filter"), action="store_true", required=False)
     optional.add_argument('--long-filter-size', dest='long_filter_size', help="Size of longitudinal filter. Default: 5",
-        default=get_defaults("long_filter_size"), metavar="<params>", required=False, type=int)
+        default=get_defaults("long_filter_size"), metavar="<int>", required=False, type=int)
     optional.add_argument('--no-close-mask', dest='no_close_mask', help="Do not apply closing operation to mask, i.e. do not attempt to close small holes.",
         default=get_defaults("no_close_mask"), action="store_true", required=False)
     optional.add_argument('--mca', dest="mca", help="Type of marching-cube algorithm. Either \'mri_mc\' or \'skimage\'. Default: \'skimage\'",
-        default=get_defaults("mca"), metavar="<params>", required=False)
+        default=get_defaults("mca"), metavar="<mri_mc|skimage>", required=False)
     optional.add_argument('--remesh', dest='remesh', help="Apply remeshing operation to surface, i.e. create a regular, evenly spaced surface grid.",
-        default=get_defaults("remesh"), metavar="<params>", required=False)
+        default=get_defaults("remesh"),  action="store_true", required=False)
     optional.add_argument('--smooth', dest="smooth", help="Mesh smoothing iterations. Default: 5",
-        default=get_defaults("smooth"), metavar="<params>", required=False, type=int)
-    optional.add_argument('--cut-params', dest="cut_range", help="Parameters to fine-tune the cut operation. Default: -0.975, 0.975",
-        default=get_defaults("cut_range"), metavar="<params>", nargs=2, required=False, type=float)
-    optional.add_argument('--aniso-alpha', dest="aniso_alpha", help="Anisotropy parameter. Specify one or two numbers. Default: 40",
-        default=get_defaults("aniso_alpha"), metavar="<params>", nargs='+', required=False, type=float)
-    optional.add_argument('--aniso-smooth', dest="aniso_smooth", help="Anisotropy smoothing parameter. Default: 3",
-        default=get_defaults("aniso_smooth"), metavar="<params>", required=False, type=int)
-    optional.add_argument('--thickness-params', dest="thickness_xyz", help="Parameters to fine-tune the thickness computation. Specify three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: -0.9 0.9 41 -0.975 0.975 21 -0.9 0.9, 11",
-        default=get_defaults("thickness_xyz"), metavar="<params>", nargs=9, required=False, type=float)
+        default=get_defaults("smooth"), metavar="<int>", required=False, type=int)
+    optional.add_argument('--cut-range', dest="cut_range", help="Range for tetrahedral boundary cutting. Default: -0.975, 0.975",
+        default=get_defaults("cut_range"), metavar="<float>", nargs=2, required=False, type=float)
+    optional.add_argument('--aniso-alpha', dest="aniso_alpha", help="Anisotropy parameter(s). Can be one or two or two numbers. Default: 40",
+        default=get_defaults("aniso_alpha"), metavar="<float>", nargs='+', required=False, type=float)
+    optional.add_argument('--aniso-smooth', dest="aniso_smooth", help="Anisotropy smoothing iterations. Default: 3",
+        default=get_defaults("aniso_smooth"), metavar="<int>", required=False, type=int)
+    optional.add_argument('--thickness-grid', dest="thickness_grid", help="Extent and resolution of the grid used for thickness computation; three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: -0.9 0.9 41 -0.975 0.975 21 -0.9 0.9 11",
+        default=get_defaults("thickness_grid"), metavar="<float>", nargs=9, required=False, type=float)
 
     # expert options
     expert = parser.add_argument_group('Expert options')
 
     expert.add_argument('--mcc', dest="mcc", help=argparse.SUPPRESS,
-        default=get_defaults("mcc"), metavar="<params>", required=False) # help="Marching-cube connectivity. Only used for \'mri_mc\' algorithm. Default: 1",
+        default=get_defaults("mcc"), metavar="<int>", required=False, type=int) # help="Marching-cube connectivity. Only used for \'mri_mc\' algorithm. Default: 1",
     expert.add_argument('--remesh-size', dest='remesh_size', help=argparse.SUPPRESS,
-        default=get_defaults("remesh_size"), metavar="<params>", required=False, type=int) # help="Target number of vertices for remeshing operation. If zero, keep original number of vertices. Default: 0",
+        default=get_defaults("remesh_size"), metavar="<int>", required=False, type=int) # help="Target number of vertices for remeshing operation. If zero, keep original number of vertices. Default: 0",
     expert.add_argument('--no-check-surface', dest='no_check_surface', help=argparse.SUPPRESS,
         default=get_defaults("no_check_surface"), action="store_true", required=False) # help="Do not check surface and proceed if there are holes.",
     expert.add_argument('--no-check-boundaries', dest='no_check_boundaries', help=argparse.SUPPRESS,
@@ -367,9 +366,9 @@ def _evaluate_args(args):
 
     ## mergeMolecularLayer
 
-    if args.lut == "freesurfer" and args.no_ml is False:
+    if args.lut == "freesurfer" and args.no_merge_molecular_layer is False:
         settings.MERGE_MOLECULAR_LAYER = True
-    elif args.lut == "freesurfer" and args.no_ml is True:
+    elif args.lut == "freesurfer" and args.no_merge_molecular_layer is True:
         settings.MERGE_MOLECULAR_LAYER = False
     else:
         settings.MERGE_MOLECULAR_LAYER = False
@@ -428,15 +427,15 @@ def _evaluate_args(args):
 
     # computeThickness
 
-    settings.THXn = args.thickness_xyz[0]
-    settings.THXp = args.thickness_xyz[1]
-    settings.THXk = int(args.thickness_xyz[2])
-    settings.THYn = args.thickness_xyz[3]
-    settings.THYp = args.thickness_xyz[4]
-    settings.THYk = int(args.thickness_xyz[5])
-    settings.THZn = args.thickness_xyz[6]
-    settings.THZp = args.thickness_xyz[7]
-    settings.THZk = int(args.thickness_xyz[8])
+    settings.THXn = args.thickness_grid[0]
+    settings.THXp = args.thickness_grid[1]
+    settings.THXk = int(args.thickness_grid[2])
+    settings.THYn = args.thickness_grid[3]
+    settings.THYp = args.thickness_grid[4]
+    settings.THYk = int(args.thickness_grid[5])
+    settings.THZn = args.thickness_grid[6]
+    settings.THZp = args.thickness_grid[7]
+    settings.THZk = int(args.thickness_grid[8])
     settings.allow_ragged_surfaces = args.allow_ragged_surfaces
     settings.allow_ragged_trias = args.allow_ragged_trias
     settings.no_orient = args.no_orient
@@ -776,10 +775,10 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     no_crop : optional
         Do not crop image. Default: False.
     upsample : optional
-        Resample to the smallest voxel size. Default: False
+        Upsample to the smallest voxel edge length. Default: False
     upsample_size : optional
-        Three multiplicative factors to determine the final voxel size. If all zeros, resample to the smallest voxel size. Default: [0, 0, 0]
-    no_ml : optional
+        Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. Default: [0, 0, 0]
+    no_merge_molecular_layer : optional
         Do not merge molecular layer (only applicable for FreeSurfer segmentations). Default: False
     automask_head : optional
         Automated boundary detection for hippocampal head. Default: False
@@ -792,7 +791,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     no_gauss_filter : optional
         Do not apply gaussian filter. Default: False
     gauss_filter_size : optional
-        Parameters to fine-tune gaussian filtering. Specify two numbers for filter width and threshold. Default: [1, 50]
+        Filter width and threshold for gaussian filtering. Default: [1, 50]
     long_filter : optional
         Apply filter along longitudinal axis, i.e. attempt to create smooth transitions between slices. Default: False
     long_filter_size : optional
@@ -806,13 +805,13 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     smooth : optional
         Mesh smoothing iterations. Default: 5
     cut_range : optional
-        Parameters to fine-tune the cut operation. Default: [-0.975, 0.975]
+        Range for tetrahedral boundary cutting. Default: [-0.975, 0.975]
     aniso_alpha : optional
-        Anisotropy parameter. Can be one or two numbers. Default: [40]
+        Anisotropy parameter(s). Can be one or two numbers. Default: [40]
     aniso_smooth : optional
         Anisotropy smoothing iterations parameter. Default: 3
-    thickness_xyz : optional
-        Parameters to fine-tune the thickness computation. Specify three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: [ -0.9, 0.9, 41, -0.975, 0.975, 21, -0.9, 0.9, 11]
+    thickness_grid : optional
+        Extent and resolution of the grid used for thickness computation; three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: [ -0.9, 0.9, 41, -0.975, 0.975, 21, -0.9, 0.9, 11]
 
     mcc : optional
         Marching-cube connectivity. Only used for \'mri_mc\' algorithm. Default: 1
@@ -829,20 +828,13 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     allow_ragged_trias
         Allow triangles for ragged mid-surfaces. Default: False
 
-    no_orient
+    no_orient : optional
         Do not orient surfaces. Default: False
-
-    first : array_like
-        the 1st param name `first`
-    second :
-        the 2nd param
-    third : {'value', 'other'}, optional
-        the 3rd param, by default 'value'
 
     Returns
     -------
     dict
-        a dictionary of inputs
+        a dictionary of input arguments
     """
 
     # define class
@@ -855,7 +847,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
             self.no_crop = get_defaults("no_crop")
             self.upsample = get_defaults("upsample")
             self.upsample_size = get_defaults("upsample_size")
-            self.no_ml = get_defaults("no_ml")
+            self.no_merge_molecular_layer = get_defaults("no_merge_molecular_layer")
             self.automask_head = get_defaults("automask_head")
             self.automask_tail = get_defaults("automask_tail")
             self.automask_head_margin = get_defaults("automask_head_margin")
@@ -871,7 +863,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
             self.cut_range = get_defaults("cut_range")
             self.aniso_alpha = get_defaults("aniso_alpha")
             self.aniso_smooth = get_defaults("aniso_smooth")
-            self.thickness_xyz = get_defaults("thickness_xyz")
+            self.thickness_grid = get_defaults("thickness_grid")
             # expert options
             self.mcc = get_defaults("mcc")
             self.remesh_size = get_defaults("remesh_size")

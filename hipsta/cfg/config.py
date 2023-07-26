@@ -15,7 +15,7 @@ def get_defaults(x):
         no_crop = False,
         upsample = False,
         upsample_size = [0, 0, 0],
-        no_ml = False,
+        no_merge_molecular_layer = False,
         automask_head = False,
         automask_tail = False,
         automask_head_margin = 0,
@@ -31,7 +31,7 @@ def get_defaults(x):
         cut_range = [-0.975, 0.975],
         aniso_alpha = [40],
         aniso_smooth = 3,
-        thickness_xyz = [ -0.9, 0.9, 41, -0.975, 0.975, 21, -0.9, 0.9, 11 ],
+        thickness_grid = [ -0.9, 0.9, 41, -0.975, 0.975, 21, -0.9, 0.9, 11 ],
         # expert options
         mcc = 1,
         remesh_size = 0,
@@ -42,7 +42,7 @@ def get_defaults(x):
         allow_ragged_trias = False,
         # deprecated options
         no_orient = False,
-        # internal options
+        # internal options (not set during parsing or class definition, but during args evaluation)
         map_values_integrate = "none",
         map_values_select = None,
         map_values_interp = "nearest",
