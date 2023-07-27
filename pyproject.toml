@@ -54,11 +54,11 @@ test = [
     'pytest-timeout',
 ]
 all = [
-    'fsqc[build]',
-    'fsqc[style]',
+    'hipsta[build]',
+    'hipsta[style]',
 ]
 full = [
-    'fsqc[all]',
+    'hipsta[all]',
 ]
 
 [project.urls]
@@ -75,12 +75,12 @@ version = {file = 'VERSION'}
 readme = {file = 'README.md', content-type = "text/markdown"}
 dependencies = {file = 'requirements.txt'}
 
-#[tool.setuptools] ### probably not needed
-#include-package-data = false
-
 [tool.setuptools.packages.find]
-include = ['hipsta', 'hipsta.cli', 'hipsta.utils', 'hipsta.cfg', 'hipsta.doc']
+include = ['hipsta*']
 exclude = ['docker', 'singularity']
+
+[tool.setuptools.package-data]
+"hipsta.doc" = ["*.md"]
 
 [tool.black]
 line-length = 88

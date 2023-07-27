@@ -1,9 +1,3 @@
-# TODO: add details about segmentations
-# TOOD: remove freesurfer requirements
-# TODO: this file needs to be included with the python package - how?
-# TODO: this file needs to be parsed with myst
-# TODO: this file needs to be referenced from the main README.
-
 # Hippocampal shape and thickness analysis
 
 
@@ -53,6 +47,8 @@ This script performs the following major processing steps:
 ## Usage:
 
 ### As a command-line script:
+
+The hipsta scripts can be run from the command line as follows:
 
 ```
 ----------------------------------------

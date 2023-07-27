@@ -10,7 +10,7 @@ hippocampal shape and thickness analysis as described in our recent [publication
 ## Documentation:
 
 Please see the documentation pages for a general overview, usage information and 
-examples, and output description.
+examples, and output description. Brief usage information is also available [here](hipsta/doc/DOCUMENTATION.md).
 
 
 ## Current status:

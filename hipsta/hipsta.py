@@ -4,8 +4,6 @@ thickness analysis package.
 
 """
 
-# TODO: harmonize arg names within files
-
 import os
 import sys
 import shutil
@@ -31,6 +29,7 @@ from .utils.map_values import mapValues
 from .utils.create_supplementary_files import createSupplementaryFiles
 from .utils.qc_plots import qcPlots
 from .cfg.config import get_defaults
+from .doc.documentation import get_help_text
 
 # ==============================================================================
 # FUNCTIONS
@@ -61,12 +60,7 @@ def get_help(print_help=True, return_help=False):
 
     """
 
-    # TODO: read help text from file, convert from md to txt
-    HELPTEXT = """
-
-    ...
-
-    """
+    HELPTEXT = get_help_text()
 
     if print_help:
         print(HELPTEXT)
