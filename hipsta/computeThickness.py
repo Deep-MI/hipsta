@@ -13,7 +13,7 @@ import nibabel as nb
 from lapy import TriaMesh, TetMesh, io
 from scipy.sparse import csgraph as sc
 
-from .utils.getLevelsets import levelsetsTetra
+from .utils.get_levelsets import levelsetsTetra
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
@@ -51,9 +51,9 @@ def computeThickness(params):
     paramsTHZp = params.internal.THZp
     paramsTHZk = params.internal.THZk
 
-    allowRagged = params.internal.allowRagged
-    allowRaggedTriangles = params.internal.allowRaggedTriangles
-    skipOrient = params.internal.skipOrient
+    allowRagged = params.internal.allow_ragged_surfaces
+    allowRaggedTriangles = params.internal.allow_ragged_trias
+    skipOrient = params.internal.no_orient
 
     # load mesh
 

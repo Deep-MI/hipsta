@@ -36,7 +36,7 @@ def gaussFilter(params):
         img = nb.load(params.FILENAME)
         dat = img.get_fdata()
 
-        dat_filtered = ndimage.gaussian_filter((dat>0)*100, sigma=params.internal.GAUSSFILTER_SIZE[0], mode="constant", cval=0.0)>params.internal.GAUSSFILTER_SIZE[1] # TODO: need to set threshold after testing
+        dat_filtered = ndimage.gaussian_filter((dat>0)*100, sigma=params.internal.GAUSSFILTER_SIZE[0], mode="constant", cval=0.0)>params.internal.GAUSSFILTER_SIZE[1]
 
         nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".gaussian_filter.mgz"))
 

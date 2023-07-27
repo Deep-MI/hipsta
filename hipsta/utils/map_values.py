@@ -275,7 +275,6 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
 
     print(subproc.returncode)
 
-    # TODO: move resliced image to separate folder
     # reslice input if necessary
     if subproc.returncode == 1:
         sys.exit(1)

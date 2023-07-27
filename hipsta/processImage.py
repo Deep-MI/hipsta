@@ -98,7 +98,7 @@ def upsampleImage(params):
 
         # upsample
 
-        if len(params.internal.UPSAMPLE) == 3:
+        if any(x!=0 for x in params.internal.UPSAMPLE_SIZE):
 
             logging.info("Upsampling with custom parameters ...")
 
@@ -112,7 +112,7 @@ def upsampleImage(params):
 
             subprocess.run(cmd.split(), capture_output=True)
 
-        elif len(params.internal.UPSAMPLE) == 0:
+        else:
 
             #
             logging.info("Upsampling to min voxel size ...")

@@ -11,7 +11,7 @@ import numpy as np
 
 from lapy import TriaMesh
 
-from .getLevelsets import levelsetsTria
+from .get_levelsets import levelsetsTria
 
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION

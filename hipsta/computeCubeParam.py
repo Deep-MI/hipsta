@@ -508,11 +508,11 @@ def computeCubeParam(params):
 
     hemi = params.HEMI
 
-    if len(params.internal.anisoAlpha) == 1:
-        paramAnisoAlpha = params.internal.anisoAlpha[0]
+    if len(params.internal.aniso_alpha) == 1:
+        paramAnisoAlpha = params.internal.aniso_alpha[0]
     else:
-        paramAnisoAlpha = params.internal.anisoAlpha
-    paramAnisoSmooth = params.internal.anisoSmooth
+        paramAnisoAlpha = params.internal.aniso_alpha
+    paramAnisoSmooth = params.internal.aniso_smooth
 
     labelPrsbc = params.LUTDICT['presubiculum']
     labelSbc = params.LUTDICT['subiculum']

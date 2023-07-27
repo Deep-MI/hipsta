@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 from lapy import TriaMesh, io, plot as lpp
 from plotly.subplots import make_subplots
 
-from .getLevelsets import levelsetsTria
+from .get_levelsets import levelsetsTria
 
 # ==============================================================================
 # FUNCTIONS
@@ -87,7 +87,7 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
 def qcPlots(params, stage=None):
 
     # mesh
-    if params.internal.noqc is False and stage=="mesh":
+    if params.internal.no_qc is False and stage=="mesh":
 
         triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
@@ -105,7 +105,7 @@ def qcPlots(params, stage=None):
         lpp.plot_tria_mesh(triaMesh, tcolor=[50,50,50], background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.mesh.png'), no_display=True, scale_png=0.5)
 
     # profile
-    if params.internal.noqc is False and stage=="profile":
+    if params.internal.no_qc is False and stage=="profile":
 
         triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 

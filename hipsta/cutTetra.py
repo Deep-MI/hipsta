@@ -12,7 +12,7 @@ import itertools as it
 
 from lapy import TriaMesh, TetMesh, io, TetMesh, Solver
 
-from .utils.getLevelsets import levelsetsTetra
+from .utils.get_levelsets import levelsetsTetra
 
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
@@ -304,7 +304,7 @@ def cutTetra(params):
     labelBndTail = params.LUTDICT['bndtail']
     labelBndCA4 = params.LUTDICT['bndca4']
 
-    cutRange = params.internal.cutrange
+    cutRange = params.internal.cut_range
 
     hemi = params.HEMI
 

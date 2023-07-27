@@ -4,7 +4,6 @@ This module provides a function to check surfaces
 """
 
 import os
-import sys
 import logging
 
 from lapy import TriaMesh
