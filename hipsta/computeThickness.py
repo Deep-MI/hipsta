@@ -32,27 +32,9 @@ def computeThickness(params):
 
     # get data
 
-    HEMI = params.HEMI
-    VERBOSE = not (params.internal.CLEANUP)
-    IN_MESH = os.path.join(params.OUTDIR, "tetra-cube", HEMI + ".seam.rm.cut.vtk")
-    IN_FUNC = os.path.join(params.OUTDIR, "tetra-cube", HEMI + ".uvw.seam.rm.cut.vtk")
+    IN_MESH = os.path.join(params.OUTDIR, "tetra-cube", params.HEMI + ".seam.rm.cut.vtk")
+    IN_FUNC = os.path.join(params.OUTDIR, "tetra-cube", params.HEMI + ".uvw.seam.rm.cut.vtk")
     OUT_DIR = os.path.join(params.OUTDIR, "thickness")
-
-    paramsTHXn = params.internal.THXn
-    paramsTHXp = params.internal.THXp
-    paramsTHXk = params.internal.THXk
-
-    paramsTHYn = params.internal.THYn
-    paramsTHYp = params.internal.THYp
-    paramsTHYk = params.internal.THYk
-
-    paramsTHZn = params.internal.THZn
-    paramsTHZp = params.internal.THZp
-    paramsTHZk = params.internal.THZk
-
-    allowRagged = params.internal.allow_ragged_surfaces
-    allowRaggedTriangles = params.internal.allow_ragged_trias
-    skipOrient = params.internal.no_orient
 
     # load mesh
 
@@ -70,9 +52,9 @@ def computeThickness(params):
 
     # determine levels
 
-    lLVL4x = np.linspace(paramsTHXn, paramsTHXp, paramsTHXk)
-    lLVL4y = np.linspace(paramsTHYn, paramsTHYp, paramsTHYk)
-    lLVL4z = np.linspace(paramsTHZn, paramsTHZp, paramsTHZk)
+    lLVL4x = np.linspace(params.internal.THXn, params.internal.THXp, params.internal.THXk)
+    lLVL4y = np.linspace(params.internal.THYn, params.internal.THYp, params.internal.THYk)
+    lLVL4z = np.linspace(params.internal.THZn, params.internal.THZp, params.internal.THZk)
 
     # compute levelsets in original space
 
@@ -88,29 +70,29 @@ def computeThickness(params):
 
     # write out single slices in x, y, z directions
 
-    if VERBOSE is True:
+    if params.internal.CLEANUP is False:
         for i in range(0, len(vLVL4px)):
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4x[i], tLVL4x[i] - 1), os.path.join(OUT_DIR, HEMI + ".vlx.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4x[i], tLVL4x[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".vlx.lvl" + str(i) + ".vtk")
             )
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4px[i], tLVL4px[i] - 1), os.path.join(OUT_DIR, HEMI + ".uvw.vlx.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4px[i], tLVL4px[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".uvw.vlx.lvl" + str(i) + ".vtk")
             )
 
         for i in range(0, len(vLVL4py)):
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4y[i], tLVL4y[i] - 1), os.path.join(OUT_DIR, HEMI + ".vly.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4y[i], tLVL4y[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".vly.lvl" + str(i) + ".vtk")
             )
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4py[i], tLVL4py[i] - 1), os.path.join(OUT_DIR, HEMI + ".uvw.vly.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4py[i], tLVL4py[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".uvw.vly.lvl" + str(i) + ".vtk")
             )
 
         for i in range(0, len(vLVL4pz)):
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4z[i], tLVL4z[i] - 1), os.path.join(OUT_DIR, HEMI + ".vlz.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4z[i], tLVL4z[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".vlz.lvl" + str(i) + ".vtk")
             )
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4pz[i], tLVL4pz[i] - 1), os.path.join(OUT_DIR, HEMI + ".uvw.vlz.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4pz[i], tLVL4pz[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".uvw.vlz.lvl" + str(i) + ".vtk")
             )
 
     # now loop across levelsets
@@ -276,7 +258,7 @@ def computeThickness(params):
                 if np.sum(tmp):  # empty lists are false
                     llxLgth[ii, ij] = np.sum(tmp)
 
-    TriaMesh.write_vtk(TriaMesh(np.array(vlx), np.asarray(tlx) - 1), os.path.join(OUT_DIR, HEMI + ".grid-lines-x.vtk"))
+    TriaMesh.write_vtk(TriaMesh(np.array(vlx), np.asarray(tlx) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-x.vtk"))
 
     dfx = pd.DataFrame(llxLgth)
 
@@ -286,7 +268,7 @@ def computeThickness(params):
     dy = zip(range(0, dfx.shape[0]), ["y" + str(z) for z in range(0, dfx.shape[0])])
     dfx = dfx.rename(index=dict(dy))
 
-    dfx.to_csv(os.path.join(OUT_DIR, HEMI + ".grid-segments-x.csv"))
+    dfx.to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-segments-x.csv"))
 
     # y
 
@@ -320,7 +302,7 @@ def computeThickness(params):
                 if np.sum(tmp):  # empty lists are false
                     llyLgth[ii, ij] = np.sum(tmp)
 
-    TriaMesh.write_vtk(TriaMesh(np.array(vly), np.asarray(tly) - 1), os.path.join(OUT_DIR, HEMI + ".grid-lines-y.vtk"))
+    TriaMesh.write_vtk(TriaMesh(np.array(vly), np.asarray(tly) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-y.vtk"))
 
     dfy = pd.DataFrame(llyLgth)
 
@@ -330,7 +312,7 @@ def computeThickness(params):
     dx = zip(range(0, dfy.shape[0]), ["x" + str(z) for z in range(0, dfy.shape[0])])
     dfy = dfy.rename(index=dict(dx))
 
-    dfy.to_csv(os.path.join(OUT_DIR, HEMI + ".grid-segments-y.csv"))
+    dfy.to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-segments-y.csv"))
 
     # z
 
@@ -364,7 +346,7 @@ def computeThickness(params):
                 if np.sum(tmp):  # empty lists are false
                     llzLgth[ii, ij] = np.sum(tmp)
 
-    TriaMesh.write_vtk(TriaMesh(np.array(vlz), np.asarray(tlz) - 1), os.path.join(OUT_DIR, HEMI + ".grid-lines-z.vtk"))
+    TriaMesh.write_vtk(TriaMesh(np.array(vlz), np.asarray(tlz) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-z.vtk"))
 
     dfz = pd.DataFrame(llzLgth)
 
@@ -374,12 +356,12 @@ def computeThickness(params):
     dx = zip(range(0, dfz.shape[0]), ["x" + str(z) for z in range(0, dfz.shape[0])])
     dfz = dfz.rename(index=dict(dx))
 
-    dfz.to_csv(os.path.join(OUT_DIR, HEMI + ".grid-segments-z.csv"))
+    dfz.to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-segments-z.csv"))
 
     # --------------------------------------------------------------------------
     # export origV4flat
 
-    pd.DataFrame(origV4flat).to_csv(os.path.join(OUT_DIR, HEMI + ".grid-lines.csv"), header=False, index=False)
+    pd.DataFrame(origV4flat).to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-lines.csv"), header=False, index=False)
 
     # --------------------------------------------------------------------------
     # create checkerboard (we only do it for one dimension: z)
@@ -399,9 +381,9 @@ def computeThickness(params):
 
         for i in range(0, len(llz) - 1):
 
-            if allowRagged or (
-            (len(np.unique(origV4flat[np.logical_and(origV4flat[:, 0] == i, origV4flat[:, 2] == k), 1])) == paramsTHYk) and
-            (len(np.unique(origV4flat[np.logical_and(origV4flat[:, 0] == i+1, origV4flat[:, 2] == k), 1])) == paramsTHYk)
+            if params.internal.allow_ragged_surfaces or (
+            (len(np.unique(origV4flat[np.logical_and(origV4flat[:, 0] == i, origV4flat[:, 2] == k), 1])) == params.internal.THYk) and
+            (len(np.unique(origV4flat[np.logical_and(origV4flat[:, 0] == i+1, origV4flat[:, 2] == k), 1])) == params.internal.THYk)
             ):
 
                 for j in range(0, len(llz[i])-1):
@@ -411,7 +393,7 @@ def computeThickness(params):
                     # we are doing this per square, could be done per tria also (split
                     # into two if-clauses)
 
-                    if allowRaggedTriangles is False:
+                    if params.internal.allow_ragged_trias is False:
 
                         if all((
                             (len(np.where(np.logical_and(origV4flat[:, 0] == i    , np.logical_and(origV4flat[:, 1] == j    , origV4flat[:, 2] == k)))[0])>0),
@@ -439,7 +421,7 @@ def computeThickness(params):
                             origV4flatCol[k].append(np.mod(i + j, 2))
                             origV4flatCol[k].append(np.mod(i + j, 2))
 
-                    elif allowRaggedTriangles is True:
+                    elif params.internal.allow_ragged_trias is True:
 
                         if all((
                             (len(np.where(np.logical_and(origV4flat[:, 0] == i    , np.logical_and(origV4flat[:, 1] == j    , origV4flat[:, 2] == k)))[0])>0),
@@ -509,7 +491,7 @@ def computeThickness(params):
 
     #
 
-    if skipOrient is False:
+    if params.internal.no_orient is False:
         if sc.connected_components(triaMinRm._construct_adj_sym())[0] == 1:
             triaMinRm.orient_()
             skipOrientMin = False
@@ -539,18 +521,18 @@ def computeThickness(params):
 
     #
 
-    TriaMesh.write_vtk(triaMinRm, os.path.join(OUT_DIR, HEMI + ".ext-surface.vtk"))
-    TriaMesh.write_vtk(triaMidRm, os.path.join(OUT_DIR, HEMI + ".mid-surface.vtk"))
-    TriaMesh.write_vtk(triaMaxRm, os.path.join(OUT_DIR, HEMI + ".int-surface.vtk"))
+    TriaMesh.write_vtk(triaMinRm, os.path.join(OUT_DIR, params.HEMI + ".ext-surface.vtk"))
+    TriaMesh.write_vtk(triaMidRm, os.path.join(OUT_DIR, params.HEMI + ".mid-surface.vtk"))
+    TriaMesh.write_vtk(triaMaxRm, os.path.join(OUT_DIR, params.HEMI + ".int-surface.vtk"))
 
     pd.DataFrame(np.concatenate((cMinRm, triaMinRm.v), axis=1)).to_csv(
-        os.path.join(OUT_DIR, HEMI + ".ext-surface.csv"), header=False, index=False
+        os.path.join(OUT_DIR, params.HEMI + ".ext-surface.csv"), header=False, index=False
     )
     pd.DataFrame(np.concatenate((cMidRm, triaMidRm.v), axis=1)).to_csv(
-        os.path.join(OUT_DIR, HEMI + ".mid-surface.csv"), header=False, index=False
+        os.path.join(OUT_DIR, params.HEMI + ".mid-surface.csv"), header=False, index=False
     )
     pd.DataFrame(np.concatenate((cMaxRm, triaMaxRm.v), axis=1)).to_csv(
-        os.path.join(OUT_DIR, HEMI + ".int-surface.csv"), header=False, index=False
+        os.path.join(OUT_DIR, params.HEMI + ".int-surface.csv"), header=False, index=False
     )
 
     # --------------------------------------------------------------------------
@@ -561,11 +543,11 @@ def computeThickness(params):
     for i in range(0, len(cMidRm)):
         thickness.append(np.array(dfz)[int(cMidRm[i, 0]), int(cMidRm[i, 1])])
 
-    io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".mid-surface.thickness.psol"), np.array(thickness))
+    io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".mid-surface.thickness.psol"), np.array(thickness))
 
     nb.freesurfer.save(
         nb.freesurfer.MGHImage(dataobj=np.array(thickness).astype("float32"), affine=None),
-        filename=os.path.join(OUT_DIR, HEMI + ".mid-surface.thickness.mgh"),
+        filename=os.path.join(OUT_DIR, params.HEMI + ".mid-surface.thickness.mgh"),
     )
 
     # --------------------------------------------------------------------------
@@ -582,26 +564,26 @@ def computeThickness(params):
 
         gauss_curvMin = triaMinRm.map_tfunc_to_vfunc(gauss_curvMin)
 
-        io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".ext-surface.mean-curv.psol"), mean_curvMin)
+        io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".ext-surface.mean-curv.psol"), mean_curvMin)
 
-        io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".ext-surface.gauss-curv.psol"), gauss_curvMin)
+        io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".ext-surface.gauss-curv.psol"), gauss_curvMin)
 
         nb.freesurfer.save(
             nb.freesurfer.MGHImage(dataobj=mean_curvMin.astype("float32"), affine=None),
-            filename=os.path.join(OUT_DIR, HEMI + ".ext-surface.mean-curv.mgh"),
+            filename=os.path.join(OUT_DIR, params.HEMI + ".ext-surface.mean-curv.mgh"),
         )
 
         nb.freesurfer.save(
             nb.freesurfer.MGHImage(dataobj=gauss_curvMin.astype("float32"), affine=None),
-            filename=os.path.join(OUT_DIR, HEMI + ".ext-surface.gauss-curv.mgh"),
+            filename=os.path.join(OUT_DIR, params.HEMI + ".ext-surface.gauss-curv.mgh"),
         )
 
         pd.DataFrame(np.concatenate((cMinRm, np.array(mean_curvMin, ndmin=2).transpose()), axis=1)).to_csv(
-            os.path.join(OUT_DIR, HEMI + ".ext-surface.mean-curv.csv"), header=False, index=False
+            os.path.join(OUT_DIR, params.HEMI + ".ext-surface.mean-curv.csv"), header=False, index=False
         )
 
         pd.DataFrame(np.concatenate((cMinRm, np.array(gauss_curvMin, ndmin=2).transpose()), axis=1)).to_csv(
-            os.path.join(OUT_DIR, HEMI + ".ext-surface.gauss-curv.csv"), header=False, index=False
+            os.path.join(OUT_DIR, params.HEMI + ".ext-surface.gauss-curv.csv"), header=False, index=False
         )
 
     else:
@@ -618,26 +600,26 @@ def computeThickness(params):
 
         gauss_curvMid = triaMidRm.map_tfunc_to_vfunc(gauss_curvMid)
 
-        io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".mid-surface.mean-curv.psol"), mean_curvMid)
+        io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".mid-surface.mean-curv.psol"), mean_curvMid)
 
-        io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".mid-surface.gauss-curv.psol"), gauss_curvMid)
+        io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".mid-surface.gauss-curv.psol"), gauss_curvMid)
 
         nb.freesurfer.save(
             nb.freesurfer.MGHImage(dataobj=mean_curvMid.astype("float32"), affine=None),
-            filename=os.path.join(OUT_DIR, HEMI + ".mid-surface.mean-curv.mgh"),
+            filename=os.path.join(OUT_DIR, params.HEMI + ".mid-surface.mean-curv.mgh"),
         )
 
         nb.freesurfer.save(
             nb.freesurfer.MGHImage(dataobj=gauss_curvMid.astype("float32"), affine=None),
-            filename=os.path.join(OUT_DIR, HEMI + ".mid-surface.gauss-curv.mgh"),
+            filename=os.path.join(OUT_DIR, params.HEMI + ".mid-surface.gauss-curv.mgh"),
         )
 
         pd.DataFrame(np.concatenate((cMidRm, np.array(mean_curvMid, ndmin=2).transpose()), axis=1)).to_csv(
-            os.path.join(OUT_DIR, HEMI + ".mid-surface.mean-curv.csv"), header=False, index=False
+            os.path.join(OUT_DIR, params.HEMI + ".mid-surface.mean-curv.csv"), header=False, index=False
         )
 
         pd.DataFrame(np.concatenate((cMidRm, np.array(gauss_curvMid, ndmin=2).transpose()), axis=1)).to_csv(
-            os.path.join(OUT_DIR, HEMI + ".mid-surface.gauss-curv.csv"), header=False, index=False
+            os.path.join(OUT_DIR, params.HEMI + ".mid-surface.gauss-curv.csv"), header=False, index=False
         )
 
     else:
@@ -654,26 +636,26 @@ def computeThickness(params):
 
         gauss_curvMax = triaMaxRm.map_tfunc_to_vfunc(gauss_curvMax)
 
-        io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".int-surface.mean-curv.psol"), mean_curvMax)
+        io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".int-surface.mean-curv.psol"), mean_curvMax)
 
-        io.write_vfunc(os.path.join(OUT_DIR, HEMI + ".int-surface.gauss-curv.psol"), gauss_curvMax)
+        io.write_vfunc(os.path.join(OUT_DIR, params.HEMI + ".int-surface.gauss-curv.psol"), gauss_curvMax)
 
         nb.freesurfer.save(
             nb.freesurfer.MGHImage(dataobj=mean_curvMax.astype("float32"), affine=None),
-            filename=os.path.join(OUT_DIR, HEMI + ".int-surface.mean-curv.mgh"),
+            filename=os.path.join(OUT_DIR, params.HEMI + ".int-surface.mean-curv.mgh"),
         )
 
         nb.freesurfer.save(
             nb.freesurfer.MGHImage(dataobj=gauss_curvMax.astype("float32"), affine=None),
-            filename=os.path.join(OUT_DIR, HEMI + ".int-surface.gauss-curv.mgh"),
+            filename=os.path.join(OUT_DIR, params.HEMI + ".int-surface.gauss-curv.mgh"),
         )
 
         pd.DataFrame(np.concatenate((cMaxRm, np.array(mean_curvMax, ndmin=2).transpose()), axis=1)).to_csv(
-            os.path.join(OUT_DIR, HEMI + ".int-surface.mean-curv.csv"), header=False, index=False
+            os.path.join(OUT_DIR, params.HEMI + ".int-surface.mean-curv.csv"), header=False, index=False
         )
 
         pd.DataFrame(np.concatenate((cMaxRm, np.array(gauss_curvMax, ndmin=2).transpose()), axis=1)).to_csv(
-            os.path.join(OUT_DIR, HEMI + ".int-surface.gauss-curv.csv"), header=False, index=False
+            os.path.join(OUT_DIR, params.HEMI + ".int-surface.gauss-curv.csv"), header=False, index=False
         )
 
     else:
@@ -686,9 +668,9 @@ def computeThickness(params):
 
     f = origV4flat
 
-    d1 = paramsTHXk
-    d2 = paramsTHYk
-    d3 = paramsTHZk
+    d1 = params.internal.THXk
+    d2 = params.internal.THYk
+    d3 = params.internal.THZk
 
     #
 
@@ -734,7 +716,7 @@ def computeThickness(params):
     vertList = np.reshape(vert, (d1 * d2 * d3, 3))
     triaNoNan = np.array(tria)[np.sum(np.sum(np.isnan(vertList[tria, :]), axis=2), axis=1) == 0, :]
 
-    TriaMesh.write_vtk(TriaMesh(vertList, triaNoNan), os.path.join(OUT_DIR, HEMI + ".hull.vtk"))
+    TriaMesh.write_vtk(TriaMesh(vertList, triaNoNan), os.path.join(OUT_DIR, params.HEMI + ".hull.vtk"))
 
     # --------------------------------------------------------------------------
     # return

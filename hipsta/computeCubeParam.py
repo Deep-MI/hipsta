@@ -598,21 +598,10 @@ def computeCubeParam(params):
     openBndCutTetraMeshFile = os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".open.bnd.cut.vtk")
     tetraIndexFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.psol")
 
-    hemi = params.HEMI
-
     if len(params.internal.aniso_alpha) == 1:
         paramAnisoAlpha = params.internal.aniso_alpha[0]
     else:
         paramAnisoAlpha = params.internal.aniso_alpha
-    paramAnisoSmooth = params.internal.aniso_smooth
-
-    labelPrsbc = params.LUTDICT["presubiculum"]
-    labelSbc = params.LUTDICT["subiculum"]
-    labelCA1 = params.LUTDICT["ca1"]
-    labelCA3 = params.LUTDICT["ca3"]
-    labelBndCA4 = params.LUTDICT["bndca4"]
-    labelTail = params.LUTDICT["jointtail"]
-    labelHead = params.LUTDICT["jointhead"]
 
     # load cut tetra mesh
 
@@ -659,20 +648,20 @@ def computeCubeParam(params):
 
     # compute first eigenfunction
 
-    fem = Solver(triaMesh4cBndOpenRm, lump=True, aniso=paramAnisoAlpha, aniso_smooth=paramAnisoSmooth)
+    fem = Solver(triaMesh4cBndOpenRm, lump=True, aniso=paramAnisoAlpha, aniso_smooth=params.internal.aniso_smooth)
 
     anisoLaplEval, anisoLaplEvec = fem.eigs(k=3)
 
     # --------------------------------------------------------------------------
     # get mapping of open boundary vertices to subfields
 
-    with open(os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + ".rm.open.bnd.cut.lst"), "r") as f:
+    with open(os.path.join(os.path.dirname(openBndCutTetraMeshFile), params.HEMI + ".rm.open.bnd.cut.lst"), "r") as f:
         hsfList = f.read().splitlines()
 
     hsfList = np.array(hsfList).astype(int)
 
     io.write_vfunc(
-        os.path.join(os.path.dirname(openBndCutTetraMeshFile), hemi + ".hsf.rm.open.bnd.cut.psol"), k4c[hsfList]
+        os.path.join(os.path.dirname(openBndCutTetraMeshFile), params.HEMI + ".hsf.rm.open.bnd.cut.psol"), k4c[hsfList]
     )
 
     # --------------------------------------------------------------------------
@@ -701,12 +690,12 @@ def computeCubeParam(params):
     #  (i.e., reverse) for 240 as well
 
     if np.median(
-        v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == labelPrsbc))[0], 2]
-    ) > np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == labelPrsbc))[0], 2]):
+        v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]
+    ) > np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]):
         pass
     elif np.median(
-        v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == labelPrsbc))[0], 2]
-    ) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == labelPrsbc))[0], 2]):
+        v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]
+    ) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]):
         logging.info("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
@@ -715,17 +704,17 @@ def computeCubeParam(params):
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
 
     if (
-        np.median(anisoLaplEvec[np.where(k4c[hsfList] == labelPrsbc)[0], 2]) < 0
+        np.median(anisoLaplEvec[np.where(k4c[hsfList] == params.LUTDICT["presubiculum"])[0], 2]) < 0
         and np.median(
-            anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == labelCA3, k4c[hsfList] == labelBndCA4))[0], 2]
+            anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"]))[0], 2]
         )
         > 0
     ):
         pass
     elif (
-        np.median(anisoLaplEvec[np.where(k4c[hsfList] == labelPrsbc)[0], 2]) > 0
+        np.median(anisoLaplEvec[np.where(k4c[hsfList] == params.LUTDICT["presubiculum"])[0], 2]) > 0
         and np.median(
-            anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == labelCA3, k4c[hsfList] == labelBndCA4))[0], 2]
+            anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"]))[0], 2]
         )
         < 0
     ):
@@ -734,8 +723,8 @@ def computeCubeParam(params):
     else:
         raise RuntimeError("Inconsistency detected for EV2, exiting.")
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
 
     # --------------------------------------------------------------------------
     # define boundary conditions (note that we changed dimensions and directions!)
@@ -771,8 +760,8 @@ def computeCubeParam(params):
     # y: Tail (226) -> Head (232) (post --> ant)
 
     vfuncY = np.zeros(np.shape(v4c)[0])
-    vfuncY[np.where(i4c == labelTail)[0]] = -1
-    vfuncY[np.where(i4c == labelHead)[0]] = 1
+    vfuncY[np.where(i4c == params.LUTDICT["jointtail"])[0]] = -1
+    vfuncY[np.where(i4c == params.LUTDICT["jointhead"])[0]] = 1
 
     # z: inf->sup
 
@@ -817,7 +806,7 @@ def computeCubeParam(params):
     v4cRm = tetMesh4c.v
     t4cRm = tetMesh4c.t
 
-    TetMesh.write_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, hemi + ".seam.rm.cut.vtk"))
+    TetMesh.write_vtk(tetMesh4c, os.path.join(cutTetraMeshDir, params.HEMI + ".seam.rm.cut.vtk"))
 
     #
 
@@ -846,13 +835,13 @@ def computeCubeParam(params):
 
     # write out functions
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".vfuncX.seam.rm.cut.psol"), vfuncXRm)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".vfuncY.seam.rm.cut.psol"), vfuncYRm)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".vfuncZ.seam.rm.cut.psol"), vfuncZRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncX.seam.rm.cut.psol"), vfuncXRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncY.seam.rm.cut.psol"), vfuncYRm)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncZ.seam.rm.cut.psol"), vfuncZRm)
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".poisson0.seam.rm.cut.psol"), P0)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".poisson1.seam.rm.cut.psol"), P1)
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".poisson2.seam.rm.cut.psol"), P2)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.seam.rm.cut.psol"), P0)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.seam.rm.cut.psol"), P1)
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson2.seam.rm.cut.psol"), P2)
 
     # also write out boundary files for visualization
 
@@ -863,21 +852,21 @@ def computeCubeParam(params):
     v4cRmBndRm = tetMesh4cRmBnd.v
     t4cRmBndRm = tetMesh4cRmBnd.t
 
-    TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, hemi + ".rm.bnd.seam.rm.cut.vtk"))
+    TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".vfuncX.rm.bnd.seam.rm.cut.psol"), vfuncXRm[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".vfuncY.rm.bnd.seam.rm.cut.psol"), vfuncYRm[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".vfuncZ.rm.bnd.seam.rm.cut.psol"), vfuncZRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncX.rm.bnd.seam.rm.cut.psol"), vfuncXRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncY.rm.bnd.seam.rm.cut.psol"), vfuncYRm[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncZ.rm.bnd.seam.rm.cut.psol"), vfuncZRm[v4cRmBndRmKeep])
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".poisson0.rm.bnd.seam.rm.cut.psol"), P0[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".poisson1.rm.bnd.seam.rm.cut.psol"), P1[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, hemi + ".poisson2.rm.bnd.seam.rm.cut.psol"), P2[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.rm.bnd.seam.rm.cut.psol"), P0[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol"), P1[v4cRmBndRmKeep])
+    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson2.rm.bnd.seam.rm.cut.psol"), P2[v4cRmBndRmKeep])
 
     # write out cube
 
     w4cRm = np.vstack((P0, P1, P2)).transpose()
 
-    TetMesh.write_vtk(TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, hemi + ".uvw.seam.rm.cut.vtk"))
+    TetMesh.write_vtk(TetMesh(v=w4cRm, t=t4cRm), os.path.join(cutTetraMeshDir, params.HEMI + ".uvw.seam.rm.cut.vtk"))
 
     #
 

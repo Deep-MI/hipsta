@@ -300,26 +300,16 @@ def cutTetra(params):
 
     tetraCutOutDir = os.path.join(params.OUTDIR, "tetra-cut")
 
-    labelHead = params.LUTDICT["jointhead"]
-    labelTail = params.LUTDICT["jointtail"]
-    labelBndHead = params.LUTDICT["bndhead"]
-    labelBndTail = params.LUTDICT["bndtail"]
-    labelBndCA4 = params.LUTDICT["bndca4"]
-
-    cutRange = params.internal.cut_range
-
-    hemi = params.HEMI
-
     # -------------------------------------------------------------------------
     # get data
     # -------------------------------------------------------------------------
 
     v4, t4, l4idx = _importData(tetraFile, tetraIdxFile)
 
-    l4idx[np.where(l4idx < labelBndTail)[0]] = 0
-    l4idx[np.where(l4idx == labelBndCA4)[0]] = 0
-    l4idx[np.where(l4idx == labelBndHead)[0]] = -1
-    l4idx[np.where(l4idx == labelBndTail)[0]] = 1
+    l4idx[np.where(l4idx < params.LUTDICT["bndtail"])[0]] = 0
+    l4idx[np.where(l4idx == params.LUTDICT["bndca4"])[0]] = 0
+    l4idx[np.where(l4idx == params.LUTDICT["bndhead"])[0]] = -1
+    l4idx[np.where(l4idx == params.LUTDICT["bndtail"])[0]] = 1
 
     # -------------------------------------------------------------------------
     # preprocess data
@@ -332,11 +322,11 @@ def cutTetra(params):
     # -------------------------------------------------------------------------
 
     # compute level sets
-    vlTail, llTail, ilTail, jlTail, olTail = levelsetsTetra(v4, t4, l4, cutRange[0])
-    vlHead, llHead, ilHead, jlHead, olHead = levelsetsTetra(v4, t4, l4, cutRange[1])
+    vlTail, llTail, ilTail, jlTail, olTail = levelsetsTetra(v4, t4, l4, params.internal.cut_range[0])
+    vlHead, llHead, ilHead, jlHead, olHead = levelsetsTetra(v4, t4, l4, params.internal.cut_range[1])
 
     # find all tetras that do not exceed the cutting criteria
-    t4c1 = t4[np.where(np.sum(np.isin(t4, np.where((l4 > cutRange[0]) & (l4 < cutRange[1]))), axis=1) == 4), :][0]
+    t4c1 = t4[np.where(np.sum(np.isin(t4, np.where((l4 > params.internal.cut_range[0]) & (l4 < params.internal.cut_range[1]))), axis=1) == 4), :][0]
 
     # add new points to v and generate new triangles
     v4c = np.concatenate((v4, vlTail[0], vlHead[0]), axis=0)
@@ -628,8 +618,8 @@ def cutTetra(params):
     i4c = np.concatenate(
         (
             1 * np.ones(np.shape(v4)[0]),  # original points (includes exterior and interior points)
-            labelTail * np.ones(np.shape(vlTail[0])[0]),  # labelTail points
-            labelHead * np.ones(np.shape(vlHead[0])[0]),  # labelHead points
+            params.LUTDICT["jointtail"] * np.ones(np.shape(vlTail[0])[0]),  # labelTail points
+            params.LUTDICT["jointhead"] * np.ones(np.shape(vlHead[0])[0]),  # labelHead points
             2
             * np.ones(
                 np.shape(v4c)[0] - np.shape(v4)[0] - np.shape(vlTail[0])[0] - np.shape(vlHead[0])[0]
@@ -641,7 +631,7 @@ def cutTetra(params):
     # export data
     # -------------------------------------------------------------------------
 
-    _exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, hemi, v4c, t4c, i4c)
+    _exportData(tetraCutOutFile, tetraCutOutFileFunc, tetraCutOutDir, params.HEMI, v4c, t4c, i4c)
 
     # -------------------------------------------------------------------------
     # return

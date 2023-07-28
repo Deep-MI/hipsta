@@ -27,9 +27,6 @@ def removeBoundaryMask(params):
     VTKFile = os.path.join(params.OUTDIR, params.HEMI + ".tetra.vtk")
     PSOLFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.psol")
 
-    labelBndHead = params.LUTDICT["bndhead"]
-    labelBndTail = params.LUTDICT["bndtail"]
-
     # -------------------------------------------------------------------------
     # load data
 
@@ -38,8 +35,8 @@ def removeBoundaryMask(params):
     lbl = io.read_vfunc(PSOLFile)
     lbl = np.array(lbl)
 
-    vTail = tetMesh.v[lbl == labelBndTail,]
-    vHead = tetMesh.v[lbl == labelBndHead,]
+    vTail = tetMesh.v[lbl == params.LUTDICT["bndtail"],]
+    vHead = tetMesh.v[lbl == params.LUTDICT["bndhead"],]
 
     # -------------------------------------------------------------------------
     # cutting surfaces based on point-cloud PCA
@@ -148,8 +145,8 @@ def removeBoundaryMask(params):
     # write PSOL
 
     vIdx = np.zeros(np.shape(tetMesh.v)[0])
-    vIdx[vcutIdxHead] = labelBndTail
-    vIdx[vcutIdxTail] = labelBndHead
+    vIdx[vcutIdxHead] = params.LUTDICT["bndtail"]
+    vIdx[vcutIdxTail] = params.LUTDICT["bndhead"]
 
     io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".tetra-remove_bnd.psol"), vIdx)
 
