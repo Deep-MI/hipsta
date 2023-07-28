@@ -13,7 +13,6 @@ import nibabel as nb
 import numpy as np
 import pandas as pd
 from lapy import TriaMesh, io
-from scipy import spatial as sp
 from scipy import stats as st
 
 # ------------------------------------------------------------------------------
@@ -305,6 +304,7 @@ def mapValues(params, IN_VOL=None, IN_SURF=None, IN_LABEL=None, IN_INDICES=None,
 
     # variant 1: do it in surface RAS space (disadvantage: need to do distance
     # computation for many unnecessary values)
+    #from scipy import spatial as sp
     #coordXYZ = np.concatenate((ind, np.ones((len(ind), 1))), axis=1)
     #coordSurfRAS = np.matmul(coordXYZ, mat.transpose())[:, 0:3]
     #dst = sp.distance_matrix(surf.v, coordSurfRAS)

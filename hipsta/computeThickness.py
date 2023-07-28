@@ -201,10 +201,10 @@ def computeThickness(params):
 
                         ctr[lx,ly,lz] = tmp[tmpi[0]]
 
-                if any(np.isnan(origV4[lx,ly,lz,:])) == False:
+                if any(np.isnan(origV4[lx,ly,lz,:])) is False:
                     origV4flat.append(np.hstack((np.array([lx,ly,lz]), origV4[lx,ly,lz,:])))
 
-                if np.isnan(ctr[lx,ly,lz]) == False:
+                if np.isnan(ctr[lx,ly,lz]) is False:
                     ctrflat.append(np.hstack((np.array([lx,ly,lz]), ctr[lx,ly,lz])))
 
     origV4flat = np.array(origV4flat)
@@ -670,13 +670,13 @@ def computeThickness(params):
     vert = np.full((d1, d2, d3, 3), np.nan)
     tria = list()
 
-    for l in range(0, len(f)):
+    for f_i in range(0, len(f)):
 
         # get indices
-        i, j, k = f[l, 0:3].astype(int)
+        i, j, k = f[f_i, 0:3].astype(int)
 
         # assign coordinates
-        vert[i,j,k,:] = f[l, 3:6]
+        vert[i,j,k,:] = f[f_i, 3:6]
 
         # get trias
 
@@ -714,25 +714,3 @@ def computeThickness(params):
     # return
 
     return(params)
-
-
-# ------------------------------------------------------------------------------
-# CLI
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-# MAIN PART
-
-if __name__ == "__main__":
-
-    # Command line options and error checking
-
-    options = options_parse()
-
-    # Run analysis
-
-    computeThickness(params=None,
-        IN_MESH=options.IN_MESH,
-        IN_FUNC=options.IN_FUNC,
-        OUT_DIR=options.OUT_DIR,
-        HEMI=options.HEMI)

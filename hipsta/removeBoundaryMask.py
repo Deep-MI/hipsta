@@ -35,11 +35,11 @@ def removeBoundaryMask(params):
 
     tetMesh = TetMesh.read_vtk(VTKFile)
 
-    l = io.read_vfunc(PSOLFile)
-    l = np.array(l)
+    lbl = io.read_vfunc(PSOLFile)
+    lbl = np.array(lbl)
 
-    vTail = tetMesh.v[l==labelBndTail, ]
-    vHead = tetMesh.v[l==labelBndHead, ]
+    vTail = tetMesh.v[lbl==labelBndTail, ]
+    vHead = tetMesh.v[lbl==labelBndHead, ]
 
     # -------------------------------------------------------------------------
     # cutting surfaces based on point-cloud PCA

@@ -21,11 +21,11 @@ def levelsetsTria(v, t, p, levelsets):
 
     levelsets = (np.array(levelsets, ndmin=2))
 
-    for l in range(len(levelsets)):
+    for l_i in range(len(levelsets)):
 
         A = lil_matrix((np.shape(v)[0],np.shape(v)[0]))
 
-        lvl = levelsets[l]
+        lvl = levelsets[l_i]
 
         nlvl = p[t] > lvl
 
@@ -131,7 +131,7 @@ def levelsetsTetra(v, t, p, levelsets):
 
     levelsets = (np.array(levelsets, ndmin=2))
 
-    for l in range(len(levelsets[0])):
+    for l_i in range(len(levelsets[0])):
 
         # matrix to store previous interpolation
 
@@ -139,7 +139,7 @@ def levelsetsTetra(v, t, p, levelsets):
 
         # current levelset
 
-        lvl = levelsets[0][l]
+        lvl = levelsets[0][l_i]
 
         # for each tetra, which of its four points are outlying? nlvl is yes/no, n contains indices
 
