@@ -3,15 +3,15 @@ This module provides a function to compute a cube parametrization
 
 """
 
-import os
 import logging
+import os
 
-import numpy as np
 import nibabel as nb
-
+import numpy as np
+from lapy import Solver, TetMesh, TriaMesh, io
+from scipy import sparse as sp
+from scipy import stats as st
 from sklearn.decomposition import PCA
-from scipy import sparse as sp, stats as st
-from lapy import TriaMesh, TetMesh, Solver, io
 
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS

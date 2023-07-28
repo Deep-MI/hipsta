@@ -4,32 +4,51 @@ thickness analysis package.
 
 """
 
-import os
-import sys
-import shutil
-import logging
 import argparse
-import pandas
+import logging
+import os
+import shutil
+import sys
 import tempfile
 import time
-import traceback
 
-from .processImage import convertFormat, cropImage, upsampleImage, copy_image_to_main
-from .processLabels import createLabels, mergeMolecularLayer, autoMask, copy_labels_to_main
-from .processMask import binarizeMask, gaussFilter, longFilter, closeMask, copy_mask_to_main
-from .createSurface import extractSurface, remeshSurface, smoothSurface
-from .createTetraMesh import createTetraMesh
-from .createTetraLabels import createTetraLabels
-from .removeBoundaryMask import removeBoundaryMask
-from .cutTetra import cutTetra
+import pandas
+
+from .cfg import setup_logging
+from .cfg.config import get_defaults
 from .computeCubeParam import computeCubeParam
 from .computeThickness import computeThickness
-from .utils.check_surface import checkSurface
-from .utils.map_values import mapValues
-from .utils.create_supplementary_files import createSupplementaryFiles
-from .utils.qc_plots import qcPlots
-from .cfg.config import get_defaults
+from .createSurface import extractSurface, remeshSurface, smoothSurface
+from .createTetraLabels import createTetraLabels
+from .createTetraMesh import createTetraMesh
+from .cutTetra import cutTetra
 from .doc.documentation import get_help_text
+from .processImage import convertFormat, copy_image_to_main, cropImage, upsampleImage
+from .processLabels import (
+    autoMask,
+    copy_labels_to_main,
+    createLabels,
+    mergeMolecularLayer,
+)
+from .processMask import (
+    binarizeMask,
+    closeMask,
+    copy_mask_to_main,
+    gaussFilter,
+    longFilter,
+)
+from .removeBoundaryMask import removeBoundaryMask
+from .utils.check_surface import checkSurface
+from .utils.create_supplementary_files import createSupplementaryFiles
+from .utils.map_values import mapValues
+from .utils.qc_plots import qcPlots
+
+print("3456")
+
+# ==============================================================================
+# LOGGING
+
+logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # FUNCTIONS
@@ -67,74 +86,6 @@ def get_help(print_help=True, return_help=False):
 
     if return_help:
         return HELPTEXT
-
-
-# ------------------------------------------------------------------------------
-# start logging
-
-def _start_logging(args):
-    """
-    start logging
-
-    """
-
-    # TODO: logfile will be empty when attempting to overwrite an existing logfile
-    # TODO: when calling from python, logging behavior will be altered permanently
-    #       for the session, i.e. unrelated error are handled by the logger also.
-    #       maybe the solution is to define a dedicated logger?
-
-    # setup function to log uncaught exceptions
-    def foo(exctype, value, tb):
-        # log
-        logging.error('Error Information:')
-        logging.error('Type: %s', exctype)
-        logging.error('Value: %s', value)
-        for i in traceback.format_list(traceback.extract_tb(tb)):
-            logging.error('Traceback: %s', i)
-        # message
-        logging.error('Program exited with ERRORS.')
-    sys.excepthook = foo
-
-    # check if output directory exists or can be created
-    if os.path.isdir(args.outputdir):
-        logging.info("Found output directory " + args.outputdir)
-    else:
-        try:
-            os.mkdir(args.outputdir)
-        except OSError as e:
-            logging.error("Cannot create output directory " + args.outputdir)
-            logging.error("Reason: " + str(e))
-            raise
-
-    # check if logfile can be written in output directory
-    try:
-        testfile = tempfile.TemporaryFile(dir=args.outputdir)
-        testfile.close()
-    except OSError as e:
-        logging.error(args.outputdir + " not writeable")
-        logging.error("Reason: " + str(e))
-        raise
-
-    # set up logging
-    logfile_format = "[%(levelname)s: %(filename)s] %(message)s"
-    logfile_handlers = [logging.StreamHandler(sys.stdout)]
-    logging.basicConfig(level=logging.INFO, format=logfile_format, handlers=logfile_handlers)
-
-    # start logging
-    logfile =  os.path.join(args.outputdir, 'logfile.txt')
-    logging.getLogger().addHandler(logging.FileHandler(filename=logfile, mode="w"))
-
-    # intial messages
-    logging.info("Starting logging for hippocampal shapetools ...")
-    logging.info("Logfile: %s", logfile)
-    logging.info("Version: %s", get_version())
-    logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
-
-    # log args
-    logging.info("Command: " + " ".join(sys.argv))
-
-    # return
-    return args
 
 
 # ------------------------------------------------------------------------------
@@ -725,24 +676,31 @@ def _run_hipsta(args):
 
     """
 
-    # start logging
-    args = _start_logging(args)
+    #
+    try:
 
-    # check environment and packages
-    _check_environment_and_packages()
+        # check environment and packages
+        _check_environment_and_packages()
 
-    # create directories
-    _create_directories(args)
+        # create directories
+        _create_directories(args)
 
-    # convert arguments to params
-    params = _evaluate_args(args)
+        # convert arguments to params
+        params = _evaluate_args(args)
 
-    # check params
-    _check_params(params)
+        # check params
+        _check_params(params)
 
-    # run analysis
-    _run_analysis(params)
+        # run analysis
+        _run_analysis(params)
 
+    except Exception as e:
+
+        logging.error('Error Information:')
+        logging.error('Type: %s', type(e))
+        logging.error('Value: %s', e.args)
+
+        raise
 
 # ------------------------------------------------------------------------------
 # run_hipsta
@@ -850,7 +808,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
             self.gauss_filter_size = get_defaults("gauss_filter_size")
             self.long_filter = get_defaults("long_filter")
             self.long_filter_size = get_defaults("long_filter_size")
-            self.no_clos_emask = get_defaults("no_close_mask")
+            self.no_close_mask = get_defaults("no_close_mask")
             self.mca = get_defaults("mca")
             self.remesh = get_defaults("remesh")
             self.smooth = get_defaults("smooth")

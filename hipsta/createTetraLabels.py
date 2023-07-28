@@ -7,10 +7,9 @@ This module provides a function to create a label files for a tetrahedral mesh
 import os
 import subprocess
 
-import numpy as np
 import nibabel as nb
-
-from lapy import TriaMesh, TetMesh, io
+import numpy as np
+from lapy import TetMesh, TriaMesh, io
 
 # -----------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS

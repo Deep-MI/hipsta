@@ -3,18 +3,18 @@ This module provides a function to map values from a volume to the midsurface.
 
 """
 
-import os
-import sys
-import subprocess
-import logging
 import argparse
+import logging
+import os
+import subprocess
+import sys
 
 import nibabel as nb
 import numpy as np
 import pandas as pd
-
 from lapy import TriaMesh, io
-from scipy import spatial as sp, stats as st
+from scipy import spatial as sp
+from scipy import stats as st
 
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS

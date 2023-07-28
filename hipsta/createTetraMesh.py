@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 
-from lapy import TriaMesh, TetMesh
+from lapy import TetMesh, TriaMesh
 
 # ==============================================================================
 # FUNCTIONS

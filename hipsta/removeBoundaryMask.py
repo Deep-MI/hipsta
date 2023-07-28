@@ -6,7 +6,6 @@ This module provides a function to remove boundary tetras from tetrahedral meshe
 import os
 
 import numpy as np
-
 from lapy import TetMesh, io
 
 # -----------------------------------------------------------------------------

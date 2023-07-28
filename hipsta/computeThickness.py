@@ -3,14 +3,13 @@ This module provides a function to compute thickness
 
 """
 
-import os
 import logging
+import os
 
+import nibabel as nb
 import numpy as np
 import pandas as pd
-import nibabel as nb
-
-from lapy import TriaMesh, TetMesh, io
+from lapy import TetMesh, TriaMesh, io
 from scipy.sparse import csgraph as sc
 
 from .utils.get_levelsets import levelsetsTetra

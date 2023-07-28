@@ -8,9 +8,7 @@ import shutil
 
 import nibabel as nb
 import numpy as np
-
 from scipy import ndimage
-
 
 # ==============================================================================
 # FUNCTIONS

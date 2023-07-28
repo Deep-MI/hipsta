@@ -3,13 +3,12 @@ This module provides functions for basic image processing operations (conversion
 
 """
 
-import os
 import logging
+import os
 import shutil
 import subprocess
 
 import nibabel as nb
-
 from nilearn import image as nli
 
 # ==============================================================================

@@ -5,15 +5,13 @@ cube algorithm, remeshing and smoothing.
 """
 
 import os
+import shutil
 import subprocess
 
-import shutil
-import pyacvd
-
-import numpy as np
 import nibabel as nb
+import numpy as np
+import pyacvd
 import pyvista as pv
-
 from lapy import TriaMesh
 from scipy import sparse as sp
 from skimage import measure as skm

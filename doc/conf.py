@@ -217,9 +217,10 @@ sphinx_gallery_conf = {
     "within_subsection_order": FileNameSortKey,
 }
 
+import os
+
 # -- make sure pandoc gets installed -----------------------------------------
 from inspect import getsourcefile
-import os
 
 # Get path to directory containing this file, conf.py.
 DOCS_DIRECTORY = os.path.dirname(os.path.abspath(getsourcefile(lambda: 0)))

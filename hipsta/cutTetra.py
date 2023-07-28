@@ -3,14 +3,13 @@ This module provides a function to cut tetrahedral meshes
 
 """
 
+import itertools as it
 import os
 
 import numpy as np
-import scipy.sparse as sp
 import scipy.linalg as la
-import itertools as it
-
-from lapy import TriaMesh, TetMesh, io, TetMesh, Solver
+import scipy.sparse as sp
+from lapy import Solver, TetMesh, TriaMesh, io
 
 from .utils.get_levelsets import levelsetsTetra
 

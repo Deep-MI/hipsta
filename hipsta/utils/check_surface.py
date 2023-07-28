@@ -3,8 +3,8 @@ This module provides a function to check surfaces
 
 """
 
-import os
 import logging
+import os
 
 from lapy import TriaMesh
 

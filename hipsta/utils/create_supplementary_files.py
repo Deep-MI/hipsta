@@ -3,12 +3,11 @@ This module creates supplementary files, primarily for visualization.
 
 """
 
-import os
 import logging
+import os
 
 import nibabel as nb
 import numpy as np
-
 from lapy import TriaMesh
 
 from .get_levelsets import levelsetsTria

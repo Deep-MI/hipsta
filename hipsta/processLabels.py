@@ -3,13 +3,13 @@ This module provides functions for processing label images
 
 """
 
+import logging
 import os
 import shutil
-import logging
 import subprocess
 
-import numpy as np
 import nibabel as nb
+import numpy as np
 
 # ==============================================================================
 # FUNCTIONS
