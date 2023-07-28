@@ -27,7 +27,7 @@ Use the following code to download this package from its GitHub repository:
 
 `git clone https://github.com/Deep-MI/Hipsta.git`
 
-You can use the following code to install the required Python depencies:
+You can use the following code to install the required Python dependencies:
 
 `pip install -r requirements.txt`
 
@@ -54,7 +54,7 @@ and settings apply; see [Supported Segmentations](https://github.com/Deep-MI/Hip
 pyacvd libraries, among others. See `requirements.txt` for a full list, and use
 `pip install -r requirements.txt` to install.
 
-4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
+4. The gmsh package (version 2.x; http://gmsh.info) must be installed. Can be
 downloaded e.g. as binaries for [linux](https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz) or
 [MacOSX](https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg) . The 'gmsh' binary must 
 be on the $PATH:

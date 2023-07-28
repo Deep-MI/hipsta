@@ -252,7 +252,7 @@ Also the intermediate volume and surface files can be useful for quality control
 3. Python 3.8 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
    pyacvd libraries. See `requirements.txt` for a full list.
 
-4. The gmsh package (verson 2.x; http://gmsh.info) must be installed. Can be
+4. The gmsh package (version 2.x; http://gmsh.info) must be installed. Can be
    downloaded from e.g. https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz
    or https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg. The 'gmsh' binary
    must also be on the $PATH, i.e `export PATH=${PATH}:/path/to/my/gmsh`
