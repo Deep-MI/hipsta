@@ -83,7 +83,7 @@ exclude = ['docker', 'singularity']
 "hipsta.doc" = ["*.md"]
 
 [tool.black]
-line-length = 88
+line-length = 120
 target-version = ['py38']
 include = '\.pyi?$'
 extend-exclude = '''
@@ -97,7 +97,7 @@ extend-exclude = '''
 [tool.isort]
 profile = 'black'
 multi_line_output = 3
-line_length = 88
+line_length = 120
 py_version = 38
 extend_skip_glob = [
     'setup.py',
@@ -113,12 +113,12 @@ match-dir = '^fsqc.*'
 add_ignore = 'D100,D104,D107'
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 extend-exclude = [
     "doc",
     "setup.py",
 ]
-ignore = ["E501"] # line too long (black will do that)
+ignore = ["E501", "F841"] # line too long (black will do that), variable assigned but not used (useful for debugging, future development)
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
