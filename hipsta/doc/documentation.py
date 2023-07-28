@@ -6,7 +6,8 @@ thickness analysis package.
 
 # this is a backport to python 3.8; for newer versions (>=3.10) use built-in
 # importlib.resources
-from importlib_resources import files 
+from importlib_resources import files
+
 
 def get_help_text():
 
