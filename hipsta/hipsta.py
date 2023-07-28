@@ -56,8 +56,8 @@ logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------------------
 # get_version()
 
-def get_version():
 
+def get_version():
     from importlib import metadata
 
     try:
@@ -72,6 +72,7 @@ def get_version():
 
 # ------------------------------------------------------------------------------
 # get_help()
+
 
 def get_help(print_help=True, return_help=False):
     """
@@ -91,26 +92,26 @@ def get_help(print_help=True, return_help=False):
 # ------------------------------------------------------------------------------
 # check environment and packages
 
-def _check_environment_and_packages():
 
+def _check_environment_and_packages():
     # check environment variables
-    if os.environ.get('FREESURFER_HOME') is None:
-        raise RuntimeError('Need to set the FreeSurfer_HOME environment variable')
+    if os.environ.get("FREESURFER_HOME") is None:
+        raise RuntimeError("Need to set the FreeSurfer_HOME environment variable")
 
     # check python version
     if sys.version_info <= (3, 5):
-        raise RuntimeError('Python version must be 3.5 or greater')
+        raise RuntimeError("Python version must be 3.5 or greater")
 
     # check for gmsh
     if shutil.which("gmsh") is None:
-        raise RuntimeError('Could not find a \'gmsh\' executable')
+        raise RuntimeError("Could not find a 'gmsh' executable")
 
 
 # ------------------------------------------------------------------------------
 # check directories
 
-def _create_directories(args):
 
+def _create_directories(args):
     # note that the main output directory has been created during
     # _start_logging() already
 
@@ -126,17 +127,15 @@ def _create_directories(args):
         os.path.join(args.outputdir, "tetra-cut"),
         os.path.join(args.outputdir, "tetra-cube"),
         os.path.join(args.outputdir, "thickness"),
-        os.path.join(args.outputdir, "qc")
-        ]
+        os.path.join(args.outputdir, "qc"),
+    ]
 
     # loop over list of directories
 
     for directory in list_of_directories:
-
         if not os.path.isdir(directory):
-
             try:
-                logging.info('Creating output directory ' + directory)
+                logging.info("Creating output directory " + directory)
                 os.mkdir(directory)
             except OSError as e:
                 logging.error("Cannot create output directory " + args.outputdir)
@@ -147,6 +146,7 @@ def _create_directories(args):
 # ------------------------------------------------------------------------------
 # parse_arguments
 
+
 def _parse_arguments():
     """
     an internal function to parse input arguments
@@ -154,101 +154,322 @@ def _parse_arguments():
     """
 
     # setup parser
-    parser = argparse.ArgumentParser(description="This program conducts a thickness analysis of the hippocampus, based on a FreeSurfer, ASHS, or custom hippocampal subfield segmentation.",
-        add_help=False)
+    parser = argparse.ArgumentParser(
+        description="This program conducts a thickness analysis of the hippocampus, based on a FreeSurfer, ASHS, or custom hippocampal subfield segmentation.",
+        add_help=False,
+    )
 
     # required arguments (set to required=False, because not required when using --more-help)
-    required = parser.add_argument_group('Required arguments')
+    required = parser.add_argument_group("Required arguments")
 
-    required.add_argument('--filename', dest="filename", help="Filename of a segmentation file.",
-        default=None, metavar="<filename>", required=False)
-    required.add_argument('--hemi', dest="hemi", help="Hemisphere. Either \'lh\' or \'rh\'.",
-        default=None, metavar="<lh|rh>", required=False)
-    required.add_argument('--lut', dest="lut", help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\' and \'ashs\' are keywords for built-in tables.",
-        default=None, metavar="<freesurfer|ashs|filename>", required=False)
-    required.add_argument('--outputdir', dest="outputdir", help="Directory where the results will be written.",
-        default=None, metavar="<directory>", required=False)
+    required.add_argument(
+        "--filename",
+        dest="filename",
+        help="Filename of a segmentation file.",
+        default=None,
+        metavar="<filename>",
+        required=False,
+    )
+    required.add_argument(
+        "--hemi", dest="hemi", help="Hemisphere. Either 'lh' or 'rh'.", default=None, metavar="<lh|rh>", required=False
+    )
+    required.add_argument(
+        "--lut",
+        dest="lut",
+        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer' and 'ashs' are keywords for built-in tables.",
+        default=None,
+        metavar="<freesurfer|ashs|filename>",
+        required=False,
+    )
+    required.add_argument(
+        "--outputdir",
+        dest="outputdir",
+        help="Directory where the results will be written.",
+        default=None,
+        metavar="<directory>",
+        required=False,
+    )
 
     # optional arguments
-    optional = parser.add_argument_group('Optional arguments')
+    optional = parser.add_argument_group("Optional arguments")
 
-    optional.add_argument('--no-cleanup', dest='no_cleanup', help="Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.",
-        default=get_defaults("no_cleanup"), action="store_true", required=False)
-    optional.add_argument('--no-crop', dest='no_crop', help="Do not crop image.",
-        default=get_defaults("no_crop"), action="store_true", required=False)
-    optional.add_argument('--upsample', dest='upsample', help="Upsample to the smallest voxel edge length.",
-        default=get_defaults("upsample"), action="store_true", required=False)
-    optional.add_argument('--upsample-size', dest='upsample_size', help="Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. Default: 0 0 0",
-        default=get_defaults("upsample_size"), metavar="<float>", nargs=3, required=False, type=float)
-    optional.add_argument('--no-merge-molecular-layer', dest='no_merge_molecular_layer', help="Do not merge molecular layer (only applicable for FreeSurfer segmentations).",
-        default=get_defaults("no_merge_molecular_layer"), action="store_true", required=False)
-    optional.add_argument('--automask-head', dest='automask_head', help="Automated boundary detection for hippocampal head.",
-        default=get_defaults("automask_head"), action="store_true", required=False)
-    optional.add_argument('--automask-tail', dest='automask_tail', help="Automated boundary detection for hippocampal tail.",
-        default=get_defaults("automask_tail"), action="store_true", required=False)
-    optional.add_argument('--automask-head-margin', dest="automask_head_margin", help="Margin for automated boundary detection for hippocampal head. Default: 0",
-        default=get_defaults("automask_head_margin"), metavar="<int>", required=False, type=int)
-    optional.add_argument('--automask-tail-margin', dest="automask_tail_margin", help="Margin for automated boundary detection for hippocampal tail. Default: 0",
-        default=get_defaults("automask_tail_margin"), metavar="<int>", required=False, type=int)
-    optional.add_argument('--no-gauss-filter', dest='no_gauss_filter', help="Do not apply gaussian filter.",
-        default=get_defaults("no_gauss_filter"), action="store_true", required=False)
-    optional.add_argument('--gauss-filter-size', dest='gauss_filter_size', help="Filter width and threshold for gaussian filtering. Default: 1 50.",
-        default=get_defaults("gauss_filter_size"), metavar="<float>", nargs=2, required=False, type=float)
-    optional.add_argument('--long-filter', dest='long_filter', help="Apply filter along longitudinal axis, i.e. attempt to create smooth transitions between slices.",
-        default=get_defaults("long_filter"), action="store_true", required=False)
-    optional.add_argument('--long-filter-size', dest='long_filter_size', help="Size of longitudinal filter. Default: 5",
-        default=get_defaults("long_filter_size"), metavar="<int>", required=False, type=int)
-    optional.add_argument('--no-close-mask', dest='no_close_mask', help="Do not apply closing operation to mask, i.e. do not attempt to close small holes.",
-        default=get_defaults("no_close_mask"), action="store_true", required=False)
-    optional.add_argument('--mca', dest="mca", help="Type of marching-cube algorithm. Either \'mri_mc\' or \'skimage\'. Default: \'skimage\'",
-        default=get_defaults("mca"), metavar="<mri_mc|skimage>", required=False)
-    optional.add_argument('--remesh', dest='remesh', help="Apply remeshing operation to surface, i.e. create a regular, evenly spaced surface grid.",
-        default=get_defaults("remesh"),  action="store_true", required=False)
-    optional.add_argument('--smooth', dest="smooth", help="Mesh smoothing iterations. Default: 5",
-        default=get_defaults("smooth"), metavar="<int>", required=False, type=int)
-    optional.add_argument('--cut-range', dest="cut_range", help="Range for tetrahedral boundary cutting. Default: -0.975, 0.975",
-        default=get_defaults("cut_range"), metavar="<float>", nargs=2, required=False, type=float)
-    optional.add_argument('--aniso-alpha', dest="aniso_alpha", help="Anisotropy parameter(s). Can be one or two or two numbers. Default: 40",
-        default=get_defaults("aniso_alpha"), metavar="<float>", nargs='+', required=False, type=float)
-    optional.add_argument('--aniso-smooth', dest="aniso_smooth", help="Anisotropy smoothing iterations. Default: 3",
-        default=get_defaults("aniso_smooth"), metavar="<int>", required=False, type=int)
-    optional.add_argument('--thickness-grid', dest="thickness_grid", help="Extent and resolution of the grid used for thickness computation; three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: -0.9 0.9 41 -0.975 0.975 21 -0.9 0.9 11",
-        default=get_defaults("thickness_grid"), metavar="<float>", nargs=9, required=False, type=float)
+    optional.add_argument(
+        "--no-cleanup",
+        dest="no_cleanup",
+        help="Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.",
+        default=get_defaults("no_cleanup"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--no-crop",
+        dest="no_crop",
+        help="Do not crop image.",
+        default=get_defaults("no_crop"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--upsample",
+        dest="upsample",
+        help="Upsample to the smallest voxel edge length.",
+        default=get_defaults("upsample"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--upsample-size",
+        dest="upsample_size",
+        help="Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. Default: 0 0 0",
+        default=get_defaults("upsample_size"),
+        metavar="<float>",
+        nargs=3,
+        required=False,
+        type=float,
+    )
+    optional.add_argument(
+        "--no-merge-molecular-layer",
+        dest="no_merge_molecular_layer",
+        help="Do not merge molecular layer (only applicable for FreeSurfer segmentations).",
+        default=get_defaults("no_merge_molecular_layer"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--automask-head",
+        dest="automask_head",
+        help="Automated boundary detection for hippocampal head.",
+        default=get_defaults("automask_head"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--automask-tail",
+        dest="automask_tail",
+        help="Automated boundary detection for hippocampal tail.",
+        default=get_defaults("automask_tail"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--automask-head-margin",
+        dest="automask_head_margin",
+        help="Margin for automated boundary detection for hippocampal head. Default: 0",
+        default=get_defaults("automask_head_margin"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )
+    optional.add_argument(
+        "--automask-tail-margin",
+        dest="automask_tail_margin",
+        help="Margin for automated boundary detection for hippocampal tail. Default: 0",
+        default=get_defaults("automask_tail_margin"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )
+    optional.add_argument(
+        "--no-gauss-filter",
+        dest="no_gauss_filter",
+        help="Do not apply gaussian filter.",
+        default=get_defaults("no_gauss_filter"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--gauss-filter-size",
+        dest="gauss_filter_size",
+        help="Filter width and threshold for gaussian filtering. Default: 1 50.",
+        default=get_defaults("gauss_filter_size"),
+        metavar="<float>",
+        nargs=2,
+        required=False,
+        type=float,
+    )
+    optional.add_argument(
+        "--long-filter",
+        dest="long_filter",
+        help="Apply filter along longitudinal axis, i.e. attempt to create smooth transitions between slices.",
+        default=get_defaults("long_filter"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--long-filter-size",
+        dest="long_filter_size",
+        help="Size of longitudinal filter. Default: 5",
+        default=get_defaults("long_filter_size"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )
+    optional.add_argument(
+        "--no-close-mask",
+        dest="no_close_mask",
+        help="Do not apply closing operation to mask, i.e. do not attempt to close small holes.",
+        default=get_defaults("no_close_mask"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--mca",
+        dest="mca",
+        help="Type of marching-cube algorithm. Either 'mri_mc' or 'skimage'. Default: 'skimage'",
+        default=get_defaults("mca"),
+        metavar="<mri_mc|skimage>",
+        required=False,
+    )
+    optional.add_argument(
+        "--remesh",
+        dest="remesh",
+        help="Apply remeshing operation to surface, i.e. create a regular, evenly spaced surface grid.",
+        default=get_defaults("remesh"),
+        action="store_true",
+        required=False,
+    )
+    optional.add_argument(
+        "--smooth",
+        dest="smooth",
+        help="Mesh smoothing iterations. Default: 5",
+        default=get_defaults("smooth"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )
+    optional.add_argument(
+        "--cut-range",
+        dest="cut_range",
+        help="Range for tetrahedral boundary cutting. Default: -0.975, 0.975",
+        default=get_defaults("cut_range"),
+        metavar="<float>",
+        nargs=2,
+        required=False,
+        type=float,
+    )
+    optional.add_argument(
+        "--aniso-alpha",
+        dest="aniso_alpha",
+        help="Anisotropy parameter(s). Can be one or two or two numbers. Default: 40",
+        default=get_defaults("aniso_alpha"),
+        metavar="<float>",
+        nargs="+",
+        required=False,
+        type=float,
+    )
+    optional.add_argument(
+        "--aniso-smooth",
+        dest="aniso_smooth",
+        help="Anisotropy smoothing iterations. Default: 3",
+        default=get_defaults("aniso_smooth"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )
+    optional.add_argument(
+        "--thickness-grid",
+        dest="thickness_grid",
+        help="Extent and resolution of the grid used for thickness computation; three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: -0.9 0.9 41 -0.975 0.975 21 -0.9 0.9 11",
+        default=get_defaults("thickness_grid"),
+        metavar="<float>",
+        nargs=9,
+        required=False,
+        type=float,
+    )
 
     # expert options
-    expert = parser.add_argument_group('Expert options')
+    expert = parser.add_argument_group("Expert options")
 
-    expert.add_argument('--mcc', dest="mcc", help=argparse.SUPPRESS,
-        default=get_defaults("mcc"), metavar="<int>", required=False, type=int) # help="Marching-cube connectivity. Only used for \'mri_mc\' algorithm. Default: 1",
-    expert.add_argument('--remesh-size', dest='remesh_size', help=argparse.SUPPRESS,
-        default=get_defaults("remesh_size"), metavar="<int>", required=False, type=int) # help="Target number of vertices for remeshing operation. If zero, keep original number of vertices. Default: 0",
-    expert.add_argument('--no-check-surface', dest='no_check_surface', help=argparse.SUPPRESS,
-        default=get_defaults("no_check_surface"), action="store_true", required=False) # help="Do not check surface and proceed if there are holes.",
-    expert.add_argument('--no-check-boundaries', dest='no_check_boundaries', help=argparse.SUPPRESS,
-        default=get_defaults("no_check_boundaries"), action="store_true", required=False) # help="Do not check boundaries and proceed if there are less / more than two continuous boundary loops.",
-    expert.add_argument('--no-qc', dest='no_qc', help=argparse.SUPPRESS,
-        default=get_defaults("no_qc"), action="store_true", required=False) # help="Do not perform QC",
-    expert.add_argument('--allow-ragged-surfaces', dest='allow_ragged_surfaces', help=argparse.SUPPRESS,
-        default=get_defaults("allow_ragged_surfaces"), action="store_true", required=False) # help="Allow ragged mid-surfaces.",
-    expert.add_argument('--allow-ragged-trias', dest='allow_ragged_trias', help=argparse.SUPPRESS,
-        default=get_defaults("allow_ragged_trias"), action="store_true", required=False) # help="Allow triangles for ragged mid-surfaces.",
+    expert.add_argument(
+        "--mcc",
+        dest="mcc",
+        help=argparse.SUPPRESS,
+        default=get_defaults("mcc"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )  # help="Marching-cube connectivity. Only used for \'mri_mc\' algorithm. Default: 1",
+    expert.add_argument(
+        "--remesh-size",
+        dest="remesh_size",
+        help=argparse.SUPPRESS,
+        default=get_defaults("remesh_size"),
+        metavar="<int>",
+        required=False,
+        type=int,
+    )  # help="Target number of vertices for remeshing operation. If zero, keep original number of vertices. Default: 0",
+    expert.add_argument(
+        "--no-check-surface",
+        dest="no_check_surface",
+        help=argparse.SUPPRESS,
+        default=get_defaults("no_check_surface"),
+        action="store_true",
+        required=False,
+    )  # help="Do not check surface and proceed if there are holes.",
+    expert.add_argument(
+        "--no-check-boundaries",
+        dest="no_check_boundaries",
+        help=argparse.SUPPRESS,
+        default=get_defaults("no_check_boundaries"),
+        action="store_true",
+        required=False,
+    )  # help="Do not check boundaries and proceed if there are less / more than two continuous boundary loops.",
+    expert.add_argument(
+        "--no-qc",
+        dest="no_qc",
+        help=argparse.SUPPRESS,
+        default=get_defaults("no_qc"),
+        action="store_true",
+        required=False,
+    )  # help="Do not perform QC",
+    expert.add_argument(
+        "--allow-ragged-surfaces",
+        dest="allow_ragged_surfaces",
+        help=argparse.SUPPRESS,
+        default=get_defaults("allow_ragged_surfaces"),
+        action="store_true",
+        required=False,
+    )  # help="Allow ragged mid-surfaces.",
+    expert.add_argument(
+        "--allow-ragged-trias",
+        dest="allow_ragged_trias",
+        help=argparse.SUPPRESS,
+        default=get_defaults("allow_ragged_trias"),
+        action="store_true",
+        required=False,
+    )  # help="Allow triangles for ragged mid-surfaces.",
 
     # deprecated options - to be removed in the future
-    deprecated = parser.add_argument_group('Deprecated options')
+    deprecated = parser.add_argument_group("Deprecated options")
 
-    deprecated.add_argument('--no-orient', dest='no_orient', help=argparse.SUPPRESS,
-        default=get_defaults("no_orient"), action="store_true", required=False) # help="Do not check surface.",
+    deprecated.add_argument(
+        "--no-orient",
+        dest="no_orient",
+        help=argparse.SUPPRESS,
+        default=get_defaults("no_orient"),
+        action="store_true",
+        required=False,
+    )  # help="Do not check surface.",
 
     # define help
-    help = parser.add_argument_group('Getting help')
+    help = parser.add_argument_group("Getting help")
 
-    help.add_argument('--help', help="Display this help message and exit", action='help')
-    help.add_argument('--more-help', dest='more_help', help="Display extensive help message and exit", default=False, action="store_true", required=False)
-    help.add_argument('--version', help="Display version number and exit", action='version', version='%(prog)s ' + get_version())
+    help.add_argument("--help", help="Display this help message and exit", action="help")
+    help.add_argument(
+        "--more-help",
+        dest="more_help",
+        help="Display extensive help message and exit",
+        default=False,
+        action="store_true",
+        required=False,
+    )
+    help.add_argument(
+        "--version", help="Display version number and exit", action="version", version="%(prog)s " + get_version()
+    )
 
     # check if there are any inputs; if not, print help
     if len(sys.argv) == 1:
-        args = parser.parse_args(['--help'])
+        args = parser.parse_args(["--help"])
     else:
         args = parser.parse_args()
 
@@ -282,6 +503,7 @@ def _parse_arguments():
 # ------------------------------------------------------------------------------
 # evaluate arguments
 
+
 def _evaluate_args(args):
     """
     an internal function to set and return internal parameters
@@ -299,11 +521,11 @@ def _evaluate_args(args):
 
     # clean up
 
-    settings.CLEANUP = not(args.no_cleanup)
+    settings.CLEANUP = not (args.no_cleanup)
 
     # processImage
 
-    settings.CROP = not(args.no_crop)
+    settings.CROP = not (args.no_crop)
     settings.UPSAMPLE = args.upsample
     settings.UPSAMPLE_SIZE = args.upsample_size
 
@@ -327,11 +549,11 @@ def _evaluate_args(args):
 
     # processMask
 
-    settings.GAUSSFILTER = not(args.no_gauss_filter)
+    settings.GAUSSFILTER = not (args.no_gauss_filter)
     settings.GAUSSFILTER_SIZE = args.gauss_filter_size
     settings.LONGFILTER = args.long_filter
     settings.LONGFILTER_SIZE = args.long_filter_size
-    settings.CLOSEMASK = not(args.no_close_mask)
+    settings.CLOSEMASK = not (args.no_close_mask)
 
     # createSurface
 
@@ -358,8 +580,8 @@ def _evaluate_args(args):
 
     # checkSurface
 
-    settings.CHECKSURFACE = not(args.no_check_surface)
-    settings.CHECKBOUNDARIES = not(args.no_check_boundaries)
+    settings.CHECKSURFACE = not (args.no_check_surface)
+    settings.CHECKBOUNDARIES = not (args.no_check_boundaries)
 
     # cutTetra
 
@@ -391,74 +613,89 @@ def _evaluate_args(args):
     settings.mapValuesSelect = get_defaults("map_values_select")
     settings.mapValuesInterp = get_defaults("map_values_interp")
     settings.mapValuesWritePSOL = get_defaults("map_values_write_psol")
-    settings.mapValuesWriteMGH =  get_defaults("map_values_write_mgh")
-    settings.mapValuesWriteANNOT =  get_defaults("map_values_write_annot")
+    settings.mapValuesWriteMGH = get_defaults("map_values_write_mgh")
+    settings.mapValuesWriteANNOT = get_defaults("map_values_write_annot")
 
     # create the LUT # TODO: maybe move this to config
 
     if args.lut == "freesurfer":
-
         logging.info("Found internal, modified look-up table for FreeSurfer.")
 
-        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml" ]
+        LUTLABEL = ["tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml"]
 
-        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246 ]
+        LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246]
 
         LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
 
-        HSFLIST = [ 234, 236, 238, 240, 246 ]
+        HSFLIST = [234, 236, 238, 240, 246]
 
     elif args.lut == "freesurfer-no_ml":
-
         logging.info("Found internal, modified look-up table for FreeSurfer.")
 
-        LUTLABEL = [ "tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg" ]
+        LUTLABEL = ["tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg"]
 
-        LUTINDEX = [ 226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244 ]
+        LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244]
 
         LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
 
-        HSFLIST = [ 234, 236, 238, 240]
+        HSFLIST = [234, 236, 238, 240]
 
     elif args.lut == "ashs":
-
         logging.info("Found internal, modified look-up table for ASHS atlas.")
 
-        LUTLABEL = [ "ca1", "ca2", "ca3", "ca4", "dg", "tail_orig", "subiculum",
-            "presubiculum", "entorhinal", "ba35", "ba36", "parahippocampal",
-            "head", "tail" ]
+        LUTLABEL = [
+            "ca1",
+            "ca2",
+            "ca3",
+            "ca4",
+            "dg",
+            "tail_orig",
+            "subiculum",
+            "presubiculum",
+            "entorhinal",
+            "ba35",
+            "ba36",
+            "parahippocampal",
+            "head",
+            "tail",
+        ]
 
-        LUTINDEX = [ 1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5 ]
+        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
 
         LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
 
-        HSFLIST = [ 8, 1, 2, 4 ]
+        HSFLIST = [8, 1, 2, 4]
 
     elif os.path.isfile(args.lut):
-
         logging.info("Found look-up table " + args.lut)
 
-        lut = pandas.read_csv(args.lut, sep=' ', comment='#',
-            header=None, skipinitialspace=True, skip_blank_lines=True,
-            error_bad_lines=False, warn_bad_lines=True)
+        lut = pandas.read_csv(
+            args.lut,
+            sep=" ",
+            comment="#",
+            header=None,
+            skipinitialspace=True,
+            skip_blank_lines=True,
+            error_bad_lines=False,
+            warn_bad_lines=True,
+        )
 
         LUTDICT = dict(zip(lut[0], lut[1]))
 
         HSFLIST = list(lut[1])
 
     else:
-
         LUTDICT = dict()
 
         HSFLIST = []
 
     # add entries for tetra-labels # TODO: maybe move this to config
 
-    LUTDICT['jointtail'] = 226
-    LUTDICT['jointhead'] = 232
-    LUTDICT['bndtail'] = 2260
-    LUTDICT['bndhead'] = 2320
-    LUTDICT['bndca4'] = 2420
+    LUTDICT["jointtail"] = 226
+    LUTDICT["jointhead"] = 232
+    LUTDICT["bndtail"] = 2260
+    LUTDICT["bndhead"] = 2320
+    LUTDICT["bndca4"] = 2420
 
     # assemble and return params
 
@@ -483,6 +720,7 @@ def _evaluate_args(args):
 
 # ------------------------------------------------------------------------------
 # check params
+
 
 def _check_params(params):
     """
@@ -509,7 +747,7 @@ def _check_params(params):
 
     # check upsampling
 
-    if any(x<0 for x in params.internal.UPSAMPLE_SIZE) or any(x>1 for x in params.internal.UPSAMPLE_SIZE):
+    if any(x < 0 for x in params.internal.UPSAMPLE_SIZE) or any(x > 1 for x in params.internal.UPSAMPLE_SIZE):
         raise RuntimeError("All upsampling parameters should be between 0 and 1.")
 
     # check ML
@@ -523,13 +761,13 @@ def _check_params(params):
 
     # check aniso alpha
 
-    if len(params.internal.aniso_alpha)>2:
+    if len(params.internal.aniso_alpha) > 2:
         raise RuntimeError("Length of aniso-alpha must be 1 or 2.")
 
     # check LUT
 
     if params.LUT != "freesurfer" and params.LUT != "ashs" and not os.path.isfile(params.LUT):
-        raise RuntimeError("Look-up table can only be \'fs711\', \'ashs\', or an existing file, but not " + params.LUT)
+        raise RuntimeError("Look-up table can only be 'fs711', 'ashs', or an existing file, but not " + params.LUT)
 
     # return
 
@@ -539,10 +777,9 @@ def _check_params(params):
 # ------------------------------------------------------------------------------
 # run analysis
 
-def _run_analysis(params):
-    """
 
-    """
+def _run_analysis(params):
+    """ """
 
     # process image (1)
 
@@ -663,12 +900,13 @@ def _run_analysis(params):
 
     # all done
 
-    logging.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
+    logging.info("Date: %s", time.strftime("%d/%m/%Y %H:%M:%S"))
     logging.info("Hippocampal shapetools finished without errors.")
 
 
 # ------------------------------------------------------------------------------
 # _run_hipsta
+
 
 def _run_hipsta(args):
     """
@@ -678,7 +916,6 @@ def _run_hipsta(args):
 
     #
     try:
-
         # check environment and packages
         _check_environment_and_packages()
 
@@ -695,18 +932,18 @@ def _run_hipsta(args):
         _run_analysis(params)
 
     except Exception as e:
-
-        logging.error('Error Information:')
-        logging.error('Type: %s', type(e))
-        logging.error('Value: %s', e.args)
+        logging.error("Error Information:")
+        logging.error("Type: %s", type(e))
+        logging.error("Value: %s", e.args)
 
         raise
+
 
 # ------------------------------------------------------------------------------
 # run_hipsta
 
-def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
 
+def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     """
     Run the hippocampal shape and thickness analysis
 
@@ -793,7 +1030,6 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
 
     class Args:
         def __init__(self, dct=None):
-
             # get defaults
             self.no_cleanup = get_defaults("no_cleanup")
             self.no_crop = get_defaults("no_crop")
