@@ -17,15 +17,25 @@ from .get_levelsets import levelsetsTria
 # ==============================================================================
 # FUNCTIONS
 
-def _sortLevelSets(LVL, dims, tol=1e-16):
 
+def _sortLevelSets(LVL, dims, tol=1e-16):
     # create array of line segments
     tmpx = list()
     tmpy = list()
 
     for i in range(len(LVL[1][0])):
-        tmpx.append((LVL[0][0][LVL[1][0][i][0] - 1][dims[0]], LVL[0][0][LVL[1][0][i][1] - 1][dims[0]]))
-        tmpy.append((LVL[0][0][LVL[1][0][i][0] - 1][dims[1]], LVL[0][0][LVL[1][0][i][1] - 1][dims[1]]))
+        tmpx.append(
+            (
+                LVL[0][0][LVL[1][0][i][0] - 1][dims[0]],
+                LVL[0][0][LVL[1][0][i][1] - 1][dims[0]],
+            )
+        )
+        tmpy.append(
+            (
+                LVL[0][0][LVL[1][0][i][0] - 1][dims[1]],
+                LVL[0][0][LVL[1][0][i][1] - 1][dims[1]],
+            )
+        )
 
     tmpx = np.array(tmpx)
     tmpy = np.array(tmpy)
@@ -36,7 +46,9 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
     tmpy = tmpxy[:, 2:4]
 
     # remove segments which are de-facto points
-    tmpIdx = np.logical_or(np.abs(tmpx[:,0]-tmpx[:,1])>tol, np.abs(tmpy[:,0]-tmpy[:,1])>tol)
+    tmpIdx = np.logical_or(
+        np.abs(tmpx[:, 0] - tmpx[:, 1]) > tol, np.abs(tmpy[:, 0] - tmpy[:, 1]) > tol
+    )
     tmpx = tmpx[tmpIdx, :]
     tmpy = tmpy[tmpIdx, :]
 
@@ -44,37 +56,66 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
     # closed loop, we will already plot; otherwise, plot in the end
     sortIdx = np.array(range(0, len(tmpx)))
 
-    tmpxSort = np.array(tmpx[sortIdx[0], ], ndmin=2)
-    tmpySort = np.array(tmpy[sortIdx[0], ], ndmin=2)
+    tmpxSort = np.array(tmpx[sortIdx[0],], ndmin=2)
+    tmpySort = np.array(tmpy[sortIdx[0],], ndmin=2)
 
     sortIdx = np.delete(sortIdx, sortIdx[0])
 
     while len(sortIdx) > 1:
-
-        findIdx = np.array(np.where(np.logical_and(
-            np.abs(tmpx[sortIdx, ] - tmpxSort[tmpxSort.shape[0]-1, 1]) < tol,
-            np.abs(tmpy[sortIdx, ] - tmpySort[tmpySort.shape[0]-1, 1]) < tol)), ndmin=2).T
+        findIdx = np.array(
+            np.where(
+                np.logical_and(
+                    np.abs(tmpx[sortIdx,] - tmpxSort[tmpxSort.shape[0] - 1, 1]) < tol,
+                    np.abs(tmpy[sortIdx,] - tmpySort[tmpySort.shape[0] - 1, 1]) < tol,
+                )
+            ),
+            ndmin=2,
+        ).T
 
         # delete existing finds
         findIdxKeep = list()
         for k in range(findIdx.shape[0]):
-            if not np.any(np.all(np.logical_or(tmpx[sortIdx[findIdx[k, 0]], 0] == tmpxSort, tmpx[sortIdx[findIdx[k, 0]], 1] == tmpxSort), axis=1)):
+            if not np.any(
+                np.all(
+                    np.logical_or(
+                        tmpx[sortIdx[findIdx[k, 0]], 0] == tmpxSort,
+                        tmpx[sortIdx[findIdx[k, 0]], 1] == tmpxSort,
+                    ),
+                    axis=1,
+                )
+            ):
                 findIdxKeep.append(k)
-        findIdx = findIdx[findIdxKeep, ]
+        findIdx = findIdx[findIdxKeep,]
 
         if findIdx.shape[0] == 0:
             # reset (start new loop)
-            tmpxSort = np.array(tmpx[sortIdx[0], ], ndmin=2)
-            tmpySort = np.array(tmpy[sortIdx[0], ], ndmin=2)
+            tmpxSort = np.array(tmpx[sortIdx[0],], ndmin=2)
+            tmpySort = np.array(tmpy[sortIdx[0],], ndmin=2)
             sortIdx = np.delete(sortIdx, 0)
         elif findIdx.shape[0] == 1:
             # add to current set
             if findIdx[0, 1] == 0:
-                tmpxSort = np.append(tmpxSort, np.array(tmpx[sortIdx[findIdx[0, 0]], ::1], ndmin=2), axis=0)
-                tmpySort = np.append(tmpySort, np.array(tmpy[sortIdx[findIdx[0, 0]], ::1], ndmin=2), axis=0)
+                tmpxSort = np.append(
+                    tmpxSort,
+                    np.array(tmpx[sortIdx[findIdx[0, 0]], ::1], ndmin=2),
+                    axis=0,
+                )
+                tmpySort = np.append(
+                    tmpySort,
+                    np.array(tmpy[sortIdx[findIdx[0, 0]], ::1], ndmin=2),
+                    axis=0,
+                )
             elif findIdx[0, 1] == 1:
-                tmpxSort = np.append(tmpxSort, np.array(tmpx[sortIdx[findIdx[0, 0]], ::-1], ndmin=2), axis=0)
-                tmpySort = np.append(tmpySort, np.array(tmpy[sortIdx[findIdx[0, 0]], ::-1], ndmin=2), axis=0)
+                tmpxSort = np.append(
+                    tmpxSort,
+                    np.array(tmpx[sortIdx[findIdx[0, 0]], ::-1], ndmin=2),
+                    axis=0,
+                )
+                tmpySort = np.append(
+                    tmpySort,
+                    np.array(tmpy[sortIdx[findIdx[0, 0]], ::-1], ndmin=2),
+                    axis=0,
+                )
             sortIdx = np.delete(sortIdx, findIdx[0, 0])
         elif findIdx.shape[0] > 1:
             # warning
@@ -85,31 +126,52 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
 
 
 def qcPlots(params, stage=None):
-
     # mesh
-    if params.internal.no_qc is False and stage=="mesh":
+    if params.internal.no_qc is False and stage == "mesh":
+        triaMesh = TriaMesh.read_vtk(
+            os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
+        )
 
-        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
-
-        if params.HEMI =="lh":
+        if params.HEMI == "lh":
             camera = dict(
                 up=dict(x=0, y=0, z=1),
                 center=dict(x=0, y=0, z=0),
-                eye=dict(x=-2, y=1, z=1))
+                eye=dict(x=-2, y=1, z=1),
+            )
         else:
             camera = dict(
                 up=dict(x=0, y=0, z=1),
                 center=dict(x=0, y=0, z=0),
-                eye=dict(x=2, y=-1, z=1))
+                eye=dict(x=2, y=-1, z=1),
+            )
 
-        lpp.plot_tria_mesh(triaMesh, tcolor=[50,50,50], background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.mesh.png'), no_display=True, scale_png=0.5)
+        lpp.plot_tria_mesh(
+            triaMesh,
+            tcolor=[50, 50, 50],
+            background_color="black",
+            camera=camera,
+            export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".mesh.png"),
+            no_display=True,
+            scale_png=0.5,
+        )
 
     # profile
-    if params.internal.no_qc is False and stage=="profile":
+    if params.internal.no_qc is False and stage == "profile":
+        triaMesh = TriaMesh.read_vtk(
+            os.path.join(
+                params.OUTDIR, "tetra-cube", params.HEMI + ".rm.bnd.seam.rm.cut.vtk"
+            )
+        )
 
-        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
-
-        triaFunc = np.array(io.read_vfunc(os.path.join(params.OUTDIR, 'tetra-cube', params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol")))
+        triaFunc = np.array(
+            io.read_vfunc(
+                os.path.join(
+                    params.OUTDIR,
+                    "tetra-cube",
+                    params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol",
+                )
+            )
+        )
 
         #
 
@@ -131,37 +193,60 @@ def qcPlots(params, stage=None):
 
         fig = make_subplots(rows=1, cols=5)
 
-        fig.add_trace(go.Scatter(x=tmpxSort0[:,0], y=tmpySort0[:,0], mode="lines"), row=1, col=1)
-        fig.add_trace(go.Scatter(x=tmpxSort1[:,0], y=tmpySort1[:,0], mode="lines"), row=1, col=2)
-        fig.add_trace(go.Scatter(x=tmpxSort2[:,0], y=tmpySort2[:,0], mode="lines"), row=1, col=3)
-        fig.add_trace(go.Scatter(x=tmpxSort3[:,0], y=tmpySort3[:,0], mode="lines"), row=1, col=4)
-        fig.add_trace(go.Scatter(x=tmpxSort4[:,0], y=tmpySort4[:,0], mode="lines"), row=1, col=5)
+        fig.add_trace(
+            go.Scatter(x=tmpxSort0[:, 0], y=tmpySort0[:, 0], mode="lines"), row=1, col=1
+        )
+        fig.add_trace(
+            go.Scatter(x=tmpxSort1[:, 0], y=tmpySort1[:, 0], mode="lines"), row=1, col=2
+        )
+        fig.add_trace(
+            go.Scatter(x=tmpxSort2[:, 0], y=tmpySort2[:, 0], mode="lines"), row=1, col=3
+        )
+        fig.add_trace(
+            go.Scatter(x=tmpxSort3[:, 0], y=tmpySort3[:, 0], mode="lines"), row=1, col=4
+        )
+        fig.add_trace(
+            go.Scatter(x=tmpxSort4[:, 0], y=tmpySort4[:, 0], mode="lines"), row=1, col=5
+        )
 
-        fig.update_layout(yaxis = dict(scaleanchor = 'x'),
-                          yaxis2 = dict(scaleanchor = 'x'),
-                          yaxis3 = dict(scaleanchor = 'x'),
-                          yaxis4 = dict(scaleanchor = 'x'),
-                          yaxis5 = dict(scaleanchor = 'x'))
+        fig.update_layout(
+            yaxis=dict(scaleanchor="x"),
+            yaxis2=dict(scaleanchor="x"),
+            yaxis3=dict(scaleanchor="x"),
+            yaxis4=dict(scaleanchor="x"),
+            yaxis5=dict(scaleanchor="x"),
+        )
 
-        fig.write_image(os.path.join(params.OUTDIR, 'qc', params.HEMI + '.profile.png'))
+        fig.write_image(os.path.join(params.OUTDIR, "qc", params.HEMI + ".profile.png"))
 
     # hull
-    if stage=="hull":
+    if stage == "hull":
+        triaMesh = TriaMesh.read_vtk(
+            os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk")
+        )
 
-        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk"))
-
-        if params.HEMI =="lh":
+        if params.HEMI == "lh":
             camera = dict(
                 up=dict(x=0, y=0, z=1),
                 center=dict(x=0, y=0, z=0),
-                eye=dict(x=-2, y=1, z=1))
+                eye=dict(x=-2, y=1, z=1),
+            )
         else:
             camera = dict(
                 up=dict(x=0, y=0, z=1),
                 center=dict(x=0, y=0, z=0),
-                eye=dict(x=2, y=-1, z=1))
+                eye=dict(x=2, y=-1, z=1),
+            )
 
-        lpp.plot_tria_mesh(triaMesh, tcolor=[50,50,50], background_color="black", camera=camera, export_png=os.path.join(params.OUTDIR, 'qc', params.HEMI + '.hull.png'), no_display=True, scale_png=0.5)
+        lpp.plot_tria_mesh(
+            triaMesh,
+            tcolor=[50, 50, 50],
+            background_color="black",
+            camera=camera,
+            export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".hull.png"),
+            no_display=True,
+            scale_png=0.5,
+        )
 
     # return
     return params
