@@ -9,6 +9,11 @@ import os
 from lapy import TriaMesh
 
 # ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
 # FUNCTIONS
 
 
@@ -32,7 +37,7 @@ def checkSurface(params, stage=None):
 
         euler = triaMesh.euler()
 
-        logging.info(
+        LOGGER.info(
             "Euler number for "
             + os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
             + " is "
@@ -40,7 +45,7 @@ def checkSurface(params, stage=None):
         )
 
         if euler != 2:
-            logging.info(
+            LOGGER.info(
                 "Surface contains holes. Please edit the corresponding hippocampal segmentation and re-run."
             )
             continue_program = False
@@ -58,7 +63,7 @@ def checkSurface(params, stage=None):
 
         bnd_loops = triaMesh.boundary_loops()
 
-        logging.info(
+        LOGGER.info(
             "There are "
             + str(len(bnd_loops))
             + " boundary loops for "
@@ -69,7 +74,7 @@ def checkSurface(params, stage=None):
         )
 
         if len(bnd_loops) != 2:
-            logging.info(
+            LOGGER.info(
                 "Surface contains does not contain 2 boundary loops. Please retry with different cutting parameters."
             )
             continue_program = False

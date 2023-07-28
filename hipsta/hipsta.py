@@ -9,13 +9,13 @@ import logging
 import os
 import shutil
 import sys
-import tempfile
 import time
 
 import pandas
 
-from .cfg import setup_logging
+from .cfg.logging import setup_logging
 from .cfg.config import get_defaults
+from .cfg.version import get_version
 from .computeCubeParam import computeCubeParam
 from .computeThickness import computeThickness
 from .createSurface import extractSurface, remeshSurface, smoothSurface
@@ -43,32 +43,13 @@ from .utils.create_supplementary_files import createSupplementaryFiles
 from .utils.map_values import mapValues
 from .utils.qc_plots import qcPlots
 
-print("3456")
-
 # ==============================================================================
 # LOGGING
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 # ==============================================================================
 # FUNCTIONS
-
-# ------------------------------------------------------------------------------
-# get_version()
-
-
-def get_version():
-    from importlib import metadata
-
-    try:
-        # requires existing installation
-        version = metadata.version("hipsta")
-    except Exception:
-        # fall-back if package is not installed, but run directly
-        version = "unknown"
-
-    return version
-
 
 # ------------------------------------------------------------------------------
 # get_help()
@@ -135,11 +116,11 @@ def _create_directories(args):
     for directory in list_of_directories:
         if not os.path.isdir(directory):
             try:
-                logging.info("Creating output directory " + directory)
+                LOGGER.info("Creating output directory " + directory)
                 os.mkdir(directory)
             except OSError as e:
-                logging.error("Cannot create output directory " + args.outputdir)
-                logging.error("Reason: " + str(e))
+                LOGGER.error("Cannot create output directory " + args.outputdir)
+                LOGGER.error("Reason: " + str(e))
                 raise
 
 
@@ -512,7 +493,7 @@ def _evaluate_args(args):
 
     # message
 
-    logging.info("Evaluating arguments ...")
+    LOGGER.info("Evaluating arguments ...")
 
     # initialize settings
 
@@ -619,7 +600,7 @@ def _evaluate_args(args):
     # create the LUT # TODO: maybe move this to config
 
     if args.lut == "freesurfer":
-        logging.info("Found internal, modified look-up table for FreeSurfer.")
+        LOGGER.info("Found internal, modified look-up table for FreeSurfer.")
 
         LUTLABEL = ["tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml"]
 
@@ -630,7 +611,7 @@ def _evaluate_args(args):
         HSFLIST = [234, 236, 238, 240, 246]
 
     elif args.lut == "freesurfer-no_ml":
-        logging.info("Found internal, modified look-up table for FreeSurfer.")
+        LOGGER.info("Found internal, modified look-up table for FreeSurfer.")
 
         LUTLABEL = ["tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg"]
 
@@ -641,7 +622,7 @@ def _evaluate_args(args):
         HSFLIST = [234, 236, 238, 240]
 
     elif args.lut == "ashs":
-        logging.info("Found internal, modified look-up table for ASHS atlas.")
+        LOGGER.info("Found internal, modified look-up table for ASHS atlas.")
 
         LUTLABEL = [
             "ca1",
@@ -667,7 +648,7 @@ def _evaluate_args(args):
         HSFLIST = [8, 1, 2, 4]
 
     elif os.path.isfile(args.lut):
-        logging.info("Found look-up table " + args.lut)
+        LOGGER.info("Found look-up table " + args.lut)
 
         lut = pandas.read_csv(
             args.lut,
@@ -712,8 +693,8 @@ def _evaluate_args(args):
 
     params.internal = settings
 
-    logging.info("Using " + params.FILENAME + " as input file")
-    logging.info("Using " + params.OUTDIR + " as output directory")
+    LOGGER.info("Using " + params.FILENAME + " as input file")
+    LOGGER.info("Using " + params.OUTDIR + " as output directory")
 
     return params
 
@@ -731,7 +712,7 @@ def _check_params(params):
     # check for subfield segmentation file
 
     if os.path.isfile(params.FILENAME):
-        logging.info("Found " + params.FILENAME)
+        LOGGER.info("Found " + params.FILENAME)
     else:
         raise RuntimeError("Could not find " + params.FILENAME)
 
@@ -756,7 +737,7 @@ def _check_params(params):
         raise RuntimeError("Cannot use no-merge-molecular-layer with " + params.LUT + ".")
 
     if params.internal.MERGE_MOLECULAR_LAYER is True and ("ml" in params.LUTDICT.keys()) is False:
-        logging.info("Could not find molecular layer in lookup table.")
+        LOGGER.info("Could not find molecular layer in lookup table.")
         raise AssertionError()
 
     # check aniso alpha
@@ -783,125 +764,125 @@ def _run_analysis(params):
 
     # process image (1)
 
-    logging.info("Starting convertFormat() ...")
+    LOGGER.info("Starting convertFormat() ...")
     params = convertFormat(params)
 
-    logging.info("Starting cropImage() ...")
+    LOGGER.info("Starting cropImage() ...")
     params = cropImage(params)
 
-    logging.info("Starting upsampleImage() ...")
+    LOGGER.info("Starting upsampleImage() ...")
     params = upsampleImage(params)
 
-    logging.info("Starting copy_image_to_main() ...")
+    LOGGER.info("Starting copy_image_to_main() ...")
     params = copy_image_to_main(params)
 
     # process labels (2)
 
-    logging.info("Starting autoMask() ...")
+    LOGGER.info("Starting autoMask() ...")
     params = autoMask(params)
 
-    logging.info("Starting createLabels() ...")
+    LOGGER.info("Starting createLabels() ...")
     params = createLabels(params)
 
-    logging.info("Starting mergeMolecularLayer() ...")
+    LOGGER.info("Starting mergeMolecularLayer() ...")
     params = mergeMolecularLayer(params)
 
-    logging.info("Starting copy_labels_to_main() ...")
+    LOGGER.info("Starting copy_labels_to_main() ...")
     params = copy_labels_to_main(params)
 
     # process mask (3)
 
-    logging.info("Starting binarizeMask() ...")
+    LOGGER.info("Starting binarizeMask() ...")
     params = binarizeMask(params)
 
-    logging.info("Starting gaussFilter() ...")
+    LOGGER.info("Starting gaussFilter() ...")
     params = gaussFilter(params)
 
-    logging.info("Starting longFilter() ...")
+    LOGGER.info("Starting longFilter() ...")
     params = longFilter(params)
 
-    logging.info("Starting closeMask() ...")
+    LOGGER.info("Starting closeMask() ...")
     params = closeMask(params)
 
-    logging.info("Starting copy_mask_to_main() ...")
+    LOGGER.info("Starting copy_mask_to_main() ...")
     params = copy_mask_to_main(params)
 
     # create surface (4)
 
-    logging.info("Starting extractSurface() ...")
+    LOGGER.info("Starting extractSurface() ...")
     params = extractSurface(params)
 
-    logging.info("Starting remeshSurface() ...")
+    LOGGER.info("Starting remeshSurface() ...")
     params = remeshSurface(params)
 
-    logging.info("Starting smoothSurface() ...")
+    LOGGER.info("Starting smoothSurface() ...")
     params = smoothSurface(params)
 
-    logging.info("Starting qcPlots() ...")
+    LOGGER.info("Starting qcPlots() ...")
     params = qcPlots(params, stage="mesh")
 
-    logging.info("Starting checkSurface() ...")
+    LOGGER.info("Starting checkSurface() ...")
     params = checkSurface(params, stage="check_surface")
 
     if params.internal.continue_program is False:
-        logging.info("Hippocampal shapetools finished WITH ERRORS.")
+        LOGGER.info("Hippocampal shapetools finished WITH ERRORS.")
         raise AssertionError("Check surface failed (stage: surface)")
 
     # create tetra mesh for whole hippocampal body (5)
 
-    logging.info("Starting createTetraMesh() ...")
+    LOGGER.info("Starting createTetraMesh() ...")
     params = createTetraMesh(params)
 
     # create label files for tetra mesh (6)
 
-    logging.info("Starting createTetraLabels() ...")
+    LOGGER.info("Starting createTetraLabels() ...")
     params = createTetraLabels(params)
 
     # cut hippocampal body (7)
 
-    logging.info("Starting removeBoundaryMask() ...")
+    LOGGER.info("Starting removeBoundaryMask() ...")
     params = removeBoundaryMask(params)
 
-    logging.info("Starting cutTetra() ...")
+    LOGGER.info("Starting cutTetra() ...")
     params = cutTetra(params)
 
-    logging.info("Starting checkSurface() ...")
+    LOGGER.info("Starting checkSurface() ...")
     params = checkSurface(params, stage="check_boundaries")
 
     if params.internal.continue_program is False:
-        logging.info("Hippocampal shapetools finished WITH ERRORS.")
+        LOGGER.info("Hippocampal shapetools finished WITH ERRORS.")
         raise AssertionError("Check surface failed (stage: boundaries)")
 
     # compute cube parametrization (8)
 
-    logging.info("Starting computeCubeParam() ...")
+    LOGGER.info("Starting computeCubeParam() ...")
     params = computeCubeParam(params)
 
-    logging.info("Starting qcPlots() ...")
+    LOGGER.info("Starting qcPlots() ...")
     params = qcPlots(params, stage="profile")
 
     # compute thickness (9)
 
-    logging.info("Starting computeThickness() ...")
+    LOGGER.info("Starting computeThickness() ...")
     params = computeThickness(params)
 
-    logging.info("Starting qcPlots() ...")
+    LOGGER.info("Starting qcPlots() ...")
     params = qcPlots(params, stage="hull")
 
     # map subfield mapValues (10)
 
-    logging.info("Starting mapValues() ...")
+    LOGGER.info("Starting mapValues() ...")
     params = mapValues(params)
 
     # create supplementary files (11)
 
-    logging.info("Starting createSupplementaryFiles() ...")
+    LOGGER.info("Starting createSupplementaryFiles() ...")
     params = createSupplementaryFiles(params)
 
     # all done
 
-    logging.info("Date: %s", time.strftime("%d/%m/%Y %H:%M:%S"))
-    logging.info("Hippocampal shapetools finished without errors.")
+    LOGGER.info("Date: %s", time.strftime("%d/%m/%Y %H:%M:%S"))
+    LOGGER.info("Hippocampal shapetools finished without errors.")
 
 
 # ------------------------------------------------------------------------------
@@ -916,6 +897,9 @@ def _run_hipsta(args):
 
     #
     try:
+        #
+        setup_logging(args)
+
         # check environment and packages
         _check_environment_and_packages()
 
@@ -932,9 +916,9 @@ def _run_hipsta(args):
         _run_analysis(params)
 
     except Exception as e:
-        logging.error("Error Information:")
-        logging.error("Type: %s", type(e))
-        logging.error("Value: %s", e.args)
+        LOGGER.error("Error Information:")
+        LOGGER.error("Type: %s", type(e))
+        LOGGER.error("Value: %s", e.args)
 
         raise
 

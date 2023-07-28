@@ -12,6 +12,11 @@ import nibabel as nb
 import numpy as np
 
 # ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
 # FUNCTIONS
 
 
@@ -71,7 +76,7 @@ def autoMask(params):
         # head
         if params.internal.AUTOMASK_HEAD is True:
             #
-            logging.info("Using auto-mask for head")
+            LOGGER.info("Using auto-mask for head")
             # remove any potentially existing head labels
             dat[dat == labelHead] = 0
             #
@@ -109,7 +114,7 @@ def autoMask(params):
         # tail
         if params.internal.AUTOMASK_TAIL is True:
             #
-            logging.info("Using auto-mask for tail")
+            LOGGER.info("Using auto-mask for tail")
             # remove any potentially existing tail labels
             dat[dat == labelTail] = 0
             #

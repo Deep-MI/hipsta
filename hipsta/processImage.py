@@ -12,6 +12,11 @@ import nibabel as nb
 from nilearn import image as nli
 
 # ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
 # FUNCTIONS
 
 
@@ -99,7 +104,7 @@ def upsampleImage(params):
         # upsample
 
         if any(x != 0 for x in params.internal.UPSAMPLE_SIZE):
-            logging.info("Upsampling with custom parameters ...")
+            LOGGER.info("Upsampling with custom parameters ...")
 
             cmd = (
                 os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")
@@ -123,7 +128,7 @@ def upsampleImage(params):
 
         else:
             #
-            logging.info("Upsampling to min voxel size ...")
+            LOGGER.info("Upsampling to min voxel size ...")
 
             # get image and info
             img = nb.load(params.FILENAME)

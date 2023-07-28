@@ -15,6 +15,11 @@ from plotly.subplots import make_subplots
 from .get_levelsets import levelsetsTria
 
 # ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
 # FUNCTIONS
 
 
@@ -119,7 +124,7 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
             sortIdx = np.delete(sortIdx, findIdx[0, 0])
         elif findIdx.shape[0] > 1:
             # warning
-            logging.warning("A problem occurred with the surface overlays")
+            LOGGER.warning("A problem occurred with the surface overlays")
             break
 
     return tmpxSort, tmpySort

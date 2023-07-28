@@ -15,6 +15,14 @@ import pandas as pd
 from lapy import TriaMesh, io
 from scipy import stats as st
 
+# ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
+# FUNCTIONS
+
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -279,7 +287,7 @@ def _check_arguments(options):
     # check environment variables
 
     if os.environ.get("FREESURFER_HOME") is None:
-        logging.info(
+        LOGGER.info(
             "ERROR: need to set the FREESURFER_HOME environment variable and to source FREESURFER."
         )
         sys.exit(1)
@@ -287,23 +295,23 @@ def _check_arguments(options):
     # required arguments
 
     if options.IN_VOL is None:
-        logging.info("The --volume option is required. See --help for details.")
+        LOGGER.info("The --volume option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_SURF is None:
-        logging.info("The --surface option is required. See --help for details.")
+        LOGGER.info("The --surface option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_LABEL is None:
-        logging.info("The --label option is required. See --help for details.")
+        LOGGER.info("The --label option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_INDICES is None:
-        logging.info("The --table option is required. See --help for details.")
+        LOGGER.info("The --table option is required. See --help for details.")
         sys.exit(1)
 
     if options.IN_SUFFIX is None:
-        logging.info("The --suffix option is required. See --help for details.")
+        LOGGER.info("The --suffix option is required. See --help for details.")
         sys.exit(1)
 
     # change formats
@@ -475,7 +483,7 @@ def mapValues(
         integr = np.nanmin(lookup3D[:, :, SELECT], axis=2)
     elif INTEGRATE == "none":
         if len(SELECT) > 1:
-            logging.info(
+            LOGGER.info(
                 "Error: cannot use --integrate none with multiple sampling points, exiting."
             )
             sys.exit(1)

@@ -13,6 +13,14 @@ from scipy import sparse as sp
 from scipy import stats as st
 from sklearn.decomposition import PCA
 
+# ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
+# FUNCTIONS
+
 # ------------------------------------------------------------------------------
 # AUXILIARY FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -696,7 +704,7 @@ def computeCubeParam(params):
     elif np.median(
         v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]
     ) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]):
-        logging.info("Flipping EV1")
+        LOGGER.info("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
         raise RuntimeError("Inconsistency detected for EV1, exiting.")
@@ -718,7 +726,7 @@ def computeCubeParam(params):
         )
         < 0
     ):
-        logging.info("Flipping EV2")
+        LOGGER.info("Flipping EV2")
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
     else:
         raise RuntimeError("Inconsistency detected for EV2, exiting.")

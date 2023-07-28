@@ -14,6 +14,14 @@ from scipy.sparse import csgraph as sc
 
 from .utils.get_levelsets import levelsetsTetra
 
+# ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
+# FUNCTIONS
+
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION
 # ------------------------------------------------------------------------------
@@ -198,9 +206,9 @@ def computeThickness(params):
     origV4flat = np.array(origV4flat)
     ctrflat = np.array(ctr.flat)
 
-    logging.info("No common tetra found: " + str(msgNoCmTet))
-    logging.info("Common tetra, but no intersection: " + str(msgCmTetNoInt))
-    logging.info("Common tetra, but too many intersections: " + str(msgCmTetMnInt))
+    LOGGER.info("No common tetra found: " + str(msgNoCmTet))
+    LOGGER.info("Common tetra, but no intersection: " + str(msgCmTetNoInt))
+    LOGGER.info("Common tetra, but too many intersections: " + str(msgCmTetMnInt))
 
     # -------------------------------------------------------------------------
     # lines
@@ -496,7 +504,7 @@ def computeThickness(params):
             triaMinRm.orient_()
             skipOrientMin = False
         else:
-            logging.warning(
+            LOGGER.warning(
                 "Warning: exterior surface contains more than one component, not orienting. Check your results."
             )
             skipOrientMin = True
@@ -504,13 +512,13 @@ def computeThickness(params):
             triaMidRm.orient_()
             skipOrientMid = False
         else:
-            logging.warning("Warning: mid-surface contains more than one component, not orienting. Check your results.")
+            LOGGER.warning("Warning: mid-surface contains more than one component, not orienting. Check your results.")
             skipOrientMid = True
         if sc.connected_components(triaMaxRm._construct_adj_sym())[0] == 1:
             triaMaxRm.orient_()
             skipOrientMax = False
         else:
-            logging.warning(
+            LOGGER.warning(
                 "Warning: interior surface contains more than one component, not orienting. Check your results."
             )
             skipOrientMax = True
@@ -587,7 +595,7 @@ def computeThickness(params):
         )
 
     else:
-        logging.warning("Warning: Not computing curvature for exterior surface, check surface.")
+        LOGGER.warning("Warning: Not computing curvature for exterior surface, check surface.")
 
     if skipOrientMid is False:
         u1Mid, u2Mid, c1Mid, c2Mid = triaMidRm.curvature_tria()
@@ -623,7 +631,7 @@ def computeThickness(params):
         )
 
     else:
-        logging.warning("Warning: Not computing curvature for mid-surface, check surface.")
+        LOGGER.warning("Warning: Not computing curvature for mid-surface, check surface.")
 
     if skipOrientMax is False:
         u1Max, u2Max, c1Max, c2Max = triaMaxRm.curvature_tria()
@@ -659,7 +667,7 @@ def computeThickness(params):
         )
 
     else:
-        logging.warning("Warning: Not computing curvature for interior surface, check surface.")
+        LOGGER.warning("Warning: Not computing curvature for interior surface, check surface.")
 
     # -----------------------------------------------------------------------------
     # create hull
