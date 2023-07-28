@@ -13,15 +13,13 @@ from scipy import ndimage
 # ==============================================================================
 # FUNCTIONS
 
-def gaussFilter(params):
-    """
 
-    """
+def gaussFilter(params):
+    """ """
 
     #
 
     if params.internal.GAUSSFILTER is True:
-
         # message
 
         print()
@@ -34,9 +32,17 @@ def gaussFilter(params):
         img = nb.load(params.FILENAME)
         dat = img.get_fdata()
 
-        dat_filtered = ndimage.gaussian_filter((dat>0)*100, sigma=params.internal.GAUSSFILTER_SIZE[0], mode="constant", cval=0.0)>params.internal.GAUSSFILTER_SIZE[1]
+        dat_filtered = (
+            ndimage.gaussian_filter(
+                (dat > 0) * 100, sigma=params.internal.GAUSSFILTER_SIZE[0], mode="constant", cval=0.0
+            )
+            > params.internal.GAUSSFILTER_SIZE[1]
+        )
 
-        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".gaussian_filter.mgz"))
+        nb.freesurfer.save(
+            nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine),
+            filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".gaussian_filter.mgz"),
+        )
 
         # update params
 
@@ -44,18 +50,15 @@ def gaussFilter(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def longFilter(params):
-    """
-
-    """
+    """ """
 
     #
 
     if params.internal.LONGFILTER is True:
-
         # message
 
         print()
@@ -69,13 +72,16 @@ def longFilter(params):
         dat = img.get_fdata()
 
         k = np.zeros(params.internal.LONGFILTER_SIZE, params.internal.LONGFILTER_SIZE, params.internal.LONGFILTER_SIZE)
-        k[2,2,:] = 1
+        k[2, 2, :] = 1
 
         dat_filtered = ndimage.convolve(dat, k, mode="constant", cval=0.0)
 
-        dat_filtered = dat_filtered>0
+        dat_filtered = dat_filtered > 0
 
-        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".longitudinal_filter.mgz"))
+        nb.freesurfer.save(
+            nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine),
+            filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".longitudinal_filter.mgz"),
+        )
 
         # update params
 
@@ -83,18 +89,15 @@ def longFilter(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def closeMask(params):
-    """
-
-    """
+    """ """
 
     #
 
     if params.internal.CLOSEMASK is True:
-
         # message
 
         print()
@@ -107,11 +110,20 @@ def closeMask(params):
         img = nb.load(params.FILENAME)
         dat = img.get_fdata()
 
-        dat_filtered = ndimage.binary_closing(dat, structure=ndimage.iterate_structure(ndimage.generate_binary_structure(rank=3, connectivity=1), iterations=1).astype(int), iterations=1)
+        dat_filtered = ndimage.binary_closing(
+            dat,
+            structure=ndimage.iterate_structure(
+                ndimage.generate_binary_structure(rank=3, connectivity=1), iterations=1
+            ).astype(int),
+            iterations=1,
+        )
 
-        dat_filtered = dat_filtered>0
+        dat_filtered = dat_filtered > 0
 
-        nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".close_mask.mgz"))
+        nb.freesurfer.save(
+            nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine),
+            filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".close_mask.mgz"),
+        )
 
         # update params
 
@@ -119,19 +131,21 @@ def closeMask(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def binarizeMask(params):
-
     # binarize
 
     img = nb.load(params.FILENAME)
     dat = img.get_fdata()
 
-    dat_filtered = dat!=0
+    dat_filtered = dat != 0
 
-    nb.freesurfer.save(nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine), filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".initial_mask.mgz"))
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=dat_filtered.astype("float32"), affine=img.affine),
+        filename=os.path.join(params.OUTDIR, "mask", params.HEMI + ".initial_mask.mgz"),
+    )
 
     # update params
 
@@ -139,19 +153,15 @@ def binarizeMask(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def copy_mask_to_main(params):
-    """
-
-    """
+    """ """
 
     # copy to main directory
 
-    shutil.copyfile(
-        params.FILENAME,
-        os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz"))
+    shutil.copyfile(params.FILENAME, os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz"))
 
     # update params
 
@@ -159,4 +169,4 @@ def copy_mask_to_main(params):
 
     # return
 
-    return(params)
+    return params

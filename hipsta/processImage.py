@@ -16,9 +16,7 @@ from nilearn import image as nli
 
 
 def convertFormat(params):
-    """
-
-    """
+    """ """
 
     # message
 
@@ -29,9 +27,13 @@ def convertFormat(params):
 
     # convert and copy
 
-    cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
-        + params.FILENAME + " " \
+    cmd = (
+        os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")
+        + " "
+        + params.FILENAME
+        + " "
         + os.path.join(params.OUTDIR, "image", params.HEMI + ".orig.mgz")
+    )
 
     print(cmd)
 
@@ -43,16 +45,13 @@ def convertFormat(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def cropImage(params):
-    """
-
-    """
+    """ """
 
     if params.internal.CROP is True:
-
         # message
 
         print()
@@ -62,11 +61,16 @@ def cropImage(params):
 
         # crop
 
-        cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_mask") + " " \
-            + "-bb 5 " \
-            + params.FILENAME + " " \
-            + params.FILENAME + " " \
+        cmd = (
+            os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_mask")
+            + " "
+            + "-bb 5 "
+            + params.FILENAME
+            + " "
+            + params.FILENAME
+            + " "
             + os.path.join(params.OUTDIR, "image", params.HEMI + ".cropped.mgz")
+        )
 
         print(cmd)
 
@@ -78,16 +82,13 @@ def cropImage(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def upsampleImage(params):
-    """
-
-    """
+    """ """
 
     if params.internal.UPSAMPLE is True:
-
         # message
 
         print()
@@ -97,22 +98,30 @@ def upsampleImage(params):
 
         # upsample
 
-        if any(x!=0 for x in params.internal.UPSAMPLE_SIZE):
-
+        if any(x != 0 for x in params.internal.UPSAMPLE_SIZE):
             logging.info("Upsampling with custom parameters ...")
 
-            cmd = os.path.join(os.environ.get('FREESURFER_HOME'), "bin", "mri_convert") + " " \
-                + " -ds " + str(params.internal.UPSAMPLE[0]) + " " + str(params.internal.UPSAMPLE[1]) + "  " + str(params.internal.UPSAMPLE[2]) + " " \
-                + " -rt nearest " \
-                + params.FILENAME + " " \
+            cmd = (
+                os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")
+                + " "
+                + " -ds "
+                + str(params.internal.UPSAMPLE[0])
+                + " "
+                + str(params.internal.UPSAMPLE[1])
+                + "  "
+                + str(params.internal.UPSAMPLE[2])
+                + " "
+                + " -rt nearest "
+                + params.FILENAME
+                + " "
                 + os.path.join(params.OUTDIR, "image", params.HEMI + ".upsampled.mgz")
+            )
 
             print(cmd)
 
             subprocess.run(cmd.split(), capture_output=True)
 
         else:
-
             #
             logging.info("Upsampling to min voxel size ...")
 
@@ -123,9 +132,9 @@ def upsampleImage(params):
 
             # compute new affine
             target_affn = affn.copy()
-            target_affn[0:4,0] *= min(vxsz)/vxsz[0]
-            target_affn[0:4,1] *= min(vxsz)/vxsz[1]
-            target_affn[0:4,2] *= min(vxsz)/vxsz[2]
+            target_affn[0:4, 0] *= min(vxsz) / vxsz[0]
+            target_affn[0:4, 1] *= min(vxsz) / vxsz[1]
+            target_affn[0:4, 2] *= min(vxsz) / vxsz[2]
 
             # resample
             img_int = nli.resample_img(img, target_affine=target_affn, interpolation="nearest")
@@ -138,19 +147,15 @@ def upsampleImage(params):
 
     # return
 
-    return(params)
+    return params
 
 
 def copy_image_to_main(params):
-    """
-    
-    """
+    """ """
 
     # copy to main directory
 
-    shutil.copyfile(
-        params.FILENAME,
-        os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+    shutil.copyfile(params.FILENAME, os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
 
     # update params
 
@@ -158,4 +163,4 @@ def copy_image_to_main(params):
 
     # return
 
-    return(params)
+    return params

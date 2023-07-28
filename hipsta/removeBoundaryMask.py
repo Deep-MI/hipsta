@@ -11,8 +11,8 @@ from lapy import TetMesh, io
 # -----------------------------------------------------------------------------
 # MAIN FUNCTION
 
-def removeBoundaryMask(params):
 
+def removeBoundaryMask(params):
     # -------------------------------------------------------------------------
     # message
 
@@ -27,8 +27,8 @@ def removeBoundaryMask(params):
     VTKFile = os.path.join(params.OUTDIR, params.HEMI + ".tetra.vtk")
     PSOLFile = os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".tetra.psol")
 
-    labelBndHead = params.LUTDICT['bndhead']
-    labelBndTail = params.LUTDICT['bndtail']
+    labelBndHead = params.LUTDICT["bndhead"]
+    labelBndTail = params.LUTDICT["bndtail"]
 
     # -------------------------------------------------------------------------
     # load data
@@ -38,8 +38,8 @@ def removeBoundaryMask(params):
     lbl = io.read_vfunc(PSOLFile)
     lbl = np.array(lbl)
 
-    vTail = tetMesh.v[lbl==labelBndTail, ]
-    vHead = tetMesh.v[lbl==labelBndHead, ]
+    vTail = tetMesh.v[lbl == labelBndTail,]
+    vHead = tetMesh.v[lbl == labelBndHead,]
 
     # -------------------------------------------------------------------------
     # cutting surfaces based on point-cloud PCA
@@ -62,23 +62,24 @@ def removeBoundaryMask(params):
     # support vectors (move a little bit inwards, direction may differ); first,
     # determine if the richtungsvektor is pointing towards the center:
 
-    if np.linalg.norm( (np.mean(tetMesh.v, axis=0) - np.mean(vHead, axis=0)) ) > np.linalg.norm( np.mean(tetMesh.v, axis=0) - (np.mean(vHead, axis=0) + vHeadc[:, 2]) ): # yes
-        sHead   = np.mean(vHead, axis=0) + 1.0 * vHeadc[:, 2]
+    if np.linalg.norm((np.mean(tetMesh.v, axis=0) - np.mean(vHead, axis=0))) > np.linalg.norm(
+        np.mean(tetMesh.v, axis=0) - (np.mean(vHead, axis=0) + vHeadc[:, 2])
+    ):  # yes
+        sHead = np.mean(vHead, axis=0) + 1.0 * vHeadc[:, 2]
         dirHead = 1
     else:
-        sHead   = np.mean(vHead, axis=0) - 1.0 * vHeadc[:, 2]
+        sHead = np.mean(vHead, axis=0) - 1.0 * vHeadc[:, 2]
         dirHead = 0
 
     # compute unit normal vector to plane
 
-    uHead = vHeadc[:,2] / np.linalg.norm(vHeadc[:,2])
+    uHead = vHeadc[:, 2] / np.linalg.norm(vHeadc[:, 2])
 
     # compute normals from each point to plane (could be v or vHead)
 
     dHead = np.zeros(tetMesh.v.shape[0])
 
     for i in range(0, tetMesh.v.shape[0]):
-
         # vector from point to support vector
         n = tetMesh.v[i, :] - sHead
 
@@ -90,11 +91,13 @@ def removeBoundaryMask(params):
     # support vectors (move a little bit inwards, direction may differ); first,
     # determine if the richtungsvektor is pointing towards the center:
 
-    if np.linalg.norm( (np.mean(tetMesh.v, axis=0) - np.mean(vTail, axis=0)) ) > np.linalg.norm( np.mean(tetMesh.v, axis=0) - (np.mean(vTail, axis=0) + vTailc[:, 2]) ):
-        sTail   = np.mean(vTail, axis=0) + 1.0 * vTailc[:, 2] # yes
+    if np.linalg.norm((np.mean(tetMesh.v, axis=0) - np.mean(vTail, axis=0))) > np.linalg.norm(
+        np.mean(tetMesh.v, axis=0) - (np.mean(vTail, axis=0) + vTailc[:, 2])
+    ):
+        sTail = np.mean(vTail, axis=0) + 1.0 * vTailc[:, 2]  # yes
         dirTail = 1
     else:
-        sTail   = np.mean(vTail, axis=0) - 1.0 * vTailc[:, 2] # no
+        sTail = np.mean(vTail, axis=0) - 1.0 * vTailc[:, 2]  # no
         dirTail = 0
 
     # compute unit normal vector to plane
@@ -106,7 +109,6 @@ def removeBoundaryMask(params):
     dTail = np.zeros(tetMesh.v.shape[0])
 
     for i in range(0, tetMesh.v.shape[0]):
-
         # vector from point to support vector
         n = tetMesh.v[i, :] - sTail
 
@@ -117,21 +119,30 @@ def removeBoundaryMask(params):
     # remove triangles that contain 2 or 3 or 4 points
 
     if dirHead & dirTail:
-        tcut = tetMesh.t[np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0)|(dHead <= 0))), tetMesh.t.shape), axis=1) < 2, :]
+        tcut = tetMesh.t[
+            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0) | (dHead <= 0))), tetMesh.t.shape), axis=1) < 2,
+            :,
+        ]
         vcutIdxTail = np.where(dTail <= 0)[0]
         vcutIdxHead = np.where(dHead <= 0)[0]
-    elif (not(dirHead)) & dirTail :
-        tcut = tetMesh.t[np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0)|(dHead  > 0))), tetMesh.t.shape), axis=1) < 2, :]
+    elif (not (dirHead)) & dirTail:
+        tcut = tetMesh.t[
+            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0) | (dHead > 0))), tetMesh.t.shape), axis=1) < 2, :
+        ]
         vcutIdxTail = np.where(dTail <= 0)[0]
-        vcutIdxHead = np.where(dHead  > 0)[0]
-    elif dirHead & (not(dirTail)) :
-        tcut = tetMesh.t[np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail  > 0)|(dHead <= 0))), tetMesh.t.shape), axis=1) < 2, :]
-        vcutIdxTail = np.where(dTail  > 0)[0]
+        vcutIdxHead = np.where(dHead > 0)[0]
+    elif dirHead & (not (dirTail)):
+        tcut = tetMesh.t[
+            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail > 0) | (dHead <= 0))), tetMesh.t.shape), axis=1) < 2, :
+        ]
+        vcutIdxTail = np.where(dTail > 0)[0]
         vcutIdxHead = np.where(dHead <= 0)[0]
-    elif (not(dirHead)) & (not(dirTail)) :
-        tcut = tetMesh.t[np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail  > 0)|(dHead  > 0))), tetMesh.t.shape), axis=1) < 2, :]
-        vcutIdxTail = np.where(dTail  > 0)[0]
-        vcutIdxHead = np.where(dHead  > 0)[0]
+    elif (not (dirHead)) & (not (dirTail)):
+        tcut = tetMesh.t[
+            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail > 0) | (dHead > 0))), tetMesh.t.shape), axis=1) < 2, :
+        ]
+        vcutIdxTail = np.where(dTail > 0)[0]
+        vcutIdxHead = np.where(dHead > 0)[0]
 
     # -------------------------------------------------------------------------
     # write PSOL

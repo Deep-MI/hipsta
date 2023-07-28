@@ -15,6 +15,7 @@ from lapy import TetMesh, TriaMesh
 # ------------------------------------------------------------------------------
 # _createSTL
 
+
 def _createSTL(filename, v, t):
     """
     createSTL(filename, v, t)
@@ -25,14 +26,12 @@ def _createSTL(filename, v, t):
 
     import numpy as np
 
-    with open(filename, 'w') as f:
-
+    with open(filename, "w") as f:
         print("solid lap-data", file=f)
 
         for i in range(0, len(t)):
-
-            v1mv0 = v[t[i, 1],:] - v[t[i, 0],:]
-            v2mv0 = v[t[i, 2],:] - v[t[i, 0],:]
+            v1mv0 = v[t[i, 1], :] - v[t[i, 0], :]
+            v2mv0 = v[t[i, 2], :] - v[t[i, 0], :]
 
             normal = np.cross(v1mv0, v2mv0) / np.linalg.norm(np.cross(v1mv0, v2mv0))
 
@@ -40,9 +39,9 @@ def _createSTL(filename, v, t):
 
             print("    outer loop", file=f)
 
-            print("      vertex %f %f %f " % (v[t[i, 0], 0], v[t[i, 0], 1],v[t[i, 0], 2]), file=f)
-            print("      vertex %f %f %f " % (v[t[i, 1], 0], v[t[i, 1], 1],v[t[i, 1], 2]), file=f)
-            print("      vertex %f %f %f " % (v[t[i, 2], 0], v[t[i, 2], 1],v[t[i, 2], 2]), file=f)
+            print("      vertex %f %f %f " % (v[t[i, 0], 0], v[t[i, 0], 1], v[t[i, 0], 2]), file=f)
+            print("      vertex %f %f %f " % (v[t[i, 1], 0], v[t[i, 1], 1], v[t[i, 1], 2]), file=f)
+            print("      vertex %f %f %f " % (v[t[i, 2], 0], v[t[i, 2], 1], v[t[i, 2], 2]), file=f)
 
             print("    endloop", file=f)
 
@@ -54,10 +53,9 @@ def _createSTL(filename, v, t):
 # ------------------------------------------------------------------------------
 # createTetraMesh
 
-def createTetraMesh(params):
-    """
 
-    """
+def createTetraMesh(params):
+    """ """
 
     # message
 
@@ -74,22 +72,26 @@ def createTetraMesh(params):
 
     # create geofile (test.geo)
 
-    with open(os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra.geo"), 'w') as f:
-
+    with open(os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra.geo"), "w") as f:
         print("Mesh.Algorithm3D=4;", file=f)
         print("Mesh.Optimize=1;", file=f)
         print("Mesh.OptimizeNetgen=1;", file=f)
-        print("Merge \"" + params.HEMI + ".tetra.stl" + "\";", file=f)
+        print('Merge "' + params.HEMI + ".tetra.stl" + '";', file=f)
         print("Surface Loop(1) = {1};", file=f)
         print("Volume(1) = {1};", file=f)
         print("Physical Volume(1) = {1};", file=f)
 
     # use gmsh to get tetras
 
-    cmd = shutil.which("gmsh") + " " \
-        + "-3 " \
-        + "-o " + os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra-gmsh.vtk") + " " \
+    cmd = (
+        shutil.which("gmsh")
+        + " "
+        + "-3 "
+        + "-o "
+        + os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra-gmsh.vtk")
+        + " "
         + os.path.join(params.OUTDIR, "tetra-mesh", params.HEMI + ".tetra.geo")
+    )
 
     print(cmd)
 
@@ -103,4 +105,4 @@ def createTetraMesh(params):
 
     # return
 
-    return(params)
+    return params
