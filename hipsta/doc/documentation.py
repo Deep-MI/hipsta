@@ -10,7 +10,6 @@ from importlib_resources import files
 
 
 def get_help_text():
-
-    txt = files('hipsta.doc').joinpath('DOCUMENTATION.md').read_text()
+    txt = files("hipsta.doc").joinpath("DOCUMENTATION.md").read_text()
 
     return txt

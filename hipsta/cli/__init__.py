@@ -6,14 +6,13 @@ from ..hipsta import _parse_arguments, _run_hipsta, get_help
 
 
 def main():
-
     # message
 
-    print('')
-    print('----------------------------------------')
-    print('Hippocampal shape and thickness analysis')
-    print('----------------------------------------')
-    print('')
+    print("")
+    print("----------------------------------------")
+    print("Hippocampal shape and thickness analysis")
+    print("----------------------------------------")
+    print("")
 
     # parse arguments
 
