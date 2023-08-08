@@ -92,7 +92,7 @@ def extractSurface(params):
         img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz"))
         dat = img.get_fdata()
 
-        msh = skm.marching_cubes(dat)
+        msh = skm.marching_cubes(dat, allow_degenerate=False)
 
         v = np.matmul(
             img.header.get_vox2ras_tkr(), np.concatenate((msh[0], np.ones((msh[0].shape[0], 1))), axis=1).T

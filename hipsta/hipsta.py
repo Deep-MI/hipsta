@@ -740,6 +740,11 @@ def _check_params(params):
         LOGGER.info("Could not find molecular layer in lookup table.")
         raise AssertionError()
 
+    # check longfilter size
+
+    if params.internal.LONGFILTER_SIZE < 2 or (params.internal.LONGFILTER_SIZE % 2) == 0:
+        raise RuntimeError("Longfilter size must be an uneven integer greater than 2.")
+
     # check aniso alpha
 
     if len(params.internal.aniso_alpha) > 2:
