@@ -110,11 +110,11 @@ def upsampleImage(params):
                 os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")
                 + " "
                 + " -ds "
-                + str(params.internal.UPSAMPLE[0])
+                + str(params.internal.UPSAMPLE_SIZE[0])
                 + " "
-                + str(params.internal.UPSAMPLE[1])
+                + str(params.internal.UPSAMPLE_SIZE[1])
                 + "  "
-                + str(params.internal.UPSAMPLE[2])
+                + str(params.internal.UPSAMPLE_SIZE[2])
                 + " "
                 + " -rt nearest "
                 + params.FILENAME
