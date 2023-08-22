@@ -707,6 +707,8 @@ def computeCubeParam(params):
         LOGGER.info("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
+        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
         raise RuntimeError("Inconsistency detected for EV1, exiting.")
 
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
@@ -729,6 +731,8 @@ def computeCubeParam(params):
         LOGGER.info("Flipping EV2")
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
     else:
+        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
         raise RuntimeError("Inconsistency detected for EV2, exiting.")
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
