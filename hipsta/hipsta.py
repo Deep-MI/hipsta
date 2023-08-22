@@ -1058,7 +1058,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
                     if key in vars(self).keys():
                         setattr(self, key, value)
                     else:
-                        raise AssertionError("Key not included in list of default keys")
+                        raise AssertionError("Key " + key + " not included in list of default keys")
 
     #
 
