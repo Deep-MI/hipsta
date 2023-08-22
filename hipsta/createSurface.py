@@ -92,14 +92,30 @@ def extractSurface(params):
         img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz"))
         dat = img.get_fdata()
 
-        msh = skm.marching_cubes(dat, allow_degenerate=False)
+        msh = skm.marching_cubes(dat, allow_degenerate=False, step_size=2)
 
         v = np.matmul(
             img.header.get_vox2ras_tkr(), np.concatenate((msh[0], np.ones((msh[0].shape[0], 1))), axis=1).T
         ).T[:, 0:3]
         t = msh[1]
 
-        TriaMesh(v, t).write_vtk(os.path.join(params.OUTDIR, "surface", params.HEMI + ".initial_surf.vtk"))
+        # keep largest component
+
+        triaMesh = TriaMesh(v=v, t=t)
+        comps = sp.csgraph.connected_components(triaMesh.adj_sym, directed=False)
+        if comps[0] > 1:
+            compsLargest = np.argmax(np.unique(comps[1], return_counts=True)[1])
+            vtcsRemove = np.where(comps[1] != compsLargest)
+            triaKeep = np.sum(np.isin(t, vtcsRemove), axis=1) == 0
+            tcomp = t[triaKeep, :]
+        else:
+            tcomp = t
+
+        # write to file
+
+        tria_mesh = TriaMesh(v=v, t=tcomp)
+        tria_mesh.rm_free_vertices_()
+        TriaMesh.write_vtk(tria_mesh, os.path.join(params.OUTDIR, "surface", params.HEMI + ".initial_surf.vtk"))
 
     # update params
 
