@@ -1,27 +1,37 @@
-# Hippocampal shape and thickness analysis 
+# Hippocampal shape and thickness analysis
 
 
 ## Purpose:
 
-This repository contains the Hipsta package, a collection of scripts for 
+This repository contains the Hipsta package, a collection of scripts for
 hippocampal shape and thickness analysis as described in our recent [publication](https://doi.org/10.1016/j.neuroimage.2023.120182).
 
 
 ## Documentation:
 
-Please see the documentation pages for a general overview, usage information and 
+Please see the documentation pages for a general overview, usage information and
 examples, and output description. Brief usage information is also available [here](hipsta/doc/DOCUMENTATION.md).
-
+Some suggestions for running the script can be found in the [tutorial](TUTORIAL.md).
 
 ## Current status:
 
-The hippocampal shape and thickness analysis package is currently in its beta 
-stage, which means that it's open for testing, but may still contain unresolved 
-issues. Future changes with regard to the algorithms, interfaces, and package 
+The hippocampal shape and thickness analysis package is currently in its beta
+stage, which means that it's open for testing, but may still contain unresolved
+issues. Future changes with regard to the algorithms, interfaces, and package
 structure are to be expected.
 
 
 ## Installation:
+
+It is recommended to run this pipeline within its own virtual environment. A
+virtual environment can, for example, be created using Python' `virtualenv`
+command:
+
+`virtualenv /path/to/a/new/directory/of/your/choice`
+
+Activate the virtual environment as follows:
+
+`source /path/to/a/new/directory/of/your/choice/bin/activate`
 
 Use the following code to download this package from its GitHub repository:
 
@@ -31,15 +41,13 @@ You can use the following code to install the required Python dependencies:
 
 `pip install -r requirements.txt`
 
-It is recommended to run this pipeline within its own virtual environment.
-
 The above steps are not necessary when running the [Docker](docker/Docker.md) or
 [Singularity](singularity/Singularity.md) versions of the package.
 
 
 ## Requirements:
 
-Unless using the [Docker](docker/Docker.md) or [Singularity](singularity/Singularity.md) 
+Unless using the [Docker](docker/Docker.md) or [Singularity](singularity/Singularity.md)
 versions of the package, the following conditions need to be met for running an
 analysis:
 
@@ -56,7 +64,7 @@ pyacvd libraries, among others. See `requirements.txt` for a full list, and use
 
 4. The gmsh package (version 2.x; http://gmsh.info) must be installed. Can be
 downloaded e.g. as binaries for [linux](https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz) or
-[MacOSX](https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg) . The 'gmsh' binary must 
+[MacOSX](https://gmsh.info/bin/MacOSX/gmsh-2.16.0-MacOSX.dmg) . The 'gmsh' binary must
 be on the $PATH:
 
     `export PATH=${PATH}:/path/to/gmsh-directory/bin`

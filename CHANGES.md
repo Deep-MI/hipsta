@@ -9,7 +9,7 @@
 - introduced logging
 - full lapy integration
 - name change: subfieldDNA --> hippocampal shapetools (briefly: shapetools)
-- support for ASHS_IKND_7T segmentations
+- support for ASHS segmentations
 - mandatory `lut` command line argument
 - dropped `hsflist` command line argument
 - changes in default names for output folders and files

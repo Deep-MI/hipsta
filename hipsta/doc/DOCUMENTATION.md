@@ -3,46 +3,9 @@
 
 ## Purpose:
 
-This is a collection of scripts for hippocampal shape and thickness analysis.
-
-
-## Description:
-
-This script performs the following major processing steps:
-
-1. process image
-    1. convert format
-    2. cropping (optional)
-    3. upsampling (optional)
-2. process labels
-    1. automated identification of head and tail boundaries (optional)
-    2. extract and merge subfield labels
-    3. merge molecular layer (optional)
-3. process mask
-    1. binarize
-    2. apply gaussian filter operations (optional)
-    3. apply longitudinal filter operations (optional)
-    3. fill holes using dilation and erosion (optional)
-4. create surface
-    1. extract initial surface using marching cube algorithm
-    2. remesh surface (optional)
-    3. smooth surface
-    4. create QC plots
-5. create tetrahedral mesh from triangular surface
-6. create label files for tetra mesh
-7. cut open tetrahedral mesh at anterior and posterior ends
-    1. remove boundary mask
-    2. mesh cutting
-    3. check boundaries
-8. create cube parametrization
-    1. compute cube parametrization
-    2. create QC plots
-9. compute thickness and curvature
-    1. compute thickness and curvature
-    2. create QC plots
-10. map subfield values (and other volume-based data, optional)
-11. create supplementary files for visualization
-
+The hipsta package is a collection of scripts for hippocampal shape and
+thickness analysis. This page provides usage information as well as a technical
+description of processing steps and outputs.
 
 ## Usage:
 
@@ -128,30 +91,68 @@ import hipsta
 help(hipsta.run_hipsta)
 ```
 
+
+## Description:
+
+This script performs the following major processing steps:
+
+1. process image
+    1. convert format
+    2. cropping (optional)
+    3. upsampling (optional)
+2. process labels
+    1. automated identification of head and tail boundaries (optional)
+    2. extract and merge subfield labels
+    3. merge molecular layer (optional)
+3. process mask
+    1. binarize
+    2. apply gaussian filter operations (optional)
+    3. apply longitudinal filter operations (optional)
+    3. fill holes using dilation and erosion (optional)
+4. create surface
+    1. extract initial surface using marching cube algorithm
+    2. remesh surface (optional)
+    3. smooth surface
+    4. create QC plots
+5. create tetrahedral mesh from triangular surface
+6. create label files for tetra mesh
+7. cut open tetrahedral mesh at anterior and posterior ends
+    1. remove boundary mask
+    2. mesh cutting
+    3. check boundaries
+8. create cube parametrization
+    1. compute cube parametrization
+    2. create QC plots
+9. compute thickness and curvature
+    1. compute thickness and curvature
+    2. create QC plots
+10. map subfield values (and other volume-based data, optional)
+11. create supplementary files for visualization
+
 ## Outputs:
 
 1. Thickness and curvature estimates
 
-The primary output of the hippocampal shape and thickness package are surface 
+The primary output of the hippocampal shape and thickness package are surface
 files and associated thickness values in the 'tickness' folder.
-   
+
 The thickness values will be stored in csv tables:
 
 - <lh|rh>.grid-segments-<x|y|z>.csv
 
-Here, x corresponds to the medial-->lateral dimension, y to the 
-posterior-->anterior dimension, and z to the exterior-->interior dimension. 
+Here, x corresponds to the medial-->lateral dimension, y to the
+posterior-->anterior dimension, and z to the exterior-->interior dimension.
 
 The thickness values are therefore in the z files, whereas the x and y files
 contain length estimates in the other two directions.
 
-The thickness values will also be stored as mgh and psol overlay files that 
+The thickness values will also be stored as mgh and psol overlay files that
 can be overlaid onto the mid-surface vtk file.
 
 - <lh|rh>.mid-surface.vtk
 - <lh|rh>.mid-surface.thickness.<mgh|psol>
 
-It is also possible to overlay the projected subfield boundary files onto 
+It is also possible to overlay the projected subfield boundary files onto
 the midsurface:
 
 - <lh|rh>.mid-surface_hsf.<mgh|psol>
@@ -199,7 +200,7 @@ Also the intermediate volume and surface files can be useful for quality control
     3. A 'mask' folder with intermediate results, primarily files created
     during creation and post-processing of binary masks.
 
-    4. A 'surface' folder with intermediate results, primarily files created 
+    4. A 'surface' folder with intermediate results, primarily files created
     during surface construction.
 
     5. A 'tetra-mesh' folder with intermediate results, primarily files
@@ -237,7 +238,7 @@ Also the intermediate volume and surface files can be useful for quality control
   `subiculum` can have the same numeric ID if these substructures are not
   distinguished in the segmentation. `head` and `tail` can have multiple labels
   if these are distinguished in the segmentation, but should be combined for
-  the processing within the hippocampal shapetools.
+  the processing with this package.
 
 
 ## Requirements:
@@ -247,7 +248,7 @@ Also the intermediate volume and surface files can be useful for quality control
 
 2. A hippocampal subfield segmentation created by FreeSurfer 7.11 or later
    or the ASHS software. A custom segmentation is also permissible (some restrictions
-   and settings apply; see `Custom Segmentations`).
+   and settings apply; see [Supported Segmentations](#supported-segmentations)).
 
 3. Python 3.8 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
    pyacvd libraries. See `requirements.txt` for a full list.
