@@ -647,6 +647,29 @@ def _evaluate_args(args):
 
         HSFLIST = [8, 1, 2, 4]
 
+    elif args.lut == "ashs-umcutrecht_7t":
+        LOGGER.info("Found internal, modified look-up table for ASHS UMC Utrecht 7T atlas.")
+
+        LUTLABEL = [
+            "entorhinal",
+            "subiculum",
+            "presubiculum",
+            "ca1",
+            "ca2",
+            "dg",
+            "ca3",
+            "ca4",
+            "cyst",
+            "tail",
+            "head",
+        ]
+
+        LUTINDEX = [1, 2, 2, 3, 4, 5, 6, 5, 7, 8, 20]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [2, 3, 4, 6]
+
     elif os.path.isfile(args.lut):
         LOGGER.info("Found look-up table " + args.lut)
 
@@ -752,8 +775,8 @@ def _check_params(params):
 
     # check LUT
 
-    if params.LUT != "freesurfer" and params.LUT != "ashs" and not os.path.isfile(params.LUT):
-        raise RuntimeError("Look-up table can only be 'fs711', 'ashs', or an existing file, but not " + params.LUT)
+    if params.LUT != "freesurfer" and params.LUT != "ashs" and params.LUT != "ashs-umcutrecht_7t" and not os.path.isfile(params.LUT):
+        raise RuntimeError("Look-up table can only be 'fs711', 'ashs', 'ashs-umcutrecht_7t', or an existing file, but not " + params.LUT)
 
     # return
 

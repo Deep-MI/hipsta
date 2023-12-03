@@ -26,7 +26,6 @@ def checkSurface(params, stage=None):
     print(
         "--------------------------------------------------------------------------------"
     )
-    print()
     print("Check surfaces")
     print()
 
