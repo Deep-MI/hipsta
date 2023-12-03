@@ -64,7 +64,7 @@ ENV OMP_NUM_THREADS=1
 ENV PATH=/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/opt/gmsh-2.16.0-Linux/bin:${PATH}
 
 # Set entrypoint (non-interactive mode)
-ENTRYPOINT ["python3", "/app/hipsta/shapetools.py"]
+ENTRYPOINT ["/app/hipsta/run_hipsta"]
 
 ## Run app when the container launches (interactive mode)
 #CMD ["/bin/bash"]
