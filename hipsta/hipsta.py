@@ -14,6 +14,7 @@ import time
 import pandas
 
 from .cfg.logging import setup_logging
+from .cfg.atlases import get_atlases
 from .cfg.config import get_defaults
 from .cfg.version import get_version
 from .computeCubeParam import computeCubeParam
@@ -157,9 +158,9 @@ def _parse_arguments():
     required.add_argument(
         "--lut",
         dest="lut",
-        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer' and 'ashs' are keywords for built-in tables.",
+        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', 'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.",
         default=None,
-        metavar="<freesurfer|ashs|filename>",
+        metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>",
         required=False,
     )
     required.add_argument(
@@ -597,109 +598,9 @@ def _evaluate_args(args):
     settings.mapValuesWriteMGH = get_defaults("map_values_write_mgh")
     settings.mapValuesWriteANNOT = get_defaults("map_values_write_annot")
 
-    # create the LUT # TODO: maybe move this to config
+    # create the LUT
 
-    if args.lut == "freesurfer":
-        LOGGER.info("Found internal, modified look-up table for FreeSurfer.")
-
-        LUTLABEL = ["tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg", "ml"]
-
-        LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246]
-
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
-
-        HSFLIST = [234, 236, 238, 240, 246]
-
-    elif args.lut == "freesurfer-no_ml":
-        LOGGER.info("Found internal, modified look-up table for FreeSurfer.")
-
-        LUTLABEL = ["tail", "head", "presubiculum", "subiculum", "ca1", "ca2", "ca3", "ca4", "dg"]
-
-        LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244]
-
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
-
-        HSFLIST = [234, 236, 238, 240]
-
-    elif args.lut == "ashs":
-        LOGGER.info("Found internal, modified look-up table for ASHS atlas.")
-
-        LUTLABEL = [
-            "ca1",
-            "ca2",
-            "ca3",
-            "ca4",
-            "dg",
-            "tail_orig",
-            "subiculum",
-            "presubiculum",
-            "entorhinal",
-            "ba35",
-            "ba36",
-            "parahippocampal",
-            "head",
-            "tail",
-        ]
-
-        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
-
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
-
-        HSFLIST = [8, 1, 2, 4]
-
-    elif args.lut == "ashs-umcutrecht_7t":
-        LOGGER.info("Found internal, modified look-up table for ASHS UMC Utrecht 7T atlas.")
-
-        LUTLABEL = [
-            "entorhinal",
-            "subiculum",
-            "presubiculum",
-            "ca1",
-            "ca2",
-            "dg",
-            "ca3",
-            "ca4",
-            "cyst",
-            "tail",
-            "head",
-        ]
-
-        LUTINDEX = [1, 2, 2, 3, 4, 5, 6, 5, 7, 8, 20]
-
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
-
-        HSFLIST = [2, 3, 4, 6]
-
-    elif os.path.isfile(args.lut):
-        LOGGER.info("Found look-up table " + args.lut)
-
-        lut = pandas.read_csv(
-            args.lut,
-            sep=" ",
-            comment="#",
-            header=None,
-            skipinitialspace=True,
-            skip_blank_lines=True,
-            error_bad_lines=False,
-            warn_bad_lines=True,
-        )
-
-        LUTDICT = dict(zip(lut[0], lut[1]))
-
-        HSFLIST = list(lut[1])
-
-    else:
-        LUTDICT = dict()
-
-        HSFLIST = []
-
-    # add entries for tetra-labels # TODO: maybe move this to config
-
-    LUTDICT["jointtail"] = 226
-    LUTDICT["jointhead"] = 232
-    LUTDICT["bndtail"] = 2260
-    LUTDICT["bndhead"] = 2320
-    LUTDICT["bndca4"] = 2420
+    LUTDICT, HSFLIST = get_atlases(args.lut)
 
     # assemble and return params
 
@@ -775,8 +676,8 @@ def _check_params(params):
 
     # check LUT
 
-    if params.LUT != "freesurfer" and params.LUT != "ashs" and params.LUT != "ashs-umcutrecht_7t" and not os.path.isfile(params.LUT):
-        raise RuntimeError("Look-up table can only be 'fs711', 'ashs', 'ashs-umcutrecht_7t', or an existing file, but not " + params.LUT)
+    if params.LUT != "freesurfer" and params.LUT != "ashs-penn_abc_3t_t2" and params.LUT != "ashs-umcutrecht_7t" and not os.path.isfile(params.LUT):
+        raise RuntimeError("Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', or an existing file, but not " + params.LUT)
 
     # return
 
@@ -853,7 +754,7 @@ def _run_analysis(params):
     params = checkSurface(params, stage="check_surface")
 
     if params.internal.continue_program is False:
-        LOGGER.info("Hippocampal shapetools finished WITH ERRORS.")
+        LOGGER.info("Hipsta finished WITH ERRORS.")
         raise AssertionError("Check surface failed (stage: surface)")
 
     # create tetra mesh for whole hippocampal body (5)
@@ -878,7 +779,7 @@ def _run_analysis(params):
     params = checkSurface(params, stage="check_boundaries")
 
     if params.internal.continue_program is False:
-        LOGGER.info("Hippocampal shapetools finished WITH ERRORS.")
+        LOGGER.info("Hipsta finished WITH ERRORS.")
         raise AssertionError("Check surface failed (stage: boundaries)")
 
     # compute cube parametrization (8)
@@ -910,7 +811,7 @@ def _run_analysis(params):
     # all done
 
     LOGGER.info("Date: %s", time.strftime("%d/%m/%Y %H:%M:%S"))
-    LOGGER.info("Hippocampal shapetools finished without errors.")
+    LOGGER.info("Hipsta finished without errors.")
 
 
 # ------------------------------------------------------------------------------
@@ -919,7 +820,7 @@ def _run_analysis(params):
 
 def _run_hipsta(args):
     """
-    a function to run the shapetools submodules
+    a function to run the hipsta submodules
 
     """
 
@@ -967,7 +868,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     hemi :
         Hemisphere. Either \'lh\' or \'rh\'.
     lut :
-        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\' and \'ashs\' are keywords for built-in tables.
+        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2' and \'ashs-umcutrecht_7t\' are keywords for built-in tables.
     outputdir
         Directory where the results will be written.
 
