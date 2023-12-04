@@ -57,7 +57,7 @@ def setup_logging(args):
     logging.basicConfig(level=logging.INFO, format=logfile_format, handlers=[logfile_handlers_file, logfile_handlers_stream])
 
     # intial messages
-    LOGGER.info("Starting logging for hippocampal shapetools ...")
+    LOGGER.info("Starting logging ...")
     LOGGER.info("Logfile: %s", logfile)
     LOGGER.info("Version: %s", get_version())
     LOGGER.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
