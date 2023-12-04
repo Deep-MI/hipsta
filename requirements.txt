@@ -8,3 +8,4 @@ scipy==1.8.0
 nilearn==0.8.1
 lapy>=1.0.0
 kaleido==0.2.1
+scikit-image
