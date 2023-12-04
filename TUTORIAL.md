@@ -109,17 +109,12 @@ image in the main folder and the `mask` subdirectory with intermediate results.
 The fourth step converts the binary mask image into a vertex-based surface 
 representation. By default, FreeSurfer's marching cube algorithm is used. If it 
 does not give good results, it can be changed to the scikit-image algorithm 
-using the `--mca` argument.
-
-Optionally, a remeshing procedure can be applied to the the surface mesh if the 
-vertices are spaced very irregularly; this may not always be the case, therefore 
-this step has to be switched on using the `--remesh` flag if desired.
-
-In any case, the initial surface will be smoothed, the amount of which can be 
-controlled using the `--smooth` argument.
-
-During this stage, several QC plots will be created and placed in the `qc` 
-subdirectory.
+using the `--mca` argument. Optionally, a remeshing procedure can be applied to 
+the the surface mesh if the vertices are spaced very irregularly; this may not 
+always be the case, therefore this step has to be switched on using the `--remesh` 
+flag if desired. In any case, the initial surface will be smoothed, the amount 
+of which can be controlled using the `--smooth` argument. During this stage, 
+several QC plots will be created and placed in the `qc` subdirectory.
 
 The result of processing step 4 ('create surface') will be the `<lh|rh>.surf.vtk`
 surface in the main folder and the `surface` subdirectory with intermediate 
@@ -158,10 +153,8 @@ mesh') are stored in the `tetra-labels` subdirectory.
 This step cuts open the tetrahedral mesh at its anterior and posterior ends. It 
 also checks whether or not this cutting has been succesful, i.e. if there are 
 exactly two boundary loops. If this is not the case, the analysis will be 
-terminated at this stage.
-
-The range for tetrahedral boundary cutting can be modified by the `--cut-range` 
-argument. The default values are `-0.975, 0.975`.
+terminated at this stage. The range for tetrahedral boundary cutting can be 
+modified by the `--cut-range` argument. The default values are `-0.975, 0.975`.
 
 The result of processing step 7 ('cut open tetrahedral mesh') will be the `<lh|rh>.cut.vtk`
 mesh in the main folder and the `tetra-cut` subdirectory with intermediate 
@@ -178,12 +171,11 @@ results.
 
 This step computes a 'cube parametrization' on the tetrahedral mesh: it creates 
 smooth functions in three anatomically meaningful dimensions across the mesh 
-that will form the basis of the 3D coordinate system. In addition, QC plots will 
-be created and stored in the `qc` subfolder.
-
-Parameters for the cube parametrization, in particular the identification of the 
-lateral and medial boundaries, can optionally be set using the `--aniso-alpha` 
-and `--aniso-smooth` arguments.
+that will form the basis of the 3D coordinate system. Parameters for the cube 
+parametrization, in particular the identification of the lateral and medial 
+boundaries, can optionally be set using the `--aniso-alpha` and `--aniso-smooth` 
+arguments. In addition, QC plots will be created and stored in the `qc` 
+subfolder.
 
 The intermediate results of processing step 8 ('create cube parametrization') 
 are stored in the `tetra-cube` subdirectory.
@@ -199,27 +191,22 @@ resolution of the grid used for thickness computation. See [below](#additional-a
 for an explanation.
 
 The primary output of the hippocampal shape and thickness analysis are surface
-files and associated thickness values in the `tickness` folder.
-
-The thickness values will be stored in csv tables:
+files and associated thickness values in the `tickness` folder. The estimated 
+hippocampal thickness values will be stored in csv tables:
 
 - <lh|rh>.grid-segments-<x|y|z>.csv
 
-Here, x corresponds to the medial-->lateral dimension, y to the
-posterior-->anterior dimension, and z to the exterior-->interior dimension.
-
-The thickness values are therefore in the z files, whereas the x and y files
-contain length estimates in the other two directions.
+Here, x corresponds to the medial-->lateral dimension, y to the 
+posterior-->anterior dimension, and z to the exterior-->interior dimension. The 
+thickness values are therefore in the z files, whereas the x and y files
+contain length estimates for the other two directions.
 
 The thickness values will also be stored as mgh and psol overlay files that
-can be overlaid onto the mid-surface vtk file.
+can be overlaid onto the mid-surface vtk file. It is also possible to overlay 
+the projected subfield boundary files onto the midsurface: 
 
 - <lh|rh>.mid-surface.vtk
 - <lh|rh>.mid-surface.thickness.<mgh|psol>
-
-It is also possible to overlay the projected subfield boundary files onto
-the midsurface:
-
 - <lh|rh>.mid-surface_hsf.<mgh|psol>
 
 <figure> 
@@ -274,7 +261,7 @@ requires the following arguments:
 
 - `--filename`: Filename of a segmentation file
 - `--hemi`: Hemisphere. Either 'lh' (left) or 'rh' (right)
-- `--lut` Look-up table ('atlas'). Can be 'freesurfer' or '' or ''. Alternatively, a text file with numeric and verbal segmentation labels can be used.
+- `--lut` Look-up table ('atlas'). Can be 'freesurfer' or 'ashs-penn_abc_3t_t2' or 'ashs-umcutrecht_7t'. Alternatively, a text file with numeric and verbal segmentation labels can be used.
 - `--outputdir`: Output directory where the results will be written.
 
 A minimal command could therefore look like this (for an analysis of the left 

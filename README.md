@@ -24,7 +24,7 @@ structure are to be expected.
 ## Installation:
 
 It is recommended to run this pipeline within its own virtual environment. A
-virtual environment can, for example, be created using Python' `virtualenv`
+virtual environment can, for example, be created using Python's `virtualenv`
 command:
 
 `virtualenv /path/to/a/new/directory/of/your/choice`
@@ -43,8 +43,7 @@ The next step is to install hipsta as a python package (after changing into the
 
 `pip install .`
 
-As soon as the package is available on `pypi.org`, it will also be installable 
-via (downloading from GitHub is not necessary in this case):
+As soon as the package is available on `pypi.org`, it will also be installable directly and downloading from GitHub is not necessary in this case:
 
 `pip install hipsta`
 
