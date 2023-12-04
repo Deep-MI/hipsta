@@ -58,7 +58,7 @@ def createSupplementaryFiles(params):
             3.5,
         ]  # note that this implicitly also accounts for 246 labels if present
 
-    elif LUT == "ashs":
+    elif LUT == "ashs-penn_abc_3t_t2":
         # get labels
 
         hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface_hsf.mgh"))
@@ -73,7 +73,21 @@ def createSupplementaryFiles(params):
 
         lstBnd = [11.5, 12.5, 13.5]
 
-        #
+    elif LUT == "ashs-umcutrecht_7t":
+
+        # get labels
+
+        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface_hsf.mgh"))
+        hsfBnd = np.array(hsfBnd.get_fdata()).flatten()
+
+        # recode to consecutive values
+
+        hsfBnd[hsfBnd == 2] = 21
+        hsfBnd[hsfBnd == 3] = 22
+        hsfBnd[hsfBnd == 4] = 23
+        hsfBnd[hsfBnd == 6] = 24
+
+        lstBnd = [21.5, 22.5, 23.5]
 
     else:
         logging.info(

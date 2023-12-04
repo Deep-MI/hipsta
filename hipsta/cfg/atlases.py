@@ -4,6 +4,15 @@ analysis package.
 
 """
 
+import logging
+
+# ==============================================================================
+# LOGGING
+
+LOGGER = logging.getLogger(__name__)
+
+# ==============================================================================
+# FUNCTIONS
 
 def get_atlases(lut):
 
@@ -30,7 +39,7 @@ def get_atlases(lut):
         HSFLIST = [234, 236, 238, 240]
 
     elif lut == "ashs-penn_abc_3t_t2":
-        LOGGER.info("Found internal, modified look-up table for ASHS atlas.")
+        LOGGER.info("Found internal, modified look-up table the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
 
         LUTLABEL = [
             "ca1",
