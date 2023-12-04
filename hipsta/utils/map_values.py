@@ -408,11 +408,18 @@ def mapValues(
     if subproc.returncode == 1:
         sys.exit(1)
     elif subproc.returncode > 100:
-        RESLICED_VOL = (
-            os.path.splitext(IN_VOL)[0]
-            + "_reslicedToHighresHC"
-            + os.path.splitext(IN_VOL)[1]
-        )
+        if os.path.isdir(os.path.join(os.path.dirname(IN_VOL), "labels")):
+            RESLICED_VOL = (
+                os.path.join(os.path.dirname(IN_VOL), "labels", 
+                             os.path.splitext(os.path.basename(IN_VOL))[0] + 
+                             "_reslicedToHighresHC" + os.path.splitext(IN_VOL)[1])
+            )
+        else:
+            RESLICED_VOL = (
+                os.path.splitext(IN_VOL)[0]
+                + "_reslicedToHighresHC"
+                + os.path.splitext(IN_VOL)[1]
+            )
 
         cmd = (
             os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")

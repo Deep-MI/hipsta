@@ -901,7 +901,7 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     no_close_mask : optional
         Do not apply closing operation to mask, i.e. do not attempt to close small holes. Default: False
     mca : optional
-        Type of marching-cube algorithm. Either \'mri_mc\' or \'skimage\'. Default: \'skimage\'
+        Type of marching-cube algorithm. Either \'mri_mc\' or \'skimage\'. Default: \'mri_mc\'
     remesh : optional
         Apply remeshing operation to surface, i.e. create a regular, evenly spaced surface grid. Default: False
     smooth : optional
