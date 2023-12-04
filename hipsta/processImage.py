@@ -32,17 +32,7 @@ def convertFormat(params):
 
     # convert and copy
 
-    cmd = (
-        os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")
-        + " "
-        + params.FILENAME
-        + " "
-        + os.path.join(params.OUTDIR, "image", params.HEMI + ".orig.mgz")
-    )
-
-    print(cmd)
-
-    subprocess.run(cmd.split(), capture_output=True)
+    nb.save(nb.load(params.FILENAME), os.path.join(params.OUTDIR, "image", params.HEMI + ".orig.mgz"))
 
     # update params
 
