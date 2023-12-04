@@ -42,7 +42,7 @@ def createSupplementaryFiles(params):
     if LUT == "freesurfer":
         # get labels
 
-        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface_hsf.mgh"))
+        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface.hsf.mgh"))
         hsfBnd = np.array(hsfBnd.get_fdata()).flatten()
 
         # recode to consecutive values
@@ -61,7 +61,7 @@ def createSupplementaryFiles(params):
     elif LUT == "ashs-penn_abc_3t_t2":
         # get labels
 
-        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface_hsf.mgh"))
+        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface.hsf.mgh"))
         hsfBnd = np.array(hsfBnd.get_fdata()).flatten()
 
         # recode to consecutive values
@@ -77,7 +77,7 @@ def createSupplementaryFiles(params):
 
         # get labels
 
-        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface_hsf.mgh"))
+        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface.hsf.mgh"))
         hsfBnd = np.array(hsfBnd.get_fdata()).flatten()
 
         # recode to consecutive values
@@ -116,7 +116,7 @@ def createSupplementaryFiles(params):
 
     if len(vBnd) > 0:
         TriaMesh(v=vBnd, t=tBnd.astype("int")).write_vtk(
-            filename=os.path.join(OUT_DIR, HEMI + ".mid-surface_hsf-bnd.vtk")
+            filename=os.path.join(OUT_DIR, HEMI + ".mid-surface.hsf-bnd.vtk")
         )
     else:
         logging.info("Could not create boundary overlays.")

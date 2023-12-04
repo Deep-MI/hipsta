@@ -156,7 +156,7 @@ can be overlaid onto the mid-surface vtk file.
 It is also possible to overlay the projected subfield boundary files onto
 the midsurface:
 
-- <lh|rh>.mid-surface_hsf.<mgh|psol>
+- <lh|rh>.mid-surface.hsf.<mgh|psol>
 
 Besides the thickness values, mean and gaussian curvature estimates are
 provided for interior, mid, and exterior surfaces:
@@ -173,8 +173,8 @@ were created / used during the thickness computation:
 - <lh|rh>.mid-surface.csv
 - <lh|rh>.grid-lines.csv
 - <lh|rh>.grid-lines-<x|y|z>.vtk
-- <lh|rh>.mid-surface_hsf.csv
-- <lh|rh>.mid-surface_hsf-bnd.vtk
+- <lh|rh>.mid-surface.hsf.csv
+- <lh|rh>.mid-surface.hsf-bnd.vtk
 
 2. Logfile and intermediate volume and surface files
 

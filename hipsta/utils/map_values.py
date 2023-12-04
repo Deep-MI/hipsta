@@ -507,7 +507,7 @@ def mapValues(
     integr = pd.DataFrame(integr).sort_values([0, 1])
 
     # output
-    OUT_CSV = IN_SURF.replace(".vtk", "_" + IN_SUFFIX + ".csv")
+    OUT_CSV = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".csv")
     pd.DataFrame(integr).to_csv(OUT_CSV, header=False, index=False)
 
     if writePSOL is True:
@@ -519,11 +519,11 @@ def mapValues(
             or INTEGRATE == "min"
         ):
             OUT_PSOL_INTEGR = IN_SURF.replace(
-                ".vtk", "_" + IN_SUFFIX + "-integrated.psol"
+                ".vtk", "." + IN_SUFFIX + "-integrated.psol"
             )
             io.write_vfunc(OUT_PSOL_INTEGR, np.asarray(integr)[:, 2])
         else:
-            OUT_PSOL = IN_SURF.replace(".vtk", "_" + IN_SUFFIX + ".psol")
+            OUT_PSOL = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".psol")
             io.write_vfunc(OUT_PSOL, lookup)
 
     if writeMGH is True:
@@ -535,7 +535,7 @@ def mapValues(
             or INTEGRATE == "min"
         ):
             OUT_MGH_INTEGR = IN_SURF.replace(
-                ".vtk", "_" + IN_SUFFIX + "-integrated.mgh"
+                ".vtk", "." + IN_SUFFIX + "-integrated.mgh"
             )
             nb.freesurfer.save(
                 nb.freesurfer.MGHImage(
@@ -544,14 +544,14 @@ def mapValues(
                 filename=OUT_MGH_INTEGR,
             )
         else:
-            OUT_MGH = IN_SURF.replace(".vtk", "_" + IN_SUFFIX + ".mgh")
+            OUT_MGH = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".mgh")
             nb.freesurfer.save(
                 nb.freesurfer.MGHImage(dataobj=lookup.astype("float32"), affine=None),
                 filename=OUT_MGH,
             )
 
     if writeANNOT is True:
-        OUT_ANNOT = IN_SURF.replace(".vtk", "_" + IN_SUFFIX + ".annot")
+        OUT_ANNOT = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".annot")
         # ctab = np.array([(63,63,63,255,0), (255,0,0,255,234), (0,255,0,255,236), (0,0,255,255,238), (255,255,0,255,240), (255,255,0,255,246)])
         # names = ['Void', 'PrSbc', 'Sbc', 'CA1', 'CA2/3', 'ML']
         # labels = np.zeros(len(lookup))

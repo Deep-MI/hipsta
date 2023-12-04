@@ -207,19 +207,19 @@ the projected subfield boundary files onto the midsurface:
 
 - <lh|rh>.mid-surface.vtk
 - <lh|rh>.mid-surface.thickness.<mgh|psol>
-- <lh|rh>.mid-surface_hsf.<mgh|psol>
+- <lh|rh>.mid-surface.hsf.<mgh|psol>
 
 <figure> 
     <center>
     <img src="images/mid.png" width="400"/>
     <img src="images/mid_tria.png" width="400"/>
-    <figcaption>mid-surface.vtk as a surface (left) and with additional triangulation overlay (right)</figcaption> 
+    <figcaption>mid-surface.vtk as a surface (left) and with additional triangulation overlay (right)</figcaption>
 </figure>     
 <figure> 
     <center>
     <img src="images/mid_thickness.png" width="400"/>
     <img src="images/mid_hsf.png" width="400"/>
-    <figcaption>overlays of mid-surface.thickness.mgh (left) and mid-surface_hsf.mgh (right) onto mid-surface.vtk </figcaption> 
+    <figcaption>overlays of mid-surface.thickness.mgh (left) and mid-surface.hsf.mgh (right) onto mid-surface.vtk </figcaption>
 </figure> 
 
 Besides the thickness values, mean and gaussian curvature estimates are
