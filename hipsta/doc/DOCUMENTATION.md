@@ -5,7 +5,8 @@
 
 The hipsta package is a collection of scripts for hippocampal shape and
 thickness analysis. This page provides usage information as well as a technical
-description of processing steps and outputs.
+description of processing steps and outputs. An explanative description can be
+found in the tutorial.
 
 ## Usage:
 
@@ -18,7 +19,7 @@ The hipsta scripts can be run from the command line as follows:
 Hippocampal shape and thickness analysis
 ----------------------------------------
 
-usage: run_hipsta [--filename <filename>] [--hemi <lh|rh>] [--lut <freesurfer|ashs|filename>] [--outputdir <directory>] [--no-cleanup] [--no-crop] [--upsample] [--upsample-size <float> <float> <float>]
+usage: run_hipsta [--filename <filename>] [--hemi <lh|rh>] [--lut <freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>] [--outputdir <directory>] [--no-cleanup] [--no-crop] [--upsample] [--upsample-size <float> <float> <float>]
                   [--no-merge-molecular-layer] [--automask-head] [--automask-tail] [--automask-head-margin <int>] [--automask-tail-margin <int>] [--no-gauss-filter]
                   [--gauss-filter-size <float> <float>] [--long-filter] [--long-filter-size <int>] [--no-close-mask] [--mca <mri_mc|skimage>] [--remesh] [--smooth <int>] [--cut-range <float> <float>]
                   [--aniso-alpha <float> [<float> ...]] [--aniso-smooth <int>] [--thickness-grid <float> <float> <float> <float> <float> <float> <float> <float> <float>] [--help] [--more-help]
@@ -30,8 +31,8 @@ Required arguments:
   --filename <filename>
                         Filename of a segmentation file.
   --hemi <lh|rh>        Hemisphere. Either 'lh' or 'rh'.
-  --lut <freesurfer|ashs|filename>
-                        Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer' and 'ashs' are keywords for built-in tables.
+  --lut <freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>
+                        Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', 'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.
   --outputdir <directory>
                         Directory where the results will be written.
 
@@ -57,7 +58,7 @@ Optional arguments:
                         Size of longitudinal filter. Default: 5
   --no-close-mask       Do not apply closing operation to mask, i.e. do not attempt to close small holes.
   --mca <mri_mc|skimage>
-                        Type of marching-cube algorithm. Either 'mri_mc' or 'skimage'. Default: 'skimage'
+                        Type of marching-cube algorithm. Either 'mri_mc' or 'skimage'. Default: 'mri_mc'
   --remesh              Apply remeshing operation to surface, i.e. create a regular, evenly spaced surface grid.
   --smooth <int>        Mesh smoothing iterations. Default: 5
   --cut-range <float> <float>
@@ -222,9 +223,14 @@ Also the intermediate volume and surface files can be useful for quality control
 
 ## Supported segmentations:
 
-- The `freesurfer` segmentation should work as-is.
-- If using the `ashs` segmentation, additional labels for the hippocampal head
-  (label value: 20) and tail (label value: 5) labels are required. Use `--lut ashs`.
+- A hippocampal subfields segmentation based on FreeSurfer 7.1.1 or later should 
+  work as-is. Use `--lut freesurfer`.
+- Two ASHS atlases are currently supported, the Penn ABC-3T ASHS Atlas for 
+  T2-weighted MRI and the UMC Utrecht 7T atlas. Use `--lut ashs-penn_abc_3t_t2` 
+  or `--lut ashs-umcutrecht_7t`. If additional labels for the hippocampal head
+  (label value: 20) and tail (label value: 5) labels are missing, use the `--automask-head` 
+  and/or `--automask-tail` arguments. It may also make sense to upsample the 
+  segmentations to isotropic voxel size using `--upsample`.
 - If using a custom look-up table (`--lut <filename>`), the expected format for
   the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are
   numerical values for RGB colors and transparency (alpha) and will be ignored.

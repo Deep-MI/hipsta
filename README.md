@@ -33,13 +33,20 @@ Activate the virtual environment as follows:
 
 `source /path/to/a/new/directory/of/your/choice/bin/activate`
 
-Use the following code to download this package from its GitHub repository:
+Use the following code to download this package from its GitHub repository (this 
+will create a 'Hipsta' directory within the current working directory):
 
 `git clone https://github.com/Deep-MI/Hipsta.git`
 
-You can use the following code to install the required Python dependencies:
+The next step is to install hipsta as a python package (after changing into the 
+'Hipsta' directory). This will automatically install all required dependencies:
 
-`pip install -r requirements.txt`
+`pip install .`
+
+As soon as the package is available on `pypi.org`, it will also be installable 
+via (downloading from GitHub is not necessary in this case):
+
+`pip install hipsta`
 
 The above steps are not necessary when running the [Docker](docker/Docker.md) or
 [Singularity](singularity/Singularity.md) versions of the package.
