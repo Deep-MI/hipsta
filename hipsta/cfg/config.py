@@ -24,7 +24,7 @@ def get_defaults(x):
         long_filter=False,
         long_filter_size=5,
         no_close_mask=False,
-        mca="skimage",
+        mca="mri_mc",
         remesh=False,
         smooth=5,
         cut_range=[-0.975, 0.975],
