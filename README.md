@@ -13,12 +13,19 @@ Please see the documentation pages for a general overview, usage information and
 examples, and output description. Brief usage information is also available [here](hipsta/doc/DOCUMENTATION.md).
 Some suggestions for running the script can be found in the [tutorial](TUTORIAL.md).
 
+
 ## Current status:
 
 The hippocampal shape and thickness analysis package is currently in its beta
 stage, which means that it's open for testing, but may still contain unresolved
 issues. Future changes with regard to the algorithms, interfaces, and package
 structure are to be expected.
+
+
+## Feedback:
+
+Questions, suggestions, and feedback are welcome, and should preferably be
+submitted as an [issue](https://github.com/Deep-MI/Hipsta/issues).
 
 
 ## Installation:
