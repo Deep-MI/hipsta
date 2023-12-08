@@ -1,10 +1,10 @@
-## Changes
+# Changes
 
-### v0.4.0-beta
+## v0.4.0-beta
 
 - fundamental revision incl. changes in command-line interface
 
-### v0.3.0-beta
+## v0.3.0-beta
 
 - introduced logging
 - full lapy integration
@@ -14,7 +14,7 @@
 - dropped `hsflist` command line argument
 - changes in default names for output folders and files
 
-### v0.2.0-beta
+## v0.2.0-beta
 
 - re-introduced remeshing as a preprocessing step; requires additional python
   packages `pyvista` and `pyacvd`. See README.md.
@@ -24,12 +24,12 @@
   comply with Freesurfer conventions; what was negative is now positive and
   vice versa.
 
-### v0.1.1-beta
+## v0.1.1-beta
 
 - standalone functionality for `mapValues()`  function
 - curvature output for interior and exterior surfaces
 
-### v0.1.0-beta
+## v0.1.0-beta
 
 - direction of `x`, `y`, `z` dimensions for output files in the `thickness`
   folder has changed:

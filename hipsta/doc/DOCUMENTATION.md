@@ -1,4 +1,4 @@
-# Hippocampal shape and thickness analysis
+# Documentation
 
 
 ## Purpose:

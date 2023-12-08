@@ -1,4 +1,4 @@
-# Tutorial for the hippocampal shape and thickness analysis
+# Tutorial
 
 This documenent complements the [technical documentation](hipsta/doc/DOCUMENTATION.md) 
 of the hippocampal shape and thickness analysis scripts by providing a more 
