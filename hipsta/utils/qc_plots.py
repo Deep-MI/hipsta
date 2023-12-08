@@ -6,6 +6,7 @@ This module provides a function to create QC plots
 import logging
 import os
 
+import nibabel as nb
 import numpy as np
 import plotly.graph_objects as go
 from lapy import TriaMesh, io
@@ -131,29 +132,73 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
 
 
 def qcPlots(params, stage=None):
+    # get axes
+    img = nb.load(params.FILENAME)
+    ras2ras_tkr = img.header.get_vox2ras_tkr() @ img.header.get_ras2vox()
+    ornts = nb.orientations.io_orientation(np.linalg.inv(ras2ras_tkr))
+    scale_factor = 2
+    tilt_factor = 1
+    if ornts[0, 0] == 2:
+        up=dict(x=ornts[0, 1], y=0, z=0)
+    elif ornts[1, 0] == 2:
+        up=dict(x=0, y=ornts[0, 1], z=0)
+    elif ornts[2, 0] == 2:
+        up=dict(x=0, y=0, z=ornts[0, 1])
+    if ornts[0, 0] == 0:
+        if ornts[1, 0] == 1:
+            # SCA
+            if params.HEMI == "lh":
+                eye = dict(x=scale_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+            else:
+                eye = dict(x=-scale_factor*ornts[0, 1], y=-tilt_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+        else:
+            # SAC
+            if params.HEMI == "lh":
+                eye = dict(x=scale_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+            else:
+                eye = dict(x=-scale_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=-tilt_factor*ornts[0, 1])
+    if ornts[1, 0] == 0:
+        if ornts[0, 0] == 1:
+            # CSA
+            if params.HEMI == "lh":
+                eye = dict(x=tilt_factor*ornts[0, 1], y=scale_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+            else:
+                eye = dict(x=-tilt_factor*ornts[0, 1], y=-scale_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+        else:
+            # ASC
+            if params.HEMI == "lh":
+                eye = dict(x=tilt_factor*ornts[0, 1], y=scale_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+            else:
+                eye = dict(x=tilt_factor*ornts[0, 1], y=-scale_factor*ornts[0, 1], z=-tilt_factor*ornts[0, 1])
+    if ornts[2, 0] == 0:
+        if ornts[1, 0] == 1:
+            # ACS
+            if params.HEMI == "lh":
+                eye = dict(x=tilt_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=scale_factor*ornts[0, 1])
+            else:
+                eye = dict(x=tilt_factor*ornts[0, 1], y=-tilt_factor*ornts[0, 1], z=-scale_factor*ornts[0, 1])
+        else:
+            # CAS
+            if params.HEMI == "lh":
+                eye = dict(x=tilt_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=scale_factor*ornts[0, 1])
+            else:
+                eye = dict(x=-tilt_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=-scale_factor*ornts[0, 1])
+
     # mesh
     if params.internal.no_qc is False and stage == "mesh":
         triaMesh = TriaMesh.read_vtk(
             os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
         )
 
-        if params.HEMI == "lh":
-            camera = dict(
-                up=dict(x=0, y=0, z=1),
-                center=dict(x=0, y=0, z=0),
-                eye=dict(x=-2, y=1, z=1),
+        camera = dict(
+            up=up,
+            center=dict(x=0, y=0, z=0),
+            eye=eye,
             )
-        else:
-            camera = dict(
-                up=dict(x=0, y=0, z=1),
-                center=dict(x=0, y=0, z=0),
-                eye=dict(x=2, y=-1, z=1),
-            )
-
         lpp.plot_tria_mesh(
             triaMesh,
-            tcolor=[50, 50, 50],
-            background_color="black",
+            tcolor=[25, 25, 25],
+            background_color="white",
             camera=camera,
             export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".mesh.png"),
             no_display=True,
@@ -180,11 +225,11 @@ def qcPlots(params, stage=None):
 
         #
 
-        lvl2_0, lvl2i_0, lvl2j_0 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.05)
+        lvl2_0, lvl2i_0, lvl2j_0 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.10)
         lvl2_1, lvl2i_1, lvl2j_1 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.25)
-        lvl2_2, lvl2i_2, lvl2j_2 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.5)
+        lvl2_2, lvl2i_2, lvl2j_2 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.50)
         lvl2_3, lvl2i_3, lvl2j_3 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.75)
-        lvl2_4, lvl2i_4, lvl2j_4 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.95)
+        lvl2_4, lvl2i_4, lvl2j_4 = levelsetsTria(triaMesh.v, triaMesh.t, triaFunc, 0.90)
 
         #
 
@@ -196,7 +241,7 @@ def qcPlots(params, stage=None):
 
         #
 
-        fig = make_subplots(rows=1, cols=5)
+        fig = make_subplots(rows=2, cols=3)
 
         fig.add_trace(
             go.Scatter(x=tmpxSort0[:, 0], y=tmpySort0[:, 0], mode="lines"), row=1, col=1
@@ -208,19 +253,32 @@ def qcPlots(params, stage=None):
             go.Scatter(x=tmpxSort2[:, 0], y=tmpySort2[:, 0], mode="lines"), row=1, col=3
         )
         fig.add_trace(
-            go.Scatter(x=tmpxSort3[:, 0], y=tmpySort3[:, 0], mode="lines"), row=1, col=4
+            go.Scatter(x=tmpxSort3[:, 0], y=tmpySort3[:, 0], mode="lines"), row=2, col=1
         )
         fig.add_trace(
-            go.Scatter(x=tmpxSort4[:, 0], y=tmpySort4[:, 0], mode="lines"), row=1, col=5
+            go.Scatter(x=tmpxSort4[:, 0], y=tmpySort4[:, 0], mode="lines"), row=2, col=2
         )
 
+        xmin = np.min((np.min(tmpxSort0[:, 0]), np.min(tmpxSort1[:, 0]), np.min(tmpxSort2[:, 0]), np.min(tmpxSort3[:, 0]), np.min(tmpxSort4[:, 0])))
+        xmax = np.max((np.max(tmpxSort0[:, 0]), np.max(tmpxSort1[:, 0]), np.max(tmpxSort2[:, 0]), np.max(tmpxSort3[:, 0]), np.max(tmpxSort4[:, 0])))
+
+        ymin = np.min((np.min(tmpySort0[:, 0]), np.min(tmpySort1[:, 0]), np.min(tmpySort2[:, 0]), np.min(tmpySort3[:, 0]), np.min(tmpySort4[:, 0])))
+        ymax = np.max((np.max(tmpySort0[:, 0]), np.max(tmpySort1[:, 0]), np.max(tmpySort2[:, 0]), np.max(tmpySort3[:, 0]), np.max(tmpySort4[:, 0])))
+
         fig.update_layout(
-            yaxis=dict(scaleanchor="x"),
-            yaxis2=dict(scaleanchor="x"),
-            yaxis3=dict(scaleanchor="x"),
-            yaxis4=dict(scaleanchor="x"),
-            yaxis5=dict(scaleanchor="x"),
+            xaxis=dict(range=[xmin, xmax]),
+            xaxis2=dict(range=[xmin, xmax]),
+            xaxis3=dict(range=[xmin, xmax]),
+            xaxis4=dict(range=[xmin, xmax]),
+            xaxis5=dict(range=[xmin, xmax]),
+            yaxis=dict(scaleanchor="x", range=[ymin, ymax]),
+            yaxis2=dict(scaleanchor="x", range=[ymin, ymax]),
+            yaxis3=dict(scaleanchor="x", range=[ymin, ymax]),
+            yaxis4=dict(scaleanchor="x", range=[ymin, ymax]),
+            yaxis5=dict(scaleanchor="x", range=[ymin, ymax]),
         )
+
+        fig.update_layout(showlegend=False)
 
         fig.write_image(os.path.join(params.OUTDIR, "qc", params.HEMI + ".profile.png"))
 
@@ -230,23 +288,15 @@ def qcPlots(params, stage=None):
             os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk")
         )
 
-        if params.HEMI == "lh":
-            camera = dict(
-                up=dict(x=0, y=0, z=1),
-                center=dict(x=0, y=0, z=0),
-                eye=dict(x=-2, y=1, z=1),
-            )
-        else:
-            camera = dict(
-                up=dict(x=0, y=0, z=1),
-                center=dict(x=0, y=0, z=0),
-                eye=dict(x=2, y=-1, z=1),
-            )
-
+        camera = dict(
+            up=up,
+            center=dict(x=0, y=0, z=0),
+            eye=eye,
+        )
         lpp.plot_tria_mesh(
             triaMesh,
-            tcolor=[50, 50, 50],
-            background_color="black",
+            tcolor=[25, 25, 25],
+            background_color="white",
             camera=camera,
             export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".hull.png"),
             no_display=True,
