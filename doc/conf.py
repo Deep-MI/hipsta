@@ -19,7 +19,7 @@ import hipsta
 project = "Hipsta"
 author = "Kersten Diers"
 copyright = f"{date.today().year}, {author}"
-release = hipsta.get_version()
+release = "" # hipsta.get_version() # TODO
 package = hipsta.__name__
 gh_url = "https://github.com/Deep-MI/Hipsta"
 
@@ -46,7 +46,7 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_design",
-    "sphinx_gallery.gen_gallery",
+    #"sphinx_gallery.gen_gallery",
     "sphinx_issues",
     "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",

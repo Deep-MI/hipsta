@@ -3,19 +3,19 @@
 **Hipsta**
 ==========
 
-.. toctree::
+Hipsta is an `open-source Python package <project github_>`_ for hippocampal
+shape and thickness analysis.
 
+.. toctree::
+    :maxdepth: 1
+    
     documentation/index
     tutorials/index
     changes/index
     api/index
 
-Hipsta is an `open-source Python package <project github_>`_ for hippocampal
-shape and thickness analysis.
-
-
-Install
--------
+Installation
+------------
 
 Hipsta is available on `Pypi <project pypi_>`_ and can also be installed from
 source.
