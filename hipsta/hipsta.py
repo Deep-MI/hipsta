@@ -11,8 +11,6 @@ import shutil
 import sys
 import time
 
-import pandas
-
 from .cfg.logging import setup_logging
 from .cfg.atlases import get_atlases
 from .cfg.config import get_defaults
