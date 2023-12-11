@@ -1,5 +1,9 @@
 # Changes
 
+## v0.8.0-beta
+
+- fundamental revision incl. changes in command-line interface
+
 ## v0.4.0-beta
 
 - fundamental revision incl. changes in command-line interface
