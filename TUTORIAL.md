@@ -6,6 +6,7 @@ explanative description of this software. It covers the following topics:
 
 - [Suitable input images](#input-images)
 - [Description of processing steps](#processing-steps)
+- [How to run an analysis](#running-an-analysis)
 - [Evaluation of the outputs](#evaluating-the-output)
 - [Troubleshooting](#troubleshooting)
 
@@ -192,22 +193,11 @@ for an explanation.
 
 The primary output of the hippocampal shape and thickness analysis are surface
 files and associated thickness values in the `tickness` folder. The estimated 
-hippocampal thickness values will be stored in csv tables:
-
-- <lh|rh>.grid-segments-<x|y|z>.csv
-
-Here, x corresponds to the medial-->lateral dimension, y to the 
-posterior-->anterior dimension, and z to the exterior-->interior dimension. The 
-thickness values are therefore in the z files, whereas the x and y files
-contain length estimates for the other two directions.
-
+hippocampal thickness values will be stored in csv tables. See the section on
+[evaluting the output](#evaluating-the-output) for a detailed description. 
 The thickness values will also be stored as mgh and psol overlay files that
-can be overlaid onto the mid-surface vtk file. It is also possible to overlay 
-the projected subfield boundary files onto the midsurface: 
-
-- <lh|rh>.mid-surface.vtk
-- <lh|rh>.mid-surface.thickness.<mgh|psol>
-- <lh|rh>.mid-surface.hsf.<mgh|psol>
+can be overlaid onto the mid-surface vtk file. Similar files are also created 
+for the projected subfield boundaries.
 
 <figure> 
     <center>
@@ -225,20 +215,12 @@ the projected subfield boundary files onto the midsurface:
 Besides the thickness values, mean and gaussian curvature estimates are
 provided for interior, mid, and exterior surfaces:
 
-- <lh|rh>.<int|mid|ext>-surface.vtk
-- <lh|rh>.<int|mid|ext>-surface.<mean|gauss>-curv.csv
-- <lh|rh>.<int|mid|ext>-surface.<mean|gauss>-curv.mgh
-- <lh|rh>.<int|mid|ext>-surface.<mean|gauss>-curv.psol
-
 <figure> 
     <center>
     <img src="images/mid_mean_curv.png" width="400"/>    
     <img src="images/mid_gauss_curv.png" width="400"/>
     <figcaption>overlays of mid-surface.mean-curv.mgh (left) and mid-surface.gauss-curv.mgh (right) onto mid-surface.vtk </figcaption> 
 </figure>     
-
-The other files within the 'thickness' folder files are intermediate files that
-were created / used during the thickness computation.
 
 ### 10. Mapping of subfield labels (and other volume-based data, optional)
 
@@ -303,19 +285,99 @@ values are `-0.9 0.9 41`, `-0.975 0.975 21`, and `-0.9 0.9 11`.
 
 ## Evaluating the output
 
-[...]
+The primary output of the hippocampal shape and thickness analysis are surface
+files and associated thickness values in the `tickness` folder. The estimated 
+hippocampal thickness values will be stored in csv tables:
+
+| Filenane                                           | Contents                                                  |
+|----------------------------------------------------|-----------------------------------------------------------|
+| `lh.grid-segments-x.csv`, `rh.grid-segments-x.csv` | Length estimates in the medial-to-lateral dimension       |
+| `lh.grid-segments-y.csv`, `rh.grid-segments-y.csv` | Length estimates in the medial-to-lateral dimension       |
+| `lh.grid-segments-z.csv`, `rh.grid-segments-z.csv` | Thickness estimates in the exterior-to-interior dimension |
+
+Here, x corresponds to the medial-->lateral dimension, y to the 
+posterior-->anterior dimension, and z to the exterior-->interior dimension. The 
+thickness values are therefore in the z files, whereas the x and y files
+contain length estimates for the other two directions.
+
+The thickness values will also be stored as mgh and psol overlay files that
+can be overlaid onto the mid-surface vtk file. It is also possible to overlay 
+the projected subfield boundary files onto the midsurface: 
+
+| Filenane                                                       | Contents                         |
+|----------------------------------------------------------------|----------------------------------|
+| `<lh\|rh>.mid.surface.vtk`           | Hippocampal mid-surface for the <left\|right> hemisphere   |
+| `<lh\|rh>.mid-surface.thickness.mgh` | Hippocampal thickness overlay  |
+| `<lh\|rh>.mid-surface.hsf.mgh`       | Hippocampl subfield overlay    |
+
+We recommend to use FreeSurfer's Freeview program for visualization. This is an 
+example for the left hemisphere; it may be necessary to adjust the specific 
+settings using Freeview's `configure` button in the `oOverlays` panel.
+
+```bash
+freeview -f thickness/lh.mid-surface.vtk:overlay=thickness/lh.mid-surface.thickness.mgh`
+```
+
+Besides the thickness values, mean and gaussian curvature estimates are
+provided for interior, mid, and exterior surfaces:
+
+| Filenane                                                  | Contents                                                                    |
+|-----------------------------------------------------------|-----------------------------------------------------------------------------|
+| `<lh\|rh>.<int\|mid\|ext>-surface.vtk`                    | Interior, mid, and exterior surface                                         |
+| `<lh\|rh>.<int\|mid\|ext>-surface.<mean\|gauss>-curv.csv` | Tables of mean and gaussian curvature estimtes for corresponding surfaces   | 
+| `<lh\|rh>.<int\|mid\|ext>-surface.<mean\|gauss>-curv.mgh` | Overlays of mean and gaussian curvature estimtes for corresponding surfaces | 
+
 
 ## Troubleshooting
 
+### Logfiles
+
 In case of an error, the logfile (`logfile.txt` in the main directory) may be 
-useful for identifying the cause of the error.
+useful for identifying the cause of the error. The logfile will contain 
+information about the program version, command line options, and any steps that
+were completed successfully. If an analysis ran through successfully, it will 
+contain the line `Hipsta finished without errors`. In the case of an error, it 
+will output `Hipsta finished WITH ERRORS` together with some additional 
+diagnostic information.
+
+### QC
+
+#### Automated QC
+
+A set images of the mesh and the extracted surfaces will be stored in the `qc` 
+folder. These can be used for a quick check if the analysis returned plausible 
+results. 
+
+#### Manual QC
+
+Additional QC can be done using by inspecting (overlays of) images and surfaces 
+in FreeSurfer's Freeview program. Here's an example for the left hemisphere, all 
+paths are relative to the main output folder:
+
+```bash
+freeview -v lh.image.mgz -v lh.mask.mgz -f lh.surf.vtk -f thickness/lh.mid-surface.vtk
+```
+
+The `<lh|rh>.tetra.vtk` and `<lh|rh>.cut.vtk` files represent tetrahedral meshes 
+and cannot be loaded in Freeview. However, triangular boundary meshes exist in 
+the following subfolders: `<lh|rh>.rm.bnd.tetra.vtk.vtk` in `tetra-labels`, and 
+`<lh|rh>.rm.open.bnd.cut.vtk` in `tetra-cut`.
+
+<figure> 
+    <center>
+    <img src="images/ov1.png" width="400"/>    
+    <img src="images/ov2.png" width="400"/>
+    <figcaption>Overlays of segmentation, mask, surface, and mid-surface</figcaption> 
+</figure>   
+
+### Common issues
 
 Two types of issues are frequently observed: the presence of holes in the 
 surface after processing step 4 and cutting issues after step 7. The program 
 checks for the presence of these issues and will terminate if it detects them. 
 We outline two strategies to mitigate these issue below.
 
-### Holes in the surface
+#### Holes in the surface
 
 Holes in the surfaces can be the result of less than optimal image 
 preprocessing. We recommend to try adjusting the width and threshold for the 
@@ -324,9 +386,24 @@ employ additional smoothing along the longitudinal axis using the `--long-filter
 flag (which can be fine-tuned using the `--long-filter-size` argument). It may 
 also help to change the surface extraction algorithm using the `--mca` argument.
 
-[...]
+<figure> 
+    <center>
+    <img src="images/fig1.png" width="400"/>    
+    <img src="images/fig2.png" width="400"/>
+    <figcaption>Holes in the surface (left) and artificial connection between anatomically unconnected regions (right)</figcaption> 
+</figure>    
 
-### Cutting issues
+It will return an error message as follows:
+
+```
+[INFO: check_surface.py] Euler number for <...>/rh.surf.vtk is 0
+[INFO: check_surface.py] Surface contains holes. Please edit the corresponding hippocampal segmentation and re-run.
+[INFO: hipsta.py] Hipsta finished WITH ERRORS.
+<...>
+AssertionError: Check surface failed (stage: surface)
+```
+
+#### Cutting issues
 
 Another issue may arise with cutting the tetrahedral mesh: this can be due to a 
 failure of the automated heuristics for head or tail detection. Or it can simply 
@@ -335,9 +412,9 @@ are more than two boundary loops in total.
 
 <figure> 
     <center>
-    <img src="images/cut_head.png" width="400"/>    
-    <img src="images/cut_3-loops.png" width="400"/>
-    <figcaption>failure of automated head detection (left) and more than two boundary loops (right)</figcaption> 
+    <img src="images/fig3.png" width="400"/>    
+    <img src="images/fig4.png" width="400"/>
+    <figcaption>Failure of automated head detection (left) and more than two boundary loops (right)</figcaption> 
 </figure>    
 
 It will return an error message as follows:
