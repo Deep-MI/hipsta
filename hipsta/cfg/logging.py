@@ -56,6 +56,14 @@ def setup_logging(args):
 
     logging.basicConfig(level=logging.INFO, format=logfile_format, handlers=[logfile_handlers_file, logfile_handlers_stream])
 
+    # check if file handlers is part of the root logger; usually this will be
+    # the case after the basicConfig() command is executed. However, if logging
+    # configuration is done earlier, e.g. via pytest, then basicConfig() will
+    # have no effect, and we need to do it manually as below:
+    ROOT_LOGGER = logging.getLogger("root")
+    if not (logfile_handlers_file in ROOT_LOGGER.handlers):
+        ROOT_LOGGER.addHandler(logfile_handlers_file)
+
     # intial messages (do not use logging earlier, since this will do the
     # default setup, and subsequent custom setup will have no effects)
     LOGGER.info("Starting logging ...")
