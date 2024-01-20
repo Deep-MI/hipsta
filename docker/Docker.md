@@ -33,7 +33,7 @@ docker run --rm --user XXXX:YYYY hipsta:latest
 
 * This corresponds to calling `run_hipsta` from the command line for a non-dockerized version of the program.
 * The `--rm` flag takes care of removing the container once the analysis finished.
-* The `--user XXXX:YYYY` part should be changed to the appropriate user id (XXXX, a number) and group id (YYYY, also a number); both can be checked with the commands `id -u` and `id -g` on linux-like systems). All generated files will then belong to the specified user and group. Without the flag, the Docker container will be run as root with all corresponding privileges, which is strongly discouraged.
+* The `--user XXXX:YYYY` part should be changed to the appropriate user id (XXXX, a number) and group id (YYYY, also a number); both can be checked with the commands `id -u` and `id -g` on linux-like systems. All generated files will then belong to the specified user and group. Without the flag, the Docker container will be run as root with all corresponding privileges, which is strongly discouraged.
 * You can run different versions of the image using `hipsta:<tag>` instead of `hipsta` and replacing `<tag>` with any particular version identifier.
 
 Before running an analysis, you need to register at the FreeSurfer website (https://surfer.nmr.mgh.harvard.edu/registration.html) to acquire a valid license (for free). If you already have an existing FreeSurfer installation, you can use the license file of that installation as well.

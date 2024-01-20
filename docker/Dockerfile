@@ -48,11 +48,9 @@ RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.2.0/frees
 # download gmsh
 RUN wget -qO- https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz | tar zxv --no-same-owner -C /opt
 
-# clone hipsta toolbox
-RUN git clone https://github.com/Deep-MI/Hipsta.git /app/hipsta
-
-# install additional python packages
-RUN python3 -m pip install -r /app/hipsta/requirements.txt
+#
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install git+https://github.com/Deep-MI/Hipsta.git
 
 # Add FreeSurfer environment variables (.license file needed, alternatively export FS_LICENSE=path/to/license)
 ENV FREESURFER_HOME=/opt/freesurfer
@@ -64,7 +62,7 @@ ENV OMP_NUM_THREADS=1
 ENV PATH=/opt/freesurfer/bin:/opt/freesurfer/fsfast/bin:/opt/freesurfer/tktools:/opt/freesurfer/mni/bin:/opt/gmsh-2.16.0-Linux/bin:${PATH}
 
 # Set entrypoint (non-interactive mode)
-ENTRYPOINT ["/app/hipsta/run_hipsta"]
+ENTRYPOINT ["run_hipsta"]
 
 ## Run app when the container launches (interactive mode)
 #CMD ["/bin/bash"]
