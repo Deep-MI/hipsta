@@ -2,7 +2,7 @@
 
 ## v0.8.0-beta
 
-- fundamental revision incl. changes in command-line interface
+- general code revision incl. changes in command-line interface and major documentation updates
 
 ## v0.4.0-beta
 
