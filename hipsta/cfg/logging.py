@@ -61,7 +61,7 @@ def setup_logging(args):
     # configuration is done earlier, e.g. via pytest, then basicConfig() will
     # have no effect, and we need to do it manually as below:
     ROOT_LOGGER = logging.getLogger("root")
-    if not (logfile_handlers_file in ROOT_LOGGER.handlers):
+    if logfile_handlers_file not in ROOT_LOGGER.handlers:
         ROOT_LOGGER.addHandler(logfile_handlers_file)
 
     # intial messages (do not use logging earlier, since this will do the
