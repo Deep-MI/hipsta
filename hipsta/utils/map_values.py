@@ -247,9 +247,7 @@ def _parse_arguments():
     # define help
     help = parser.add_argument_group("getting help")
 
-    help.add_argument(
-        "--help", help="display this help message and exit", action="help"
-    )
+    help.add_argument("--help", help="display this help message and exit", action="help")
     help.add_argument(
         "--more-help",
         dest="more_help",
@@ -287,9 +285,7 @@ def _check_arguments(options):
     # check environment variables
 
     if os.environ.get("FREESURFER_HOME") is None:
-        LOGGER.info(
-            "ERROR: need to set the FREESURFER_HOME environment variable and to source FREESURFER."
-        )
+        LOGGER.info("ERROR: need to set the FREESURFER_HOME environment variable and to source FREESURFER.")
         sys.exit(1)
 
     # required arguments
@@ -350,9 +346,7 @@ def mapValues(
     # message
 
     print()
-    print(
-        "--------------------------------------------------------------------------------"
-    )
+    print("--------------------------------------------------------------------------------")
     print("Mapping values")
     print()
 
@@ -364,13 +358,9 @@ def mapValues(
         # thickness toolbox; will override any other settings; set 'params=None'
         # for custom processing.
         IN_VOL = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
-        IN_SURF = os.path.join(
-            params.OUTDIR, "thickness", params.HEMI + ".mid-surface.vtk"
-        )  # or: grid-lines-z.vtk
+        IN_SURF = os.path.join(params.OUTDIR, "thickness", params.HEMI + ".mid-surface.vtk")  # or: grid-lines-z.vtk
         IN_LABEL = params.FILENAME
-        IN_INDICES = os.path.join(
-            params.OUTDIR, "thickness", params.HEMI + ".mid-surface.csv"
-        )  # or: grid-lines.csv
+        IN_INDICES = os.path.join(params.OUTDIR, "thickness", params.HEMI + ".mid-surface.csv")  # or: grid-lines.csv
         IN_SUFFIX = "hsf"
 
         writePSOL = params.internal.mapValuesWritePSOL
@@ -409,17 +399,13 @@ def mapValues(
         sys.exit(1)
     elif subproc.returncode > 100:
         if os.path.isdir(os.path.join(os.path.dirname(IN_VOL), "labels")):
-            RESLICED_VOL = (
-                os.path.join(os.path.dirname(IN_VOL), "labels", 
-                             os.path.splitext(os.path.basename(IN_VOL))[0] + 
-                             "_reslicedToHighresHC" + os.path.splitext(IN_VOL)[1])
+            RESLICED_VOL = os.path.join(
+                os.path.dirname(IN_VOL),
+                "labels",
+                os.path.splitext(os.path.basename(IN_VOL))[0] + "_reslicedToHighresHC" + os.path.splitext(IN_VOL)[1],
             )
         else:
-            RESLICED_VOL = (
-                os.path.splitext(IN_VOL)[0]
-                + "_reslicedToHighresHC"
-                + os.path.splitext(IN_VOL)[1]
-            )
+            RESLICED_VOL = os.path.splitext(IN_VOL)[0] + "_reslicedToHighresHC" + os.path.splitext(IN_VOL)[1]
 
         cmd = (
             os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mri_convert")
@@ -490,9 +476,7 @@ def mapValues(
         integr = np.nanmin(lookup3D[:, :, SELECT], axis=2)
     elif INTEGRATE == "none":
         if len(SELECT) > 1:
-            LOGGER.info(
-                "Error: cannot use --integrate none with multiple sampling points, exiting."
-            )
+            LOGGER.info("Error: cannot use --integrate none with multiple sampling points, exiting.")
             sys.exit(1)
         else:
             integr = lookup3D[:, :, SELECT]
@@ -518,9 +502,7 @@ def mapValues(
             or INTEGRATE == "max"
             or INTEGRATE == "min"
         ):
-            OUT_PSOL_INTEGR = IN_SURF.replace(
-                ".vtk", "." + IN_SUFFIX + "-integrated.psol"
-            )
+            OUT_PSOL_INTEGR = IN_SURF.replace(".vtk", "." + IN_SUFFIX + "-integrated.psol")
             io.write_vfunc(OUT_PSOL_INTEGR, np.asarray(integr)[:, 2])
         else:
             OUT_PSOL = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".psol")
@@ -534,13 +516,9 @@ def mapValues(
             or INTEGRATE == "max"
             or INTEGRATE == "min"
         ):
-            OUT_MGH_INTEGR = IN_SURF.replace(
-                ".vtk", "." + IN_SUFFIX + "-integrated.mgh"
-            )
+            OUT_MGH_INTEGR = IN_SURF.replace(".vtk", "." + IN_SUFFIX + "-integrated.mgh")
             nb.freesurfer.save(
-                nb.freesurfer.MGHImage(
-                    dataobj=np.asarray(integr)[:, 2].astype("float32"), affine=None
-                ),
+                nb.freesurfer.MGHImage(dataobj=np.asarray(integr)[:, 2].astype("float32"), affine=None),
                 filename=OUT_MGH_INTEGR,
             )
         else:

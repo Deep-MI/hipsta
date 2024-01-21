@@ -23,30 +23,19 @@ def checkSurface(params, stage=None):
     # message
 
     print()
-    print(
-        "--------------------------------------------------------------------------------"
-    )
+    print("--------------------------------------------------------------------------------")
     print("Check surfaces")
     print()
 
     if params.internal.CHECKSURFACE is True and stage == "check_surface":
-        triaMesh = TriaMesh.read_vtk(
-            os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
-        )
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
         euler = triaMesh.euler()
 
-        LOGGER.info(
-            "Euler number for "
-            + os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
-            + " is "
-            + str(euler)
-        )
+        LOGGER.info("Euler number for " + os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk") + " is " + str(euler))
 
         if euler != 2:
-            LOGGER.info(
-                "Surface contains holes. Please edit the corresponding hippocampal segmentation and re-run."
-            )
+            LOGGER.info("Surface contains holes. Please edit the corresponding hippocampal segmentation and re-run.")
             continue_program = False
 
         else:

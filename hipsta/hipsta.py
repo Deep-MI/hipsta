@@ -663,8 +663,16 @@ def _check_params(params):
 
     # check LUT
 
-    if params.LUT != "freesurfer" and params.LUT != "ashs-penn_abc_3t_t2" and params.LUT != "ashs-umcutrecht_7t" and not os.path.isfile(params.LUT):
-        raise RuntimeError("Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', or an existing file, but not " + params.LUT)
+    if (
+        params.LUT != "freesurfer"
+        and params.LUT != "ashs-penn_abc_3t_t2"
+        and params.LUT != "ashs-umcutrecht_7t"
+        and not os.path.isfile(params.LUT)
+    ):
+        raise RuntimeError(
+            "Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', or an existing file, but not "
+            + params.LUT
+        )
 
     # return
 

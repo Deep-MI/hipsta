@@ -84,7 +84,8 @@ def computeThickness(params):
                 TriaMesh(vLVL4x[i], tLVL4x[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".vlx.lvl" + str(i) + ".vtk")
             )
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4px[i], tLVL4px[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".uvw.vlx.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4px[i], tLVL4px[i] - 1),
+                os.path.join(OUT_DIR, params.HEMI + ".uvw.vlx.lvl" + str(i) + ".vtk"),
             )
 
         for i in range(0, len(vLVL4py)):
@@ -92,7 +93,8 @@ def computeThickness(params):
                 TriaMesh(vLVL4y[i], tLVL4y[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".vly.lvl" + str(i) + ".vtk")
             )
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4py[i], tLVL4py[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".uvw.vly.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4py[i], tLVL4py[i] - 1),
+                os.path.join(OUT_DIR, params.HEMI + ".uvw.vly.lvl" + str(i) + ".vtk"),
             )
 
         for i in range(0, len(vLVL4pz)):
@@ -100,7 +102,8 @@ def computeThickness(params):
                 TriaMesh(vLVL4z[i], tLVL4z[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".vlz.lvl" + str(i) + ".vtk")
             )
             TriaMesh.write_vtk(
-                TriaMesh(vLVL4pz[i], tLVL4pz[i] - 1), os.path.join(OUT_DIR, params.HEMI + ".uvw.vlz.lvl" + str(i) + ".vtk")
+                TriaMesh(vLVL4pz[i], tLVL4pz[i] - 1),
+                os.path.join(OUT_DIR, params.HEMI + ".uvw.vlz.lvl" + str(i) + ".vtk"),
             )
 
     # now loop across levelsets
@@ -266,7 +269,9 @@ def computeThickness(params):
                 if np.sum(tmp):  # empty lists are false
                     llxLgth[ii, ij] = np.sum(tmp)
 
-    TriaMesh.write_vtk(TriaMesh(np.array(vlx), np.asarray(tlx) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-x.vtk"))
+    TriaMesh.write_vtk(
+        TriaMesh(np.array(vlx), np.asarray(tlx) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-x.vtk")
+    )
 
     dfx = pd.DataFrame(llxLgth)
 
@@ -310,7 +315,9 @@ def computeThickness(params):
                 if np.sum(tmp):  # empty lists are false
                     llyLgth[ii, ij] = np.sum(tmp)
 
-    TriaMesh.write_vtk(TriaMesh(np.array(vly), np.asarray(tly) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-y.vtk"))
+    TriaMesh.write_vtk(
+        TriaMesh(np.array(vly), np.asarray(tly) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-y.vtk")
+    )
 
     dfy = pd.DataFrame(llyLgth)
 
@@ -354,7 +361,9 @@ def computeThickness(params):
                 if np.sum(tmp):  # empty lists are false
                     llzLgth[ii, ij] = np.sum(tmp)
 
-    TriaMesh.write_vtk(TriaMesh(np.array(vlz), np.asarray(tlz) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-z.vtk"))
+    TriaMesh.write_vtk(
+        TriaMesh(np.array(vlz), np.asarray(tlz) - 1), os.path.join(OUT_DIR, params.HEMI + ".grid-lines-z.vtk")
+    )
 
     dfz = pd.DataFrame(llzLgth)
 

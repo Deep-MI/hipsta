@@ -19,7 +19,7 @@ import hipsta
 project = "Hipsta"
 author = "Kersten Diers"
 copyright = f"{date.today().year}, {author}"
-release = "" # hipsta.get_version() # TODO
+release = ""  # hipsta.get_version() # TODO
 package = hipsta.__name__
 gh_url = "https://github.com/Deep-MI/Hipsta"
 
@@ -46,7 +46,7 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_design",
-    #"sphinx_gallery.gen_gallery",
+    # "sphinx_gallery.gen_gallery",
     "sphinx_issues",
     "nbsphinx",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -225,6 +225,7 @@ from inspect import getsourcefile
 # Get path to directory containing this file, conf.py.
 DOCS_DIRECTORY = os.path.dirname(os.path.abspath(getsourcefile(lambda: 0)))
 
+
 def ensure_pandoc_installed(_):
     import pypandoc
 
@@ -239,6 +240,7 @@ def ensure_pandoc_installed(_):
         targetfolder=pandoc_dir,
         delete_installer=True,
     )
+
 
 def setup(app):
     app.connect("builder-inited", ensure_pandoc_installed)

@@ -28,9 +28,7 @@ def levelsetsTria(v, t, p, levelsets):
 
         nlvl = p[t] > lvl
 
-        n = np.where(
-            np.logical_or(np.sum(nlvl, axis=1) == 1, np.sum(nlvl, axis=1) == 2)
-        )[0]
+        n = np.where(np.logical_or(np.sum(nlvl, axis=1) == 1, np.sum(nlvl, axis=1) == 2))[0]
 
         # interpolate points
 
@@ -177,10 +175,7 @@ def levelsetsTetra(v, t, p, levelsets):
 
                 # check if we have interpolated for one or more of these points before
 
-                if (
-                    np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[0]]]))
-                    == 0
-                ):
+                if np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[0]]])) == 0:
                     # compute difference vectors between outlying point and other points
 
                     d10 = v[t[n[i], oix[0]], :] - v[t[n[i], oi], :]
@@ -208,10 +203,7 @@ def levelsetsTetra(v, t, p, levelsets):
 
                 # essentially the same as above, just for oix[1]
 
-                if (
-                    np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[1]]]))
-                    == 0
-                ):
+                if np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[1]]])) == 0:
                     d20 = v[t[n[i], oix[1]], :] - v[t[n[i], oi], :]
 
                     s20 = (lvl - p[t[n[i], oi]]) / (p[t[n[i], oix[1]]] - p[t[n[i], oi]])
@@ -231,10 +223,7 @@ def levelsetsTetra(v, t, p, levelsets):
 
                 # essentially the same as above, just for oix[2]
 
-                if (
-                    np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[2]]]))
-                    == 0
-                ):
+                if np.sum(np.count_nonzero(A[t[n[i], oi.item()], t[n[i], oix[2]]])) == 0:
                     d30 = v[t[n[i], oix[2]], :] - v[t[n[i], oi], :]
 
                     s30 = (lvl - p[t[n[i], oi]]) / (p[t[n[i], oix[2]]] - p[t[n[i], oi]])
@@ -273,9 +262,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     # compute differences of all points to lvl to get interpolation
                     # factors
 
-                    s20 = (lvl - p[t[n[i], oi[0]]]) / (
-                        p[t[n[i], oix[0]]] - p[t[n[i], oi[0]]]
-                    )
+                    s20 = (lvl - p[t[n[i], oi[0]]]) / (p[t[n[i], oix[0]]] - p[t[n[i], oi[0]]])
 
                     # compute new points
 
@@ -305,9 +292,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     # compute differences of all points to lvl to get interpolation
                     # factors
 
-                    s30 = (lvl - p[t[n[i], oi[0]]]) / (
-                        p[t[n[i], oix[1]]] - p[t[n[i], oi[0]]]
-                    )
+                    s30 = (lvl - p[t[n[i], oi[0]]]) / (p[t[n[i], oix[1]]] - p[t[n[i], oi[0]]])
 
                     # compute new points
 
@@ -337,9 +322,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     # compute differences of all points to lvl to get interpolation
                     # factors
 
-                    s21 = (lvl - p[t[n[i], oi[1]]]) / (
-                        p[t[n[i], oix[0]]] - p[t[n[i], oi[1]]]
-                    )
+                    s21 = (lvl - p[t[n[i], oi[1]]]) / (p[t[n[i], oix[0]]] - p[t[n[i], oi[1]]])
 
                     # compute new points
 
@@ -369,9 +352,7 @@ def levelsetsTetra(v, t, p, levelsets):
                     # compute differences of all points to lvl to get interpolation
                     # factors
 
-                    s31 = (lvl - p[t[n[i], oi[1]]]) / (
-                        p[t[n[i], oix[1]]] - p[t[n[i], oi[1]]]
-                    )
+                    s31 = (lvl - p[t[n[i], oi[1]]]) / (p[t[n[i], oix[1]]] - p[t[n[i], oi[1]]])
 
                     # compute new points
 

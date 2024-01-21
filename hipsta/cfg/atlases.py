@@ -17,8 +17,8 @@ LOGGER = logging.getLogger(__name__)
 # ==============================================================================
 # FUNCTIONS
 
-def get_atlases(lut):
 
+def get_atlases(lut):
     if lut == "freesurfer":
         LOGGER.info("Found internal, modified look-up table for FreeSurfer.")
 
@@ -124,4 +124,3 @@ def get_atlases(lut):
     # return
 
     return LUTDICT, HSFLIST
-

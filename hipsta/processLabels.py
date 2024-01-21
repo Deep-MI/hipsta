@@ -120,7 +120,7 @@ def autoMask(params):
             #
             if labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
                 ## find instance of Sbc/CA1/CA2/CA3
-                #idxTail = np.intersect1d(
+                # idxTail = np.intersect1d(
                 #    np.argwhere(dat == labelSbc)[:, imgDimsAP],
                 #    np.intersect1d(
                 #        np.argwhere(dat == labelCA1)[:, imgDimsAP],
@@ -128,11 +128,10 @@ def autoMask(params):
                 #            np.argwhere(dat == labelCA2)[:, imgDimsAP], np.argwhere(dat == labelCA3)[:, imgDimsAP]
                 #        ),
                 #    ),
-                #)
+                # )
                 # find instance of Sbc/CA1
                 idxTail = np.intersect1d(
-                    np.argwhere(dat == labelSbc)[:, imgDimsAP],
-                    np.argwhere(dat == labelCA1)[:, imgDimsAP]
+                    np.argwhere(dat == labelSbc)[:, imgDimsAP], np.argwhere(dat == labelCA1)[:, imgDimsAP]
                 )
             else:
                 raise RuntimeError("Insufficient label information, exiting.")

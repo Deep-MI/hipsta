@@ -326,7 +326,15 @@ def cutTetra(params):
     vlHead, llHead, ilHead, jlHead, olHead = levelsetsTetra(v4, t4, l4, params.internal.cut_range[1])
 
     # find all tetras that do not exceed the cutting criteria
-    t4c1 = t4[np.where(np.sum(np.isin(t4, np.where((l4 > params.internal.cut_range[0]) & (l4 < params.internal.cut_range[1]))), axis=1) == 4), :][0]
+    t4c1 = t4[
+        np.where(
+            np.sum(
+                np.isin(t4, np.where((l4 > params.internal.cut_range[0]) & (l4 < params.internal.cut_range[1]))), axis=1
+            )
+            == 4
+        ),
+        :,
+    ][0]
 
     # add new points to v and generate new triangles
     v4c = np.concatenate((v4, vlTail[0], vlHead[0]), axis=0)

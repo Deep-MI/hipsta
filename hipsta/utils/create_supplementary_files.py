@@ -21,9 +21,7 @@ def createSupplementaryFiles(params):
     # message
 
     print()
-    print(
-        "--------------------------------------------------------------------------------"
-    )
+    print("--------------------------------------------------------------------------------")
     print("Creating supplementary files")
     print()
 
@@ -74,7 +72,6 @@ def createSupplementaryFiles(params):
         lstBnd = [11.5, 12.5, 13.5]
 
     elif LUT == "ashs-umcutrecht_7t":
-
         # get labels
 
         hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface.hsf.mgh"))

@@ -45,7 +45,7 @@ def setup_logging(args):
         raise
 
     # setup logging
-    logfile =  os.path.join(args.outputdir, 'logfile.txt')
+    logfile = os.path.join(args.outputdir, "logfile.txt")
     logfile_format = "[%(levelname)s: %(filename)s] %(message)s"
     logfile_handlers_stream = logging.StreamHandler(sys.stdout)
     logfile_handlers_stream.setFormatter(logging.Formatter(logfile_format))
@@ -54,7 +54,9 @@ def setup_logging(args):
     logfile_handlers_file.setFormatter(logging.Formatter(logfile_format))
     logfile_handlers_file.setLevel(logging.INFO)
 
-    logging.basicConfig(level=logging.INFO, format=logfile_format, handlers=[logfile_handlers_file, logfile_handlers_stream])
+    logging.basicConfig(
+        level=logging.INFO, format=logfile_format, handlers=[logfile_handlers_file, logfile_handlers_stream]
+    )
 
     # check if file handlers is part of the root logger; usually this will be
     # the case after the basicConfig() command is executed. However, if logging
@@ -69,7 +71,7 @@ def setup_logging(args):
     LOGGER.info("Starting logging ...")
     LOGGER.info("Logfile: %s", logfile)
     LOGGER.info("Version: %s", get_version())
-    LOGGER.info("Date: %s", time.strftime('%d/%m/%Y %H:%M:%S'))
+    LOGGER.info("Date: %s", time.strftime("%d/%m/%Y %H:%M:%S"))
 
     # log args
     LOGGER.info("Command: " + " ".join(sys.argv))

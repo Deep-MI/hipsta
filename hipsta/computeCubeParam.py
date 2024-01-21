@@ -698,12 +698,24 @@ def computeCubeParam(params):
     #  (i.e., reverse) for 240 as well
 
     if np.median(
-        v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]
-    ) > np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]):
+        v4cBndOpenRm[
+            np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+        ]
+    ) > np.median(
+        v4cBndOpenRm[
+            np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+        ]
+    ):
         pass
     elif np.median(
-        v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]
-    ) < np.median(v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2]):
+        v4cBndOpenRm[
+            np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+        ]
+    ) < np.median(
+        v4cBndOpenRm[
+            np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+        ]
+    ):
         LOGGER.info("Flipping EV1")
         anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
     else:
@@ -716,7 +728,12 @@ def computeCubeParam(params):
     if (
         np.median(anisoLaplEvec[np.where(k4c[hsfList] == params.LUTDICT["presubiculum"])[0], 2]) < 0
         and np.median(
-            anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"]))[0], 2]
+            anisoLaplEvec[
+                np.where(
+                    np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"])
+                )[0],
+                2,
+            ]
         )
         > 0
     ):
@@ -724,7 +741,12 @@ def computeCubeParam(params):
     elif (
         np.median(anisoLaplEvec[np.where(k4c[hsfList] == params.LUTDICT["presubiculum"])[0], 2]) > 0
         and np.median(
-            anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"]))[0], 2]
+            anisoLaplEvec[
+                np.where(
+                    np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"])
+                )[0],
+                2,
+            ]
         )
         < 0
     ):
@@ -866,9 +888,15 @@ def computeCubeParam(params):
 
     TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
-    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncX.rm.bnd.seam.rm.cut.psol"), vfuncXRm[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncY.rm.bnd.seam.rm.cut.psol"), vfuncYRm[v4cRmBndRmKeep])
-    io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncZ.rm.bnd.seam.rm.cut.psol"), vfuncZRm[v4cRmBndRmKeep])
+    io.write_vfunc(
+        os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncX.rm.bnd.seam.rm.cut.psol"), vfuncXRm[v4cRmBndRmKeep]
+    )
+    io.write_vfunc(
+        os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncY.rm.bnd.seam.rm.cut.psol"), vfuncYRm[v4cRmBndRmKeep]
+    )
+    io.write_vfunc(
+        os.path.join(cutTetraMeshDir, params.HEMI + ".vfuncZ.rm.bnd.seam.rm.cut.psol"), vfuncZRm[v4cRmBndRmKeep]
+    )
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.rm.bnd.seam.rm.cut.psol"), P0[v4cRmBndRmKeep])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol"), P1[v4cRmBndRmKeep])

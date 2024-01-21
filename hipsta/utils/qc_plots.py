@@ -52,9 +52,7 @@ def _sortLevelSets(LVL, dims, tol=1e-16):
     tmpy = tmpxy[:, 2:4]
 
     # remove segments which are de-facto points
-    tmpIdx = np.logical_or(
-        np.abs(tmpx[:, 0] - tmpx[:, 1]) > tol, np.abs(tmpy[:, 0] - tmpy[:, 1]) > tol
-    )
+    tmpIdx = np.logical_or(np.abs(tmpx[:, 0] - tmpx[:, 1]) > tol, np.abs(tmpy[:, 0] - tmpy[:, 1]) > tol)
     tmpx = tmpx[tmpIdx, :]
     tmpy = tmpy[tmpIdx, :]
 
@@ -139,62 +137,60 @@ def qcPlots(params, stage=None):
     scale_factor = 2
     tilt_factor = 1
     if ornts[0, 0] == 2:
-        up=dict(x=ornts[0, 1], y=0, z=0)
+        up = dict(x=ornts[0, 1], y=0, z=0)
     elif ornts[1, 0] == 2:
-        up=dict(x=0, y=ornts[0, 1], z=0)
+        up = dict(x=0, y=ornts[0, 1], z=0)
     elif ornts[2, 0] == 2:
-        up=dict(x=0, y=0, z=ornts[0, 1])
+        up = dict(x=0, y=0, z=ornts[0, 1])
     if ornts[0, 0] == 0:
         if ornts[1, 0] == 1:
             # SCA
             if params.HEMI == "lh":
-                eye = dict(x=scale_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+                eye = dict(x=scale_factor * ornts[0, 1], y=tilt_factor * ornts[0, 1], z=tilt_factor * ornts[0, 1])
             else:
-                eye = dict(x=-scale_factor*ornts[0, 1], y=-tilt_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+                eye = dict(x=-scale_factor * ornts[0, 1], y=-tilt_factor * ornts[0, 1], z=tilt_factor * ornts[0, 1])
         else:
             # SAC
             if params.HEMI == "lh":
-                eye = dict(x=scale_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+                eye = dict(x=scale_factor * ornts[0, 1], y=tilt_factor * ornts[0, 1], z=tilt_factor * ornts[0, 1])
             else:
-                eye = dict(x=-scale_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=-tilt_factor*ornts[0, 1])
+                eye = dict(x=-scale_factor * ornts[0, 1], y=tilt_factor * ornts[0, 1], z=-tilt_factor * ornts[0, 1])
     if ornts[1, 0] == 0:
         if ornts[0, 0] == 1:
             # CSA
             if params.HEMI == "lh":
-                eye = dict(x=tilt_factor*ornts[0, 1], y=scale_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+                eye = dict(x=tilt_factor * ornts[0, 1], y=scale_factor * ornts[0, 1], z=tilt_factor * ornts[0, 1])
             else:
-                eye = dict(x=-tilt_factor*ornts[0, 1], y=-scale_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+                eye = dict(x=-tilt_factor * ornts[0, 1], y=-scale_factor * ornts[0, 1], z=tilt_factor * ornts[0, 1])
         else:
             # ASC
             if params.HEMI == "lh":
-                eye = dict(x=tilt_factor*ornts[0, 1], y=scale_factor*ornts[0, 1], z=tilt_factor*ornts[0, 1])
+                eye = dict(x=tilt_factor * ornts[0, 1], y=scale_factor * ornts[0, 1], z=tilt_factor * ornts[0, 1])
             else:
-                eye = dict(x=tilt_factor*ornts[0, 1], y=-scale_factor*ornts[0, 1], z=-tilt_factor*ornts[0, 1])
+                eye = dict(x=tilt_factor * ornts[0, 1], y=-scale_factor * ornts[0, 1], z=-tilt_factor * ornts[0, 1])
     if ornts[2, 0] == 0:
         if ornts[1, 0] == 1:
             # ACS
             if params.HEMI == "lh":
-                eye = dict(x=tilt_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=scale_factor*ornts[0, 1])
+                eye = dict(x=tilt_factor * ornts[0, 1], y=tilt_factor * ornts[0, 1], z=scale_factor * ornts[0, 1])
             else:
-                eye = dict(x=tilt_factor*ornts[0, 1], y=-tilt_factor*ornts[0, 1], z=-scale_factor*ornts[0, 1])
+                eye = dict(x=tilt_factor * ornts[0, 1], y=-tilt_factor * ornts[0, 1], z=-scale_factor * ornts[0, 1])
         else:
             # CAS
             if params.HEMI == "lh":
-                eye = dict(x=tilt_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=scale_factor*ornts[0, 1])
+                eye = dict(x=tilt_factor * ornts[0, 1], y=tilt_factor * ornts[0, 1], z=scale_factor * ornts[0, 1])
             else:
-                eye = dict(x=-tilt_factor*ornts[0, 1], y=tilt_factor*ornts[0, 1], z=-scale_factor*ornts[0, 1])
+                eye = dict(x=-tilt_factor * ornts[0, 1], y=tilt_factor * ornts[0, 1], z=-scale_factor * ornts[0, 1])
 
     # mesh
     if params.internal.no_qc is False and stage == "mesh":
-        triaMesh = TriaMesh.read_vtk(
-            os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk")
-        )
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, params.HEMI + ".surf.vtk"))
 
         camera = dict(
             up=up,
             center=dict(x=0, y=0, z=0),
             eye=eye,
-            )
+        )
         lpp.plot_tria_mesh(
             triaMesh,
             tcolor=[25, 25, 25],
@@ -207,11 +203,7 @@ def qcPlots(params, stage=None):
 
     # profile
     if params.internal.no_qc is False and stage == "profile":
-        triaMesh = TriaMesh.read_vtk(
-            os.path.join(
-                params.OUTDIR, "tetra-cube", params.HEMI + ".rm.bnd.seam.rm.cut.vtk"
-            )
-        )
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, "tetra-cube", params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
         triaFunc = np.array(
             io.read_vfunc(
@@ -243,27 +235,49 @@ def qcPlots(params, stage=None):
 
         fig = make_subplots(rows=2, cols=3)
 
-        fig.add_trace(
-            go.Scatter(x=tmpxSort0[:, 0], y=tmpySort0[:, 0], mode="lines"), row=1, col=1
+        fig.add_trace(go.Scatter(x=tmpxSort0[:, 0], y=tmpySort0[:, 0], mode="lines"), row=1, col=1)
+        fig.add_trace(go.Scatter(x=tmpxSort1[:, 0], y=tmpySort1[:, 0], mode="lines"), row=1, col=2)
+        fig.add_trace(go.Scatter(x=tmpxSort2[:, 0], y=tmpySort2[:, 0], mode="lines"), row=1, col=3)
+        fig.add_trace(go.Scatter(x=tmpxSort3[:, 0], y=tmpySort3[:, 0], mode="lines"), row=2, col=1)
+        fig.add_trace(go.Scatter(x=tmpxSort4[:, 0], y=tmpySort4[:, 0], mode="lines"), row=2, col=2)
+
+        xmin = np.min(
+            (
+                np.min(tmpxSort0[:, 0]),
+                np.min(tmpxSort1[:, 0]),
+                np.min(tmpxSort2[:, 0]),
+                np.min(tmpxSort3[:, 0]),
+                np.min(tmpxSort4[:, 0]),
+            )
         )
-        fig.add_trace(
-            go.Scatter(x=tmpxSort1[:, 0], y=tmpySort1[:, 0], mode="lines"), row=1, col=2
-        )
-        fig.add_trace(
-            go.Scatter(x=tmpxSort2[:, 0], y=tmpySort2[:, 0], mode="lines"), row=1, col=3
-        )
-        fig.add_trace(
-            go.Scatter(x=tmpxSort3[:, 0], y=tmpySort3[:, 0], mode="lines"), row=2, col=1
-        )
-        fig.add_trace(
-            go.Scatter(x=tmpxSort4[:, 0], y=tmpySort4[:, 0], mode="lines"), row=2, col=2
+        xmax = np.max(
+            (
+                np.max(tmpxSort0[:, 0]),
+                np.max(tmpxSort1[:, 0]),
+                np.max(tmpxSort2[:, 0]),
+                np.max(tmpxSort3[:, 0]),
+                np.max(tmpxSort4[:, 0]),
+            )
         )
 
-        xmin = np.min((np.min(tmpxSort0[:, 0]), np.min(tmpxSort1[:, 0]), np.min(tmpxSort2[:, 0]), np.min(tmpxSort3[:, 0]), np.min(tmpxSort4[:, 0])))
-        xmax = np.max((np.max(tmpxSort0[:, 0]), np.max(tmpxSort1[:, 0]), np.max(tmpxSort2[:, 0]), np.max(tmpxSort3[:, 0]), np.max(tmpxSort4[:, 0])))
-
-        ymin = np.min((np.min(tmpySort0[:, 0]), np.min(tmpySort1[:, 0]), np.min(tmpySort2[:, 0]), np.min(tmpySort3[:, 0]), np.min(tmpySort4[:, 0])))
-        ymax = np.max((np.max(tmpySort0[:, 0]), np.max(tmpySort1[:, 0]), np.max(tmpySort2[:, 0]), np.max(tmpySort3[:, 0]), np.max(tmpySort4[:, 0])))
+        ymin = np.min(
+            (
+                np.min(tmpySort0[:, 0]),
+                np.min(tmpySort1[:, 0]),
+                np.min(tmpySort2[:, 0]),
+                np.min(tmpySort3[:, 0]),
+                np.min(tmpySort4[:, 0]),
+            )
+        )
+        ymax = np.max(
+            (
+                np.max(tmpySort0[:, 0]),
+                np.max(tmpySort1[:, 0]),
+                np.max(tmpySort2[:, 0]),
+                np.max(tmpySort3[:, 0]),
+                np.max(tmpySort4[:, 0]),
+            )
+        )
 
         fig.update_layout(
             xaxis=dict(range=[xmin, xmax]),
@@ -284,9 +298,7 @@ def qcPlots(params, stage=None):
 
     # hull
     if stage == "hull":
-        triaMesh = TriaMesh.read_vtk(
-            os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk")
-        )
+        triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk"))
 
         camera = dict(
             up=up,

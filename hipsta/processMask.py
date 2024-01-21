@@ -71,8 +71,10 @@ def longFilter(params):
         img = nb.load(params.FILENAME)
         dat = img.get_fdata()
 
-        k = np.zeros((params.internal.LONGFILTER_SIZE, params.internal.LONGFILTER_SIZE, params.internal.LONGFILTER_SIZE))
-        k[int((params.internal.LONGFILTER_SIZE-1)/2), int((params.internal.LONGFILTER_SIZE-1)/2), :] = 1
+        k = np.zeros(
+            (params.internal.LONGFILTER_SIZE, params.internal.LONGFILTER_SIZE, params.internal.LONGFILTER_SIZE)
+        )
+        k[int((params.internal.LONGFILTER_SIZE - 1) / 2), int((params.internal.LONGFILTER_SIZE - 1) / 2), :] = 1
 
         dat_filtered = ndimage.convolve(dat, k, mode="constant", cval=0.0)
 
