@@ -152,7 +152,7 @@ mesh') are stored in the `tetra-labels` subdirectory.
 ### 7. Cutting of the tetra mesh at anterior and posterior ends
 
 This step cuts open the tetrahedral mesh at its anterior and posterior ends. It 
-also checks whether or not this cutting has been succesful, i.e. if there are 
+also checks whether or not this cutting has been successful, i.e. if there are 
 exactly two boundary loops. If this is not the case, the analysis will be 
 terminated at this stage. The range for tetrahedral boundary cutting can be 
 modified by the `--cut-range` argument. The default values are `-0.975, 0.975`.
