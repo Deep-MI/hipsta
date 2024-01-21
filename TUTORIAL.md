@@ -41,7 +41,7 @@ can be switched off using the `--no-crop` flag).
 If the `--upsample` argument is used, the image will be sampled to a higher 
 resolution to allow for more fine-grained image and surface processing 
 operations. Using this option is recommended for images with anisotropic voxels 
-or if the voxel edge length is substantially larger than 0.33 mm. If enabeld, 
+or if the voxel edge length is substantially larger than 0.33 mm. If enabled, 
 upsampling will be done to the minimal voxel edge length by default; an 
 alternative size can be specified using the `--upsample-size` argument.
 
@@ -152,7 +152,7 @@ mesh') are stored in the `tetra-labels` subdirectory.
 ### 7. Cutting of the tetra mesh at anterior and posterior ends
 
 This step cuts open the tetrahedral mesh at its anterior and posterior ends. It 
-also checks whether or not this cutting has been succesful, i.e. if there are 
+also checks whether or not this cutting has been succesfull, i.e. if there are 
 exactly two boundary loops. If this is not the case, the analysis will be 
 terminated at this stage. The range for tetrahedral boundary cutting can be 
 modified by the `--cut-range` argument. The default values are `-0.975, 0.975`.
@@ -183,7 +183,7 @@ are stored in the `tetra-cube` subdirectory.
 
 ### 9. Thickness and curvature computation
 
-This processsing steps conducts the computation of thickness and curvature 
+This processing steps conducts the computation of thickness and curvature 
 values across the hippocampal mesh. In addition, QC plots will be created and 
 stored in the `qc` subfolder.
 
@@ -192,9 +192,9 @@ resolution of the grid used for thickness computation. See [below](#additional-a
 for an explanation.
 
 The primary output of the hippocampal shape and thickness analysis are surface
-files and associated thickness values in the `tickness` folder. The estimated 
+files and associated thickness values in the `thickness` folder. The estimated 
 hippocampal thickness values will be stored in csv tables. See the section on
-[evaluting the output](#evaluating-the-output) for a detailed description. 
+[evaluating the output](#evaluating-the-output) for a detailed description. 
 The thickness values will also be stored as mgh and psol overlay files that
 can be overlaid onto the mid-surface vtk file. Similar files are also created 
 for the projected subfield boundaries.
@@ -225,13 +225,13 @@ provided for interior, mid, and exterior surfaces:
 ### 10. Mapping of subfield labels (and other volume-based data, optional)
 
 The results of processing step 10 will be stored in already existing 
-subdirectories and are explained as part of procesing step 9 ('thickness and 
+subdirectories and are explained as part of processing step 9 ('thickness and 
 curvature computation').
 
 ### 11. Creation supplementary files for visualization
 
 The results of processing step 11 will be stored in already existing 
-subdirectories and are explained as part of procesing step 9 ('thickness and 
+subdirectories and are explained as part of processing step 9 ('thickness and 
 curvature computation').
 
 ## Running an analysis
@@ -286,7 +286,7 @@ values are `-0.9 0.9 41`, `-0.975 0.975 21`, and `-0.9 0.9 11`.
 ## Evaluating the output
 
 The primary output of the hippocampal shape and thickness analysis are surface
-files and associated thickness values in the `tickness` folder. The estimated 
+files and associated thickness values in the `thickness` folder. The estimated 
 hippocampal thickness values will be stored in csv tables:
 
 | Filenane                                           | Contents                                                  |
@@ -381,7 +381,7 @@ We outline two strategies to mitigate these issue below.
 
 Holes in the surfaces can be the result of less than optimal image 
 preprocessing. We recommend to try adjusting the width and threshold for the 
-gausian filter using the `--gauss-filter-size` argument, and optionally to 
+gaussian filter using the `--gauss-filter-size` argument, and optionally to 
 employ additional smoothing along the longitudinal axis using the `--long-filter` 
 flag (which can be fine-tuned using the `--long-filter-size` argument). It may 
 also help to change the surface extraction algorithm using the `--mca` argument.

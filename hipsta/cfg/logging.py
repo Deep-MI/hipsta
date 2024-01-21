@@ -66,7 +66,7 @@ def setup_logging(args):
     if logfile_handlers_file not in ROOT_LOGGER.handlers:
         ROOT_LOGGER.addHandler(logfile_handlers_file)
 
-    # intial messages (do not use logging earlier, since this will do the
+    # initial messages (do not use logging earlier, since this will do the
     # default setup, and subsequent custom setup will have no effects)
     LOGGER.info("Starting logging ...")
     LOGGER.info("Logfile: %s", logfile)
