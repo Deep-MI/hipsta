@@ -4,9 +4,10 @@ analysis package.
 
 """
 
-import os
-import pandas
 import logging
+import os
+
+import pandas
 
 # ==============================================================================
 # LOGGING

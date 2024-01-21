@@ -11,9 +11,9 @@ import shutil
 import sys
 import time
 
-from .cfg.logging import setup_logging
 from .cfg.atlases import get_atlases
 from .cfg.config import get_defaults
+from .cfg.logging import setup_logging
 from .cfg.version import get_version
 from .computeCubeParam import computeCubeParam
 from .computeThickness import computeThickness
@@ -23,19 +23,8 @@ from .createTetraMesh import createTetraMesh
 from .cutTetra import cutTetra
 from .doc.documentation import get_help_text
 from .processImage import convertFormat, copy_image_to_main, cropImage, upsampleImage
-from .processLabels import (
-    autoMask,
-    copy_labels_to_main,
-    createLabels,
-    mergeMolecularLayer,
-)
-from .processMask import (
-    binarizeMask,
-    closeMask,
-    copy_mask_to_main,
-    gaussFilter,
-    longFilter,
-)
+from .processLabels import autoMask, copy_labels_to_main, createLabels, mergeMolecularLayer
+from .processMask import binarizeMask, closeMask, copy_mask_to_main, gaussFilter, longFilter
 from .removeBoundaryMask import removeBoundaryMask
 from .utils.check_surface import checkSurface
 from .utils.create_supplementary_files import createSupplementaryFiles
