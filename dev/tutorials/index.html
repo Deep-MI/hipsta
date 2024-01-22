@@ -1,0 +1,761 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Changes" href="../changes/index.html" /><link rel="prev" title="Documentation" href="../documentation/index.html" />
+
+    <!-- Generated with Sphinx 7.1.2 and Furo 2023.09.10 -->
+        <title>Tutorial - Hipsta</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Hipsta</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Hipsta</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../documentation/index.html">Documentation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes/index.html">Changes</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/hipsta.run_hipsta.html">hipsta.run_hipsta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/generated/hipsta.utils.map_values.mapValues.html">hipsta.utils.map_values.mapValues</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <p>=======</p>
+<section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">#</a></h1>
+<p>This documenent complements the <a class="reference internal" href="#hipsta/doc/DOCUMENTATION.md"><span class="xref myst">technical documentation</span></a>
+of the hippocampal shape and thickness analysis scripts by providing a more
+explanative description of this software. It covers the following topics:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#input-images"><span class="std std-ref">Suitable input images</span></a></p></li>
+<li><p><a class="reference internal" href="#processing-steps"><span class="std std-ref">Description of processing steps</span></a></p></li>
+<li><p><a class="reference internal" href="#running-an-analysis"><span class="std std-ref">How to run an analysis</span></a></p></li>
+<li><p><a class="reference internal" href="#evaluating-the-output"><span class="std std-ref">Evaluation of the outputs</span></a></p></li>
+<li><p><a class="reference internal" href="#troubleshooting"><span class="std std-ref">Troubleshooting</span></a></p></li>
+</ul>
+<section id="input-images">
+<h2>Input images<a class="headerlink" href="#input-images" title="Permalink to this heading">#</a></h2>
+<p>The hippocampal shape and thickness analysis package currently support input
+images that are created by FreeSurfer’s hippocampal subfield toolbox or the ASHS
+software. Specifically, the following segmentation images can be used:</p>
+<ul class="simple">
+<li><p>FreeSurfer’s hippocampal subfield segmentation from FreeSurfer 7.11 or later.</p></li>
+<li><p>Utrecht Medical Center 7T MRI Atlas</p></li>
+<li><p>Penn ABC-3T ASHS Atlas for T2-weighted MRI</p></li>
+</ul>
+<p>Segmentation images resulting from one of these atlases can be used as inputs
+for the hippocampal shape and thickness analysis algorithm. For optimal
+segmentation accuracy, we recommend that these segmentations be created from
+high-resolution T2 images of the hippocampal / medial temporal lobe region.</p>
+</section>
+<section id="processing-steps">
+<h2>Processing steps<a class="headerlink" href="#processing-steps" title="Permalink to this heading">#</a></h2>
+<p>The hippocampal shape and thickness analysis pipeline consists of a sequence of
+several processing steps. Each step consists of one or more sub-steps, some of
+which can be optional. Each step produces one or more output files and/or
+directories, which can be useful for quality control or troubleshooting.</p>
+<section id="image-processing">
+<h3>1. Image processing<a class="headerlink" href="#image-processing" title="Permalink to this heading">#</a></h3>
+<p>The first step converts the input to FreeSurfer’s mgz format. By default, the
+image is also cropped to the hippocampal region to speed up processing (but this
+can be switched off using the <code class="docutils literal notranslate"><span class="pre">--no-crop</span></code> flag).</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">--upsample</span></code> argument is used, the image will be sampled to a higher
+resolution to allow for more fine-grained image and surface processing
+operations. Using this option is recommended for images with anisotropic voxels
+or if the voxel edge length is substantially larger than 0.33 mm. If enabled,
+upsampling will be done to the minimal voxel edge length by default; an
+alternative size can be specified using the <code class="docutils literal notranslate"><span class="pre">--upsample-size</span></code> argument.</p>
+<p>The result of processing step 1 (‘process image’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.image.mgz</span></code>
+image in the main folder and the <code class="docutils literal notranslate"><span class="pre">image</span></code> subdirectory with intermediate results.</p>
+<figure> 
+    <center>
+    <img src="images/image.png" width="400"/>
+    <figcaption>image.mgz</figcaption> 
+</figure> 
+</section>
+<section id="label-processing">
+<h3>2. Label processing<a class="headerlink" href="#label-processing" title="Permalink to this heading">#</a></h3>
+<p>The second step extracts the relevant subfield labels from the segmentation
+image and merges them into a new, reduced segmentation image. If a separate
+label is present for the molecular layer, it will be merged with the adjacent
+CA and subiculum subfields (unless switched off using the <code class="docutils literal notranslate"><span class="pre">--no-merge-molecular-layer</span></code>
+flag`).</p>
+<p>If no specific labels for the hippocampal head and/or tail are present in the
+segmentation, the boundaries between the hippocampal body and the head or tail
+need to be detected heuristically with the <code class="docutils literal notranslate"><span class="pre">automask-head</span></code> and/or <code class="docutils literal notranslate"><span class="pre">automask-tail</span></code>
+arguments. More conservative boundaries (i.e. more cropping) are created by the
+<code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code> and <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code> arguments, which can be
+used to add an extra margin (in terms of voxels along the longitudinal axis).</p>
+<p>The result of processing step 2 (‘process mask’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.label.mgz</span></code>
+image in the main folder and the <code class="docutils literal notranslate"><span class="pre">label</span></code> subdirectory with intermediate results.</p>
+<figure> 
+    <center>
+    <img src="images/labels.png" width="400"/>
+    <figcaption>labels.mgz</figcaption> 
+</figure> 
+</section>
+<section id="mask-processing">
+<h3>3. Mask processing<a class="headerlink" href="#mask-processing" title="Permalink to this heading">#</a></h3>
+<p>The third step creates a binary mask from the reduced segmentation image. By
+default, some gaussian filtering will be applied to the binary mask to reduce
+sharp edges; this can be switched off using the <code class="docutils literal notranslate"><span class="pre">--no_gauss_filter</span></code> flag. The
+filter width and threshold can be adjusted using the <code class="docutils literal notranslate"><span class="pre">--gauss_filter_size</span></code>
+argument.</p>
+<p>Alternatively or in addition to the gaussian filter, a filter that operates
+exclusively along the longitudinal axis can be used. This can further reduce the
+sharp edges in this dimension due to anisoptropic voxels. This filter can
+switched on with the <code class="docutils literal notranslate"><span class="pre">--long_filter</span></code> flag, and can be modified using the <code class="docutils literal notranslate"><span class="pre">--long_filter_size</span></code>
+argument.</p>
+<p>Finally, a binary dilation / erosion procedure is applied to the mask to close
+small holes in the segmentation. This can be switched off using the <code class="docutils literal notranslate"><span class="pre">--no-close-mask</span></code>
+flag.</p>
+<p>The result of processing step 3 (‘process mask’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.mask.mgz</span></code>
+image in the main folder and the <code class="docutils literal notranslate"><span class="pre">mask</span></code> subdirectory with intermediate results.</p>
+<figure> 
+    <center>
+    <img src="images/mask.png" width="400"/>
+    <figcaption>mask.mgz</figcaption> 
+</figure> 
+</section>
+<section id="surface-creation">
+<h3>4. Surface creation<a class="headerlink" href="#surface-creation" title="Permalink to this heading">#</a></h3>
+<p>The fourth step converts the binary mask image into a vertex-based surface
+representation. By default, FreeSurfer’s marching cube algorithm is used. If it
+does not give good results, it can be changed to the scikit-image algorithm
+using the <code class="docutils literal notranslate"><span class="pre">--mca</span></code> argument. Optionally, a remeshing procedure can be applied to
+the the surface mesh if the vertices are spaced very irregularly; this may not
+always be the case, therefore this step has to be switched on using the <code class="docutils literal notranslate"><span class="pre">--remesh</span></code>
+flag if desired. In any case, the initial surface will be smoothed, the amount
+of which can be controlled using the <code class="docutils literal notranslate"><span class="pre">--smooth</span></code> argument. During this stage,
+several QC plots will be created and placed in the <code class="docutils literal notranslate"><span class="pre">qc</span></code> subdirectory.</p>
+<p>The result of processing step 4 (‘create surface’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.surf.vtk</span></code>
+surface in the main folder and the <code class="docutils literal notranslate"><span class="pre">surface</span></code> subdirectory with intermediate
+results.</p>
+<figure> 
+    <center>
+    <img src="images/mask_w_surf.png" width="400"/>
+    <img src="images/surf.png" width="400"/>
+    <figcaption>surf.vtk overlaid onto mask.mgz (left) and in 3D view (right)</figcaption> 
+</figure> 
+</section>
+<section id="creation-of-a-tetrahedral-mesh">
+<h3>5. Creation of a tetrahedral mesh<a class="headerlink" href="#creation-of-a-tetrahedral-mesh" title="Permalink to this heading">#</a></h3>
+<p>The fifth step fills the interior of the surface mesh with vertices and edges,
+i.e. creates a tetrahedral mesh from the triangular surface mesh.</p>
+<p>There are no processing options for this step.</p>
+<p>The result of processing step 5 (‘create tetrahedral mesh’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.tetra.vtk</span></code>
+mesh in the main folder and the <code class="docutils literal notranslate"><span class="pre">tetra-mesh</span></code> subdirectory with intermediate
+results.</p>
+</section>
+<section id="creation-of-label-files-for-the-tetra-mesh">
+<h3>6. Creation of label files for the tetra mesh<a class="headerlink" href="#creation-of-label-files-for-the-tetra-mesh" title="Permalink to this heading">#</a></h3>
+<p>The sixth step will create boundary label files that are used for the next
+processing step, the cutting of the tetrahedral mesh.</p>
+<p>There are no processing options for this step.</p>
+<p>The intermediate results of processing step 6 (‘create label files for tetra
+mesh’) are stored in the <code class="docutils literal notranslate"><span class="pre">tetra-labels</span></code> subdirectory.</p>
+</section>
+<section id="cutting-of-the-tetra-mesh-at-anterior-and-posterior-ends">
+<h3>7. Cutting of the tetra mesh at anterior and posterior ends<a class="headerlink" href="#cutting-of-the-tetra-mesh-at-anterior-and-posterior-ends" title="Permalink to this heading">#</a></h3>
+<p>This step cuts open the tetrahedral mesh at its anterior and posterior ends. It
+also checks whether or not this cutting has been successful, i.e. if there are
+exactly two boundary loops. If this is not the case, the analysis will be
+terminated at this stage. The range for tetrahedral boundary cutting can be
+modified by the <code class="docutils literal notranslate"><span class="pre">--cut-range</span></code> argument. The default values are <code class="docutils literal notranslate"><span class="pre">-0.975,</span> <span class="pre">0.975</span></code>.</p>
+<p>The result of processing step 7 (‘cut open tetrahedral mesh’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.cut.vtk</span></code>
+mesh in the main folder and the <code class="docutils literal notranslate"><span class="pre">tetra-cut</span></code> subdirectory with intermediate
+results.</p>
+<figure> 
+    <center>
+    <img src="images/surf_uncut.png" width="400"/>
+    <img src="images/surf_cut.png" width="400"/>
+    <figcaption>rm.open.bnd.cut.vtk in conjunction with rm.bnd.cut.vtk (left) and alone (right)</figcaption> 
+</figure> 
+</section>
+<section id="cube-parametrization">
+<h3>8. Cube parametrization<a class="headerlink" href="#cube-parametrization" title="Permalink to this heading">#</a></h3>
+<p>This step computes a ‘cube parametrization’ on the tetrahedral mesh: it creates
+smooth functions in three anatomically meaningful dimensions across the mesh
+that will form the basis of the 3D coordinate system. Parameters for the cube
+parametrization, in particular the identification of the lateral and medial
+boundaries, can optionally be set using the <code class="docutils literal notranslate"><span class="pre">--aniso-alpha</span></code> and <code class="docutils literal notranslate"><span class="pre">--aniso-smooth</span></code>
+arguments. In addition, QC plots will be created and stored in the <code class="docutils literal notranslate"><span class="pre">qc</span></code>
+subfolder.</p>
+<p>The intermediate results of processing step 8 (‘create cube parametrization’)
+are stored in the <code class="docutils literal notranslate"><span class="pre">tetra-cube</span></code> subdirectory.</p>
+</section>
+<section id="thickness-and-curvature-computation">
+<h3>9. Thickness and curvature computation<a class="headerlink" href="#thickness-and-curvature-computation" title="Permalink to this heading">#</a></h3>
+<p>This processing steps conducts the computation of thickness and curvature
+values across the hippocampal mesh. In addition, QC plots will be created and
+stored in the <code class="docutils literal notranslate"><span class="pre">qc</span></code> subfolder.</p>
+<p>The optional <code class="docutils literal notranslate"><span class="pre">--thickness-grid</span></code> argument can be used to modify the extent and
+resolution of the grid used for thickness computation. See <a class="reference internal" href="#additional-arguments-for-ashs-and-freesurfer-segmentations"><span class="std std-ref">below</span></a>
+for an explanation.</p>
+<p>The primary output of the hippocampal shape and thickness analysis are surface
+files and associated thickness values in the <code class="docutils literal notranslate"><span class="pre">thickness</span></code> folder. The estimated
+hippocampal thickness values will be stored in csv tables. See the section on
+<a class="reference internal" href="#evaluating-the-output"><span class="std std-ref">evaluating the output</span></a> for a detailed description.
+The thickness values will also be stored as mgh and psol overlay files that
+can be overlaid onto the mid-surface vtk file. Similar files are also created
+for the projected subfield boundaries.</p>
+<figure> 
+    <center>
+    <img src="images/mid.png" width="400"/>
+    <img src="images/mid_tria.png" width="400"/>
+    <figcaption>mid-surface.vtk as a surface (left) and with additional triangulation overlay (right)</figcaption>
+</figure>     
+<figure> 
+    <center>
+    <img src="images/mid_thickness.png" width="400"/>
+    <img src="images/mid_hsf.png" width="400"/>
+    <figcaption>overlays of mid-surface.thickness.mgh (left) and mid-surface.hsf.mgh (right) onto mid-surface.vtk </figcaption>
+</figure> 
+<p>Besides the thickness values, mean and gaussian curvature estimates are
+provided for interior, mid, and exterior surfaces:</p>
+<figure> 
+    <center>
+    <img src="images/mid_mean_curv.png" width="400"/>    
+    <img src="images/mid_gauss_curv.png" width="400"/>
+    <figcaption>overlays of mid-surface.mean-curv.mgh (left) and mid-surface.gauss-curv.mgh (right) onto mid-surface.vtk </figcaption> 
+</figure>     
+</section>
+<section id="mapping-of-subfield-labels-and-other-volume-based-data-optional">
+<h3>10. Mapping of subfield labels (and other volume-based data, optional)<a class="headerlink" href="#mapping-of-subfield-labels-and-other-volume-based-data-optional" title="Permalink to this heading">#</a></h3>
+<p>The results of processing step 10 will be stored in already existing
+subdirectories and are explained as part of processing step 9 (‘thickness and
+curvature computation’).</p>
+</section>
+<section id="creation-supplementary-files-for-visualization">
+<h3>11. Creation supplementary files for visualization<a class="headerlink" href="#creation-supplementary-files-for-visualization" title="Permalink to this heading">#</a></h3>
+<p>The results of processing step 11 will be stored in already existing
+subdirectories and are explained as part of processing step 9 (‘thickness and
+curvature computation’).</p>
+</section>
+</section>
+<section id="running-an-analysis">
+<h2>Running an analysis<a class="headerlink" href="#running-an-analysis" title="Permalink to this heading">#</a></h2>
+<section id="mandatory-arguments">
+<h3>Mandatory arguments<a class="headerlink" href="#mandatory-arguments" title="Permalink to this heading">#</a></h3>
+<p>An analysis is conduced by calling the <code class="docutils literal notranslate"><span class="pre">run_hipsta</span></code> command. Each analysis
+requires the following arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--filename</span></code>: Filename of a segmentation file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--hemi</span></code>: Hemisphere. Either ‘lh’ (left) or ‘rh’ (right)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--lut</span></code> Look-up table (‘atlas’). Can be ‘freesurfer’ or ‘ashs-penn_abc_3t_t2’ or ‘ashs-umcutrecht_7t’. Alternatively, a text file with numeric and verbal segmentation labels can be used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--outputdir</span></code>: Output directory where the results will be written.</p></li>
+</ul>
+<p>A minimal command could therefore look like this (for an analysis of the left
+hemisphere in a FreeSurfer segmentation):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">run_hipsta</span> <span class="o">--</span><span class="n">filename</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">my</span><span class="o">/</span><span class="n">segmentation</span><span class="o">/</span><span class="n">image</span> <span class="o">--</span><span class="n">hemi</span> <span class="n">lh</span>  <span class="o">--</span><span class="n">lut</span> <span class="n">freesurfer</span> <span class="o">--</span><span class="n">outputdir</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">my</span><span class="o">/</span><span class="n">output</span><span class="o">/</span><span class="n">directory</span>
+</pre></div>
+</div>
+</section>
+<section id="additional-arguments-for-ashs-segmentations">
+<h3>Additional arguments for ASHS segmentations<a class="headerlink" href="#additional-arguments-for-ashs-segmentations" title="Permalink to this heading">#</a></h3>
+<p>Segmentation images that are produced by the ASHS require a set of additional
+processing directives in addition to the minimal set of arguments shown above.</p>
+<p>It is recommend to use the <code class="docutils literal notranslate"><span class="pre">--upsample</span></code> flag for upsampling the images to the
+smallest voxel edge length. This can be refined more using the <code class="docutils literal notranslate"><span class="pre">--upsample-size</span></code>
+argument.</p>
+<p>Since no explicit labels for the hippocampal head are present in ASHS
+segmentations, it will be necessary to use the <code class="docutils literal notranslate"><span class="pre">--automask-head</span></code> flag and
+optionally also the <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code> argument. If the identification of
+the boundary between hippocampal body tail does not work well given the existing
+labels, using the <code class="docutils literal notranslate"><span class="pre">--automask-tail</span></code> flag and optionally the <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code>
+argument may be advised as well.</p>
+</section>
+<section id="additional-arguments-for-ashs-and-freesurfer-segmentations">
+<h3>Additional arguments for ASHS and FreeSurfer segmentations<a class="headerlink" href="#additional-arguments-for-ashs-and-freesurfer-segmentations" title="Permalink to this heading">#</a></h3>
+<p>The default grid that is imposed on the hippocampal mid-surface results from a
+3D coordinate system that has a resolution of 41 units along the
+medial–&gt;lateral axis, 21 units along the posterior–&gt;anterior axis, and 11
+units along the outer–&gt;inner axis.</p>
+<p>This resolution - and also the space covered by the coordinate system - can be
+changed using the <code class="docutils literal notranslate"><span class="pre">--thickness-grid</span></code> argument, which determines the extent and
+resolution of the grid used for hippocampal thickness computation, and is
+defined by three lists of three numbers: negative extent of x axis, positive
+extent of x axis, resolution on x axis. Repeat for the y and z axes. The default
+values are <code class="docutils literal notranslate"><span class="pre">-0.9</span> <span class="pre">0.9</span> <span class="pre">41</span></code>, <code class="docutils literal notranslate"><span class="pre">-0.975</span> <span class="pre">0.975</span> <span class="pre">21</span></code>, and <code class="docutils literal notranslate"><span class="pre">-0.9</span> <span class="pre">0.9</span> <span class="pre">11</span></code>.</p>
+</section>
+</section>
+<section id="evaluating-the-output">
+<h2>Evaluating the output<a class="headerlink" href="#evaluating-the-output" title="Permalink to this heading">#</a></h2>
+<p>The primary output of the hippocampal shape and thickness analysis are surface
+files and associated thickness values in the <code class="docutils literal notranslate"><span class="pre">thickness</span></code> folder. The estimated
+hippocampal thickness values will be stored in csv tables:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Filenane</p></th>
+<th class="head"><p>Contents</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lh.grid-segments-x.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">rh.grid-segments-x.csv</span></code></p></td>
+<td><p>Length estimates in the medial-to-lateral dimension</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lh.grid-segments-y.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">rh.grid-segments-y.csv</span></code></p></td>
+<td><p>Length estimates in the medial-to-lateral dimension</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lh.grid-segments-z.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">rh.grid-segments-z.csv</span></code></p></td>
+<td><p>Thickness estimates in the exterior-to-interior dimension</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Here, x corresponds to the medial–&gt;lateral dimension, y to the
+posterior–&gt;anterior dimension, and z to the exterior–&gt;interior dimension. The
+thickness values are therefore in the z files, whereas the x and y files
+contain length estimates for the other two directions.</p>
+<p>The thickness values will also be stored as mgh and psol overlay files that
+can be overlaid onto the mid-surface vtk file. It is also possible to overlay
+the projected subfield boundary files onto the midsurface:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Filenane</p></th>
+<th class="head"><p>Contents</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.mid.surface.vtk</span></code></p></td>
+<td><p>Hippocampal mid-surface for the &lt;left|right&gt; hemisphere</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.mid-surface.thickness.mgh</span></code></p></td>
+<td><p>Hippocampal thickness overlay</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.mid-surface.hsf.mgh</span></code></p></td>
+<td><p>Hippocampl subfield overlay</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>We recommend to use FreeSurfer’s Freeview program for visualization. This is an
+example for the left hemisphere; it may be necessary to adjust the specific
+settings using Freeview’s <code class="docutils literal notranslate"><span class="pre">configure</span></code> button in the <code class="docutils literal notranslate"><span class="pre">oOverlays</span></code> panel.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>freeview<span class="w"> </span>-f<span class="w"> </span>thickness/lh.mid-surface.vtk:overlay<span class="o">=</span>thickness/lh.mid-surface.thickness.mgh<span class="sb">`</span>
+</pre></div>
+</div>
+<p>Besides the thickness values, mean and gaussian curvature estimates are
+provided for interior, mid, and exterior surfaces:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Filenane</p></th>
+<th class="head"><p>Contents</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.&lt;int|mid|ext&gt;-surface.vtk</span></code></p></td>
+<td><p>Interior, mid, and exterior surface</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.&lt;int|mid|ext&gt;-surface.&lt;mean|gauss&gt;-curv.csv</span></code></p></td>
+<td><p>Tables of mean and gaussian curvature estimtes for corresponding surfaces</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.&lt;int|mid|ext&gt;-surface.&lt;mean|gauss&gt;-curv.mgh</span></code></p></td>
+<td><p>Overlays of mean and gaussian curvature estimtes for corresponding surfaces</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">#</a></h2>
+<section id="logfiles">
+<h3>Logfiles<a class="headerlink" href="#logfiles" title="Permalink to this heading">#</a></h3>
+<p>In case of an error, the logfile (<code class="docutils literal notranslate"><span class="pre">logfile.txt</span></code> in the main directory) may be
+useful for identifying the cause of the error. The logfile will contain
+information about the program version, command line options, and any steps that
+were completed successfully. If an analysis ran through successfully, it will
+contain the line <code class="docutils literal notranslate"><span class="pre">Hipsta</span> <span class="pre">finished</span> <span class="pre">without</span> <span class="pre">errors</span></code>. In the case of an error, it
+will output <code class="docutils literal notranslate"><span class="pre">Hipsta</span> <span class="pre">finished</span> <span class="pre">WITH</span> <span class="pre">ERRORS</span></code> together with some additional
+diagnostic information.</p>
+</section>
+<section id="qc">
+<h3>QC<a class="headerlink" href="#qc" title="Permalink to this heading">#</a></h3>
+<section id="automated-qc">
+<h4>Automated QC<a class="headerlink" href="#automated-qc" title="Permalink to this heading">#</a></h4>
+<p>A set images of the mesh and the extracted surfaces will be stored in the <code class="docutils literal notranslate"><span class="pre">qc</span></code>
+folder. These can be used for a quick check if the analysis returned plausible
+results.</p>
+</section>
+<section id="manual-qc">
+<h4>Manual QC<a class="headerlink" href="#manual-qc" title="Permalink to this heading">#</a></h4>
+<p>Additional QC can be done using by inspecting (overlays of) images and surfaces
+in FreeSurfer’s Freeview program. Here’s an example for the left hemisphere, all
+paths are relative to the main output folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>freeview<span class="w"> </span>-v<span class="w"> </span>lh.image.mgz<span class="w"> </span>-v<span class="w"> </span>lh.mask.mgz<span class="w"> </span>-f<span class="w"> </span>lh.surf.vtk<span class="w"> </span>-f<span class="w"> </span>thickness/lh.mid-surface.vtk
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.tetra.vtk</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.cut.vtk</span></code> files represent tetrahedral meshes
+and cannot be loaded in Freeview. However, triangular boundary meshes exist in
+the following subfolders: <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.rm.bnd.tetra.vtk.vtk</span></code> in <code class="docutils literal notranslate"><span class="pre">tetra-labels</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.rm.open.bnd.cut.vtk</span></code> in <code class="docutils literal notranslate"><span class="pre">tetra-cut</span></code>.</p>
+<figure> 
+    <center>
+    <img src="images/ov1.png" width="400"/>    
+    <img src="images/ov2.png" width="400"/>
+    <figcaption>Overlays of segmentation, mask, surface, and mid-surface</figcaption> 
+</figure>   
+</section>
+</section>
+<section id="common-issues">
+<h3>Common issues<a class="headerlink" href="#common-issues" title="Permalink to this heading">#</a></h3>
+<p>Two types of issues are frequently observed: the presence of holes in the
+surface after processing step 4 and cutting issues after step 7. The program
+checks for the presence of these issues and will terminate if it detects them.
+We outline two strategies to mitigate these issue below.</p>
+<section id="holes-in-the-surface">
+<h4>Holes in the surface<a class="headerlink" href="#holes-in-the-surface" title="Permalink to this heading">#</a></h4>
+<p>Holes in the surfaces can be the result of less than optimal image
+preprocessing. We recommend to try adjusting the width and threshold for the
+gaussian filter using the <code class="docutils literal notranslate"><span class="pre">--gauss-filter-size</span></code> argument, and optionally to
+employ additional smoothing along the longitudinal axis using the <code class="docutils literal notranslate"><span class="pre">--long-filter</span></code>
+flag (which can be fine-tuned using the <code class="docutils literal notranslate"><span class="pre">--long-filter-size</span></code> argument). It may
+also help to change the surface extraction algorithm using the <code class="docutils literal notranslate"><span class="pre">--mca</span></code> argument.</p>
+<figure> 
+    <center>
+    <img src="images/fig1.png" width="400"/>    
+    <img src="images/fig2.png" width="400"/>
+    <figcaption>Holes in the surface (left) and artificial connection between anatomically unconnected regions (right)</figcaption> 
+</figure>    
+<p>It will return an error message as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Euler</span> <span class="n">number</span> <span class="k">for</span> <span class="o">&lt;...&gt;/</span><span class="n">rh</span><span class="o">.</span><span class="n">surf</span><span class="o">.</span><span class="n">vtk</span> <span class="ow">is</span> <span class="mi">0</span>
+<span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Surface</span> <span class="n">contains</span> <span class="n">holes</span><span class="o">.</span> <span class="n">Please</span> <span class="n">edit</span> <span class="n">the</span> <span class="n">corresponding</span> <span class="n">hippocampal</span> <span class="n">segmentation</span> <span class="ow">and</span> <span class="n">re</span><span class="o">-</span><span class="n">run</span><span class="o">.</span>
+<span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">hipsta</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Hipsta</span> <span class="n">finished</span> <span class="n">WITH</span> <span class="n">ERRORS</span><span class="o">.</span>
+<span class="o">&lt;...&gt;</span>
+<span class="ne">AssertionError</span><span class="p">:</span> <span class="n">Check</span> <span class="n">surface</span> <span class="n">failed</span> <span class="p">(</span><span class="n">stage</span><span class="p">:</span> <span class="n">surface</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="cutting-issues">
+<h4>Cutting issues<a class="headerlink" href="#cutting-issues" title="Permalink to this heading">#</a></h4>
+<p>Another issue may arise with cutting the tetrahedral mesh: this can be due to a
+failure of the automated heuristics for head or tail detection. Or it can simply
+be due to unclean cutting at either end of the hippocampal body so that there
+are more than two boundary loops in total.</p>
+<figure> 
+    <center>
+    <img src="images/fig3.png" width="400"/>    
+    <img src="images/fig4.png" width="400"/>
+    <figcaption>Failure of automated head detection (left) and more than two boundary loops (right)</figcaption> 
+</figure>    
+<p>It will return an error message as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">There</span> <span class="n">are</span> <span class="mi">3</span> <span class="n">boundary</span> <span class="n">loops</span> <span class="k">for</span> <span class="o">&lt;...&gt;/</span><span class="n">tetra</span><span class="o">-</span><span class="n">cut</span><span class="o">/</span><span class="n">rh</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">open</span><span class="o">.</span><span class="n">bnd</span><span class="o">.</span><span class="n">cut</span><span class="o">.</span><span class="n">vtk</span>
+<span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Surface</span> <span class="n">contains</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">contain</span> <span class="mi">2</span> <span class="n">boundary</span> <span class="n">loops</span><span class="o">.</span> <span class="n">Please</span> <span class="n">retry</span> <span class="k">with</span> <span class="n">different</span> <span class="n">cutting</span> <span class="n">parameters</span><span class="o">.</span>
+<span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">hipsta</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Hipsta</span> <span class="n">finished</span> <span class="n">WITH</span> <span class="n">ERRORS</span><span class="o">.</span>
+<span class="o">&lt;...&gt;</span>
+<span class="ne">AssertionError</span><span class="p">:</span> <span class="n">Check</span> <span class="n">surface</span> <span class="n">failed</span> <span class="p">(</span><span class="n">stage</span><span class="p">:</span> <span class="n">boundaries</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This issue can potentially be solved with more conservative margins for the head
+or tail boundaries, which can be set using the <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code> and
+<code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code> arguments. By default they are set to zero, and one
+could try to gradually increase them.</p>
+<p>Another potential solution is to choose lower values for the <code class="docutils literal notranslate"><span class="pre">--cut-range</span></code>
+argument; the defaults are set to <code class="docutils literal notranslate"><span class="pre">-0.975,</span> <span class="pre">0.975</span></code>, and better cutting results
+may be obtained with lower absolute values.</p>
+</section>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../changes/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Changes</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../documentation/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Documentation</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Kersten Diers
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/Deep-MI/Hipsta" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#input-images">Input images</a></li>
+<li><a class="reference internal" href="#processing-steps">Processing steps</a><ul>
+<li><a class="reference internal" href="#image-processing">1. Image processing</a></li>
+<li><a class="reference internal" href="#label-processing">2. Label processing</a></li>
+<li><a class="reference internal" href="#mask-processing">3. Mask processing</a></li>
+<li><a class="reference internal" href="#surface-creation">4. Surface creation</a></li>
+<li><a class="reference internal" href="#creation-of-a-tetrahedral-mesh">5. Creation of a tetrahedral mesh</a></li>
+<li><a class="reference internal" href="#creation-of-label-files-for-the-tetra-mesh">6. Creation of label files for the tetra mesh</a></li>
+<li><a class="reference internal" href="#cutting-of-the-tetra-mesh-at-anterior-and-posterior-ends">7. Cutting of the tetra mesh at anterior and posterior ends</a></li>
+<li><a class="reference internal" href="#cube-parametrization">8. Cube parametrization</a></li>
+<li><a class="reference internal" href="#thickness-and-curvature-computation">9. Thickness and curvature computation</a></li>
+<li><a class="reference internal" href="#mapping-of-subfield-labels-and-other-volume-based-data-optional">10. Mapping of subfield labels (and other volume-based data, optional)</a></li>
+<li><a class="reference internal" href="#creation-supplementary-files-for-visualization">11. Creation supplementary files for visualization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-an-analysis">Running an analysis</a><ul>
+<li><a class="reference internal" href="#mandatory-arguments">Mandatory arguments</a></li>
+<li><a class="reference internal" href="#additional-arguments-for-ashs-segmentations">Additional arguments for ASHS segmentations</a></li>
+<li><a class="reference internal" href="#additional-arguments-for-ashs-and-freesurfer-segmentations">Additional arguments for ASHS and FreeSurfer segmentations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#evaluating-the-output">Evaluating the output</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#logfiles">Logfiles</a></li>
+<li><a class="reference internal" href="#qc">QC</a><ul>
+<li><a class="reference internal" href="#automated-qc">Automated QC</a></li>
+<li><a class="reference internal" href="#manual-qc">Manual QC</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#common-issues">Common issues</a><ul>
+<li><a class="reference internal" href="#holes-in-the-surface">Holes in the surface</a></li>
+<li><a class="reference internal" href="#cutting-issues">Cutting issues</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>

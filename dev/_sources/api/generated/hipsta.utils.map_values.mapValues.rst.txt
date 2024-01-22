@@ -1,0 +1,6 @@
+﻿hipsta.utils.map\_values.mapValues
+==================================
+
+.. currentmodule:: hipsta.utils.map_values
+
+.. autofunction:: mapValues

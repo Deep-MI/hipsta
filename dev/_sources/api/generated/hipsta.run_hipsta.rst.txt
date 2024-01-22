@@ -1,0 +1,6 @@
+﻿hipsta.run\_hipsta
+==================
+
+.. currentmodule:: hipsta
+
+.. autofunction:: run_hipsta
