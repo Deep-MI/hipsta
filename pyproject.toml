@@ -133,20 +133,3 @@ addopts = [
 #    "--durations=20",
 #    "--verbose",
 ]
-
-[tool.coverage.run]
-branch = true
-cover_pylib = false
-omit = [
-    '**/__init__.py',
-    '**/fsqc/_version.py',
-    '**/fsqc/commands/*',
-    '**/tests/**',
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    'pragma: no cover',
-    'if __name__ == .__main__.:',
-]
-precision = 2
