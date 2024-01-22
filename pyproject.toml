@@ -51,6 +51,7 @@ doc = [
     'sphinx-design',
     'sphinx-gallery',
     'sphinx-issues',
+    'myst-parser',
     'pypandoc',
     'nbsphinx',
     'IPython', # For syntax highlighting in notebooks
