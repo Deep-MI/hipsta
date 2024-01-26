@@ -246,11 +246,7 @@ upsampling will be done to the minimal voxel edge length by default; an
 alternative size can be specified using the <code class="docutils literal notranslate"><span class="pre">--upsample-size</span></code> argument.</p>
 <p>The result of processing step 1 (‘process image’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.image.mgz</span></code>
 image in the main folder and the <code class="docutils literal notranslate"><span class="pre">image</span></code> subdirectory with intermediate results.</p>
-<figure> 
-    <center>
-    <img src="images/image.png" width="400"/>
-    <figcaption>image.mgz</figcaption> 
-</figure> 
+<p><img alt="" src="../_images/image.png" /></p>
 </section>
 <section id="label-processing">
 <h3>2. Label processing<a class="headerlink" href="#label-processing" title="Permalink to this heading">#</a></h3>
@@ -267,11 +263,7 @@ arguments. More conservative boundaries (i.e. more cropping) are created by the
 used to add an extra margin (in terms of voxels along the longitudinal axis).</p>
 <p>The result of processing step 2 (‘process mask’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.label.mgz</span></code>
 image in the main folder and the <code class="docutils literal notranslate"><span class="pre">label</span></code> subdirectory with intermediate results.</p>
-<figure> 
-    <center>
-    <img src="images/labels.png" width="400"/>
-    <figcaption>labels.mgz</figcaption> 
-</figure> 
+<p><img alt="" src="../_images/labels.png" /></p>
 </section>
 <section id="mask-processing">
 <h3>3. Mask processing<a class="headerlink" href="#mask-processing" title="Permalink to this heading">#</a></h3>
@@ -290,11 +282,7 @@ small holes in the segmentation. This can be switched off using the <code class=
 flag.</p>
 <p>The result of processing step 3 (‘process mask’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.mask.mgz</span></code>
 image in the main folder and the <code class="docutils literal notranslate"><span class="pre">mask</span></code> subdirectory with intermediate results.</p>
-<figure> 
-    <center>
-    <img src="images/mask.png" width="400"/>
-    <figcaption>mask.mgz</figcaption> 
-</figure> 
+<p><img alt="" src="../_images/mask.png" /></p>
 </section>
 <section id="surface-creation">
 <h3>4. Surface creation<a class="headerlink" href="#surface-creation" title="Permalink to this heading">#</a></h3>
@@ -309,13 +297,10 @@ of which can be controlled using the <code class="docutils literal notranslate">
 several QC plots will be created and placed in the <code class="docutils literal notranslate"><span class="pre">qc</span></code> subdirectory.</p>
 <p>The result of processing step 4 (‘create surface’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.surf.vtk</span></code>
 surface in the main folder and the <code class="docutils literal notranslate"><span class="pre">surface</span></code> subdirectory with intermediate
-results.</p>
-<figure> 
-    <center>
-    <img src="images/mask_w_surf.png" width="400"/>
-    <img src="images/surf.png" width="400"/>
-    <figcaption>surf.vtk overlaid onto mask.mgz (left) and in 3D view (right)</figcaption> 
-</figure> 
+results. The following images show <code class="docutils literal notranslate"><span class="pre">surf.vtk</span></code> overlaid onto <code class="docutils literal notranslate"><span class="pre">mask.mgz</span></code> and in a
+3D view.</p>
+<p><img alt="" src="../_images/mask_w_surf.png" />
+<img alt="" src="../_images/surf.png" /></p>
 </section>
 <section id="creation-of-a-tetrahedral-mesh">
 <h3>5. Creation of a tetrahedral mesh<a class="headerlink" href="#creation-of-a-tetrahedral-mesh" title="Permalink to this heading">#</a></h3>
@@ -343,13 +328,9 @@ terminated at this stage. The range for tetrahedral boundary cutting can be
 modified by the <code class="docutils literal notranslate"><span class="pre">--cut-range</span></code> argument. The default values are <code class="docutils literal notranslate"><span class="pre">-0.975,</span> <span class="pre">0.975</span></code>.</p>
 <p>The result of processing step 7 (‘cut open tetrahedral mesh’) will be the <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.cut.vtk</span></code>
 mesh in the main folder and the <code class="docutils literal notranslate"><span class="pre">tetra-cut</span></code> subdirectory with intermediate
-results.</p>
-<figure> 
-    <center>
-    <img src="images/surf_uncut.png" width="400"/>
-    <img src="images/surf_cut.png" width="400"/>
-    <figcaption>rm.open.bnd.cut.vtk in conjunction with rm.bnd.cut.vtk (left) and alone (right)</figcaption> 
-</figure> 
+results. The following images show <code class="docutils literal notranslate"><span class="pre">rm.open.bnd.cut.vtk</span></code> in conjunction with <code class="docutils literal notranslate"><span class="pre">rm.bnd.cut.vtk</span></code>.</p>
+<p><img alt="" src="../_images/surf_uncut.png" />
+<img alt="" src="../_images/surf_cut.png" /></p>
 </section>
 <section id="cube-parametrization">
 <h3>8. Cube parametrization<a class="headerlink" href="#cube-parametrization" title="Permalink to this heading">#</a></h3>
@@ -378,26 +359,18 @@ hippocampal thickness values will be stored in csv tables. See the section on
 The thickness values will also be stored as mgh and psol overlay files that
 can be overlaid onto the mid-surface vtk file. Similar files are also created
 for the projected subfield boundaries.</p>
-<figure> 
-    <center>
-    <img src="images/mid.png" width="400"/>
-    <img src="images/mid_tria.png" width="400"/>
-    <figcaption>mid-surface.vtk as a surface (left) and with additional triangulation overlay (right)</figcaption>
-</figure>     
-<figure> 
-    <center>
-    <img src="images/mid_thickness.png" width="400"/>
-    <img src="images/mid_hsf.png" width="400"/>
-    <figcaption>overlays of mid-surface.thickness.mgh (left) and mid-surface.hsf.mgh (right) onto mid-surface.vtk </figcaption>
-</figure> 
+<p>The following images show <code class="docutils literal notranslate"><span class="pre">mid-surface.vtk</span></code> as a surface and with additional
+triangulation overlay, and overlays of <code class="docutils literal notranslate"><span class="pre">mid-surface.thickness.mgh</span></code> and <code class="docutils literal notranslate"><span class="pre">mid-surface.hsf.mgh</span></code>
+onto <code class="docutils literal notranslate"><span class="pre">mid-surface.vtk</span></code>.</p>
+<p><img alt="" src="../_images/mid.png" />
+<img alt="" src="../_images/mid_tria.png" /></p>
+<p><img alt="" src="../_images/mid_thickness.png" />
+<img alt="" src="../_images/mid_hsf.png" /></p>
 <p>Besides the thickness values, mean and gaussian curvature estimates are
-provided for interior, mid, and exterior surfaces:</p>
-<figure> 
-    <center>
-    <img src="images/mid_mean_curv.png" width="400"/>    
-    <img src="images/mid_gauss_curv.png" width="400"/>
-    <figcaption>overlays of mid-surface.mean-curv.mgh (left) and mid-surface.gauss-curv.mgh (right) onto mid-surface.vtk </figcaption> 
-</figure>     
+provided for interior, mid, and exterior surfaces. Below are overlays of  <code class="docutils literal notranslate"><span class="pre">mid-surface.mean-curv.mgh</span></code>
+and <code class="docutils literal notranslate"><span class="pre">mid-surface.gauss-curv.mgh</span></code> onto <code class="docutils literal notranslate"><span class="pre">mid-surface.vtk</span></code>.</p>
+<p><img alt="" src="../_images/mid_mean_curv.png" />
+<img alt="" src="../_images/mid_gauss_curv.png" /></p>
 </section>
 <section id="mapping-of-subfield-labels-and-other-volume-based-data-optional">
 <h3>10. Mapping of subfield labels (and other volume-based data, optional)<a class="headerlink" href="#mapping-of-subfield-labels-and-other-volume-based-data-optional" title="Permalink to this heading">#</a></h3>
@@ -570,13 +543,10 @@ paths are relative to the main output folder:</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.tetra.vtk</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.cut.vtk</span></code> files represent tetrahedral meshes
 and cannot be loaded in Freeview. However, triangular boundary meshes exist in
 the following subfolders: <code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.rm.bnd.tetra.vtk.vtk</span></code> in <code class="docutils literal notranslate"><span class="pre">tetra-labels</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.rm.open.bnd.cut.vtk</span></code> in <code class="docutils literal notranslate"><span class="pre">tetra-cut</span></code>.</p>
-<figure> 
-    <center>
-    <img src="images/ov1.png" width="400"/>    
-    <img src="images/ov2.png" width="400"/>
-    <figcaption>Overlays of segmentation, mask, surface, and mid-surface</figcaption> 
-</figure>   
+<code class="docutils literal notranslate"><span class="pre">&lt;lh|rh&gt;.rm.open.bnd.cut.vtk</span></code> in <code class="docutils literal notranslate"><span class="pre">tetra-cut</span></code>. Shown below are overlays of
+segmentation, mask, surface, and mid-surface.</p>
+<p><img alt="" src="../_images/ov1.png" />
+<img alt="" src="../_images/ov2.png" /></p>
 </section>
 </section>
 <section id="common-issues">
@@ -592,13 +562,11 @@ preprocessing. We recommend to try adjusting the width and threshold for the
 gaussian filter using the <code class="docutils literal notranslate"><span class="pre">--gauss-filter-size</span></code> argument, and optionally to
 employ additional smoothing along the longitudinal axis using the <code class="docutils literal notranslate"><span class="pre">--long-filter</span></code>
 flag (which can be fine-tuned using the <code class="docutils literal notranslate"><span class="pre">--long-filter-size</span></code> argument). It may
-also help to change the surface extraction algorithm using the <code class="docutils literal notranslate"><span class="pre">--mca</span></code> argument.</p>
-<figure> 
-    <center>
-    <img src="images/fig1.png" width="400"/>    
-    <img src="images/fig2.png" width="400"/>
-    <figcaption>Holes in the surface (left) and artificial connection between anatomically unconnected regions (right)</figcaption> 
-</figure>    
+also help to change the surface extraction algorithm using the <code class="docutils literal notranslate"><span class="pre">--mca</span></code> argument.
+The following images show holes in the surface and artificial connection between
+anatomically unconnected regions,</p>
+<p><img alt="" src="../_images/fig1.png" />
+<img alt="" src="../_images/fig2.png" /></p>
 <p>It will return an error message as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Euler</span> <span class="n">number</span> <span class="k">for</span> <span class="o">&lt;...&gt;/</span><span class="n">rh</span><span class="o">.</span><span class="n">surf</span><span class="o">.</span><span class="n">vtk</span> <span class="ow">is</span> <span class="mi">0</span>
 <span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Surface</span> <span class="n">contains</span> <span class="n">holes</span><span class="o">.</span> <span class="n">Please</span> <span class="n">edit</span> <span class="n">the</span> <span class="n">corresponding</span> <span class="n">hippocampal</span> <span class="n">segmentation</span> <span class="ow">and</span> <span class="n">re</span><span class="o">-</span><span class="n">run</span><span class="o">.</span>
@@ -613,13 +581,10 @@ also help to change the surface extraction algorithm using the <code class="docu
 <p>Another issue may arise with cutting the tetrahedral mesh: this can be due to a
 failure of the automated heuristics for head or tail detection. Or it can simply
 be due to unclean cutting at either end of the hippocampal body so that there
-are more than two boundary loops in total.</p>
-<figure> 
-    <center>
-    <img src="images/fig3.png" width="400"/>    
-    <img src="images/fig4.png" width="400"/>
-    <figcaption>Failure of automated head detection (left) and more than two boundary loops (right)</figcaption> 
-</figure>    
+are more than two boundary loops in total. The following images show failures of
+automated head detection and more than two boundary loops.</p>
+<p><img alt="" src="../_images/fig3.png" />
+<img alt="" src="../_images/fig4.png" /></p>
 <p>It will return an error message as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">There</span> <span class="n">are</span> <span class="mi">3</span> <span class="n">boundary</span> <span class="n">loops</span> <span class="k">for</span> <span class="o">&lt;...&gt;/</span><span class="n">tetra</span><span class="o">-</span><span class="n">cut</span><span class="o">/</span><span class="n">rh</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">open</span><span class="o">.</span><span class="n">bnd</span><span class="o">.</span><span class="n">cut</span><span class="o">.</span><span class="n">vtk</span>
 <span class="p">[</span><span class="n">INFO</span><span class="p">:</span> <span class="n">check_surface</span><span class="o">.</span><span class="n">py</span><span class="p">]</span> <span class="n">Surface</span> <span class="n">contains</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">contain</span> <span class="mi">2</span> <span class="n">boundary</span> <span class="n">loops</span><span class="o">.</span> <span class="n">Please</span> <span class="n">retry</span> <span class="k">with</span> <span class="n">different</span> <span class="n">cutting</span> <span class="n">parameters</span><span class="o">.</span>
