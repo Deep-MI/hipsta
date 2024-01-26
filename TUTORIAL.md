@@ -48,11 +48,7 @@ alternative size can be specified using the `--upsample-size` argument.
 The result of processing step 1 ('process image') will be the `<lh|rh>.image.mgz` 
 image in the main folder and the `image` subdirectory with intermediate results.
 
-<figure> 
-    <center>
-    <img src="images/image.png" width="400"/>
-    <figcaption>image.mgz</figcaption> 
-</figure> 
+![](images/scaled/image.png)
 
 ### 2. Label processing
 
@@ -72,11 +68,7 @@ used to add an extra margin (in terms of voxels along the longitudinal axis).
 The result of processing step 2 ('process mask') will be the `<lh|rh>.label.mgz` 
 image in the main folder and the `label` subdirectory with intermediate results.
 
-<figure> 
-    <center>
-    <img src="images/labels.png" width="400"/>
-    <figcaption>labels.mgz</figcaption> 
-</figure> 
+![](images/scaled/labels.png)
 
 ### 3. Mask processing
 
@@ -99,11 +91,7 @@ flag.
 The result of processing step 3 ('process mask') will be the `<lh|rh>.mask.mgz` 
 image in the main folder and the `mask` subdirectory with intermediate results.
 
-<figure> 
-    <center>
-    <img src="images/mask.png" width="400"/>
-    <figcaption>mask.mgz</figcaption> 
-</figure> 
+![](images/scaled/mask.png)
 
 ### 4. Surface creation
 
@@ -119,14 +107,11 @@ several QC plots will be created and placed in the `qc` subdirectory.
 
 The result of processing step 4 ('create surface') will be the `<lh|rh>.surf.vtk`
 surface in the main folder and the `surface` subdirectory with intermediate 
-results.
+results. The following images show `surf.vtk` overlaid onto `mask.mgz` and in a
+3D view.
 
-<figure> 
-    <center>
-    <img src="images/mask_w_surf.png" width="400"/>
-    <img src="images/surf.png" width="400"/>
-    <figcaption>surf.vtk overlaid onto mask.mgz (left) and in 3D view (right)</figcaption> 
-</figure> 
+![](images/scaled/mask_w_surf.png)
+![](images/scaled/surf.png)
 
 ### 5. Creation of a tetrahedral mesh
 
@@ -159,14 +144,10 @@ modified by the `--cut-range` argument. The default values are `-0.975, 0.975`.
 
 The result of processing step 7 ('cut open tetrahedral mesh') will be the `<lh|rh>.cut.vtk`
 mesh in the main folder and the `tetra-cut` subdirectory with intermediate 
-results.
+results. The following images show `rm.open.bnd.cut.vtk` in conjunction with `rm.bnd.cut.vtk`.
 
-<figure> 
-    <center>
-    <img src="images/surf_uncut.png" width="400"/>
-    <img src="images/surf_cut.png" width="400"/>
-    <figcaption>rm.open.bnd.cut.vtk in conjunction with rm.bnd.cut.vtk (left) and alone (right)</figcaption> 
-</figure> 
+![](images/scaled/surf_uncut.png)
+![](images/scaled/surf_cut.png)
 
 ### 8. Cube parametrization
 
@@ -199,28 +180,22 @@ The thickness values will also be stored as mgh and psol overlay files that
 can be overlaid onto the mid-surface vtk file. Similar files are also created 
 for the projected subfield boundaries.
 
-<figure> 
-    <center>
-    <img src="images/mid.png" width="400"/>
-    <img src="images/mid_tria.png" width="400"/>
-    <figcaption>mid-surface.vtk as a surface (left) and with additional triangulation overlay (right)</figcaption>
-</figure>     
-<figure> 
-    <center>
-    <img src="images/mid_thickness.png" width="400"/>
-    <img src="images/mid_hsf.png" width="400"/>
-    <figcaption>overlays of mid-surface.thickness.mgh (left) and mid-surface.hsf.mgh (right) onto mid-surface.vtk </figcaption>
-</figure> 
+The following images show `mid-surface.vtk` as a surface and with additional 
+triangulation overlay, and overlays of `mid-surface.thickness.mgh` and `mid-surface.hsf.mgh` 
+onto `mid-surface.vtk`.
+
+![](images/scaled/mid.png)
+![](images/scaled/mid_tria.png)
+
+![](images/scaled/mid_thickness.png)
+![](images/scaled/mid_hsf.png)
 
 Besides the thickness values, mean and gaussian curvature estimates are
-provided for interior, mid, and exterior surfaces:
+provided for interior, mid, and exterior surfaces. Below are overlays of  `mid-surface.mean-curv.mgh` 
+and `mid-surface.gauss-curv.mgh` onto `mid-surface.vtk`.
 
-<figure> 
-    <center>
-    <img src="images/mid_mean_curv.png" width="400"/>    
-    <img src="images/mid_gauss_curv.png" width="400"/>
-    <figcaption>overlays of mid-surface.mean-curv.mgh (left) and mid-surface.gauss-curv.mgh (right) onto mid-surface.vtk </figcaption> 
-</figure>     
+![](images/scaled/mid_mean_curv.png)
+![](images/scaled/mid_gauss_curv.png)
 
 ### 10. Mapping of subfield labels (and other volume-based data, optional)
 
@@ -361,14 +336,11 @@ freeview -v lh.image.mgz -v lh.mask.mgz -f lh.surf.vtk -f thickness/lh.mid-surfa
 The `<lh|rh>.tetra.vtk` and `<lh|rh>.cut.vtk` files represent tetrahedral meshes 
 and cannot be loaded in Freeview. However, triangular boundary meshes exist in 
 the following subfolders: `<lh|rh>.rm.bnd.tetra.vtk.vtk` in `tetra-labels`, and 
-`<lh|rh>.rm.open.bnd.cut.vtk` in `tetra-cut`.
+`<lh|rh>.rm.open.bnd.cut.vtk` in `tetra-cut`. Shown below are overlays of 
+segmentation, mask, surface, and mid-surface.
 
-<figure> 
-    <center>
-    <img src="images/ov1.png" width="400"/>    
-    <img src="images/ov2.png" width="400"/>
-    <figcaption>Overlays of segmentation, mask, surface, and mid-surface</figcaption> 
-</figure>   
+![](images/scaled/ov1.png)
+![](images/scaled/ov2.png)
 
 ### Common issues
 
@@ -385,13 +357,11 @@ gaussian filter using the `--gauss-filter-size` argument, and optionally to
 employ additional smoothing along the longitudinal axis using the `--long-filter` 
 flag (which can be fine-tuned using the `--long-filter-size` argument). It may 
 also help to change the surface extraction algorithm using the `--mca` argument.
+The following images show holes in the surface and artificial connection between
+anatomically unconnected regions,
 
-<figure> 
-    <center>
-    <img src="images/fig1.png" width="400"/>    
-    <img src="images/fig2.png" width="400"/>
-    <figcaption>Holes in the surface (left) and artificial connection between anatomically unconnected regions (right)</figcaption> 
-</figure>    
+![](images/scaled/fig1.png)
+![](images/scaled/fig2.png)
 
 It will return an error message as follows:
 
@@ -408,14 +378,11 @@ AssertionError: Check surface failed (stage: surface)
 Another issue may arise with cutting the tetrahedral mesh: this can be due to a 
 failure of the automated heuristics for head or tail detection. Or it can simply 
 be due to unclean cutting at either end of the hippocampal body so that there 
-are more than two boundary loops in total.
+are more than two boundary loops in total. The following images show failures of 
+automated head detection and more than two boundary loops.
 
-<figure> 
-    <center>
-    <img src="images/fig3.png" width="400"/>    
-    <img src="images/fig4.png" width="400"/>
-    <figcaption>Failure of automated head detection (left) and more than two boundary loops (right)</figcaption> 
-</figure>    
+![](images/scaled/fig3.png)
+![](images/scaled/fig4.png)
 
 It will return an error message as follows:
 
