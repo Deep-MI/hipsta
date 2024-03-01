@@ -40,7 +40,8 @@ Activate the virtual environment as follows:
 
 `source /path/to/a/new/directory/of/your/choice/bin/activate`
 
-The package is available on `pypi.org`, and can be installed as follows:
+The package is available on `pypi.org`, and can be installed as follows 
+(including all required dependencies):
 
 `pip install hipsta`
 
