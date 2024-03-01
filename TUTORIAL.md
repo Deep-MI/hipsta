@@ -347,7 +347,7 @@ segmentation, mask, surface, and mid-surface.
 Two types of issues are frequently observed: the presence of holes in the 
 surface after processing step 4 and cutting issues after step 7. The program 
 checks for the presence of these issues and will terminate if it detects them. 
-We outline two strategies to mitigate these issue below.
+We outline two strategies to mitigate these issues below.
 
 #### Holes in the surface
 
@@ -358,7 +358,7 @@ employ additional smoothing along the longitudinal axis using the `--long-filter
 flag (which can be fine-tuned using the `--long-filter-size` argument). It may 
 also help to change the surface extraction algorithm using the `--mca` argument.
 The following images show holes in the surface and artificial connection between
-anatomically unconnected regions,
+anatomically unconnected regions.
 
 ![](images/scaled/fig1.png)
 ![](images/scaled/fig2.png)
@@ -394,7 +394,8 @@ It will return an error message as follows:
 AssertionError: Check surface failed (stage: boundaries)
 ```
 
-This issue can potentially be solved with more conservative margins for the head 
+If hipsta is run using the `--automask-head` or `--automask-tail` arguments,
+this issue can potentially be solved with more conservative margins for the head
 or tail boundaries, which can be set using the `--automask-head-margin` and
 `--automask-tail-margin` arguments. By default they are set to zero, and one 
 could try to gradually increase them.

@@ -1,4 +1,4 @@
-# HIPpocampal Shape and Thickness Analysis - HIPSTA
+# Hippocampal Shape and Thickness Analysis
 
 
 ## Purpose:
@@ -40,19 +40,22 @@ Activate the virtual environment as follows:
 
 `source /path/to/a/new/directory/of/your/choice/bin/activate`
 
-Use the following code to download this package from its GitHub repository (this 
-will create a 'Hipsta' directory within the current working directory):
+The package is available on `pypi.org`, and can be installed as follows:
+
+`pip install hipsta`
+
+Alternatively, the following code can be used to download this package from its
+GitHub repository (this will create a 'Hipsta' directory within the current
+working directory):
 
 `git clone https://github.com/Deep-MI/Hipsta.git`
 
-The next step is to install hipsta as a python package (after changing into the 
-'Hipsta' directory). This will automatically install all required dependencies:
+
+Use the following code to install the downloaded files as a Python packge (after
+changing into the 'Hipsta' directory). It will also install all required
+dependencies:
 
 `pip install .`
-
-As soon as the package is available on `pypi.org`, it will also be installable directly and downloading from GitHub is not necessary in this case:
-
-`pip install hipsta`
 
 The above steps are not necessary when running the [Docker](docker/Docker.md) or
 [Singularity](singularity/Singularity.md) versions of the package.
