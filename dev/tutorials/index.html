@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Changes" href="../changes/index.html" /><link rel="prev" title="Documentation" href="../documentation/index.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.09.10 -->
+    <!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
         <title>Tutorial - Hipsta</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -554,7 +554,7 @@ segmentation, mask, surface, and mid-surface.</p>
 <p>Two types of issues are frequently observed: the presence of holes in the
 surface after processing step 4 and cutting issues after step 7. The program
 checks for the presence of these issues and will terminate if it detects them.
-We outline two strategies to mitigate these issue below.</p>
+We outline two strategies to mitigate these issues below.</p>
 <section id="holes-in-the-surface">
 <h4>Holes in the surface<a class="headerlink" href="#holes-in-the-surface" title="Permalink to this heading">#</a></h4>
 <p>Holes in the surfaces can be the result of less than optimal image
@@ -564,7 +564,7 @@ employ additional smoothing along the longitudinal axis using the <code class="d
 flag (which can be fine-tuned using the <code class="docutils literal notranslate"><span class="pre">--long-filter-size</span></code> argument). It may
 also help to change the surface extraction algorithm using the <code class="docutils literal notranslate"><span class="pre">--mca</span></code> argument.
 The following images show holes in the surface and artificial connection between
-anatomically unconnected regions,</p>
+anatomically unconnected regions.</p>
 <p><img alt="" src="../_images/fig1.png" />
 <img alt="" src="../_images/fig2.png" /></p>
 <p>It will return an error message as follows:</p>
@@ -593,7 +593,8 @@ automated head detection and more than two boundary loops.</p>
 <span class="ne">AssertionError</span><span class="p">:</span> <span class="n">Check</span> <span class="n">surface</span> <span class="n">failed</span> <span class="p">(</span><span class="n">stage</span><span class="p">:</span> <span class="n">boundaries</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This issue can potentially be solved with more conservative margins for the head
+<p>If hipsta is run using the <code class="docutils literal notranslate"><span class="pre">--automask-head</span></code> or <code class="docutils literal notranslate"><span class="pre">--automask-tail</span></code> arguments,
+this issue can potentially be solved with more conservative margins for the head
 or tail boundaries, which can be set using the <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code> and
 <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code> arguments. By default they are set to zero, and one
 could try to gradually increase them.</p>
