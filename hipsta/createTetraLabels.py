@@ -3,7 +3,6 @@ This module provides a function to create a label files for a tetrahedral mesh
 
 """
 
-
 import os
 import subprocess
 
