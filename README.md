@@ -40,7 +40,8 @@ Activate the virtual environment as follows:
 
 `source /path/to/a/new/directory/of/your/choice/bin/activate`
 
-The package is available on `pypi.org`, and can be installed as follows:
+The package is available on `pypi.org`, and can be installed as follows 
+(including all required dependencies):
 
 `pip install hipsta`
 
@@ -51,8 +52,8 @@ working directory):
 `git clone https://github.com/Deep-MI/Hipsta.git`
 
 
-Use the following code to install the downloaded files as a Python packge (after
-changing into the 'Hipsta' directory). It will also install all required
+Use the following code to install the downloaded files as a Python package
+(after changing into the 'Hipsta' directory). It will also install all required
 dependencies:
 
 `pip install .`

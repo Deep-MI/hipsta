@@ -676,8 +676,8 @@ def computeCubeParam(params):
     # post-process eigenfunction (order, flipping)
 
     # decide whether or not to flip anisoLaplEvec[:, 1] and anisoLaplEvec[:, 2]:
-    # anisoLaplEvec[:, 1] should be zero at the extrema of 234 and 240.
-    # anisoLaplEvec[:, 2] should have extremal values at 234 and 240.
+    # - anisoLaplEvec[:, 1] should be zero at the extrema of 234 and 240.
+    # - anisoLaplEvec[:, 2] should have extremal values at 234 and 240.
     # We therefore check if the zeros of Evec1 are located in 234 or 240/2420
     # rather than 236 or 238. If not, we change order.
 
@@ -688,32 +688,62 @@ def computeCubeParam(params):
     e4cBndOpen = np.concatenate((t4cBndOpen[:, (0, 1)], t4cBndOpen[:, (0, 2)], t4cBndOpen[:, (1, 2)]), axis=0)
     e4cBndOpen = np.unique(np.sort(e4cBndOpen, axis=1), axis=1)
     zeroEdgeIdx = e4cBndOpen[np.where(np.abs(np.sum(np.sign(vfuncXEv1[e4cBndOpen]), axis=1)) == 0)[0]]
-    zeroVtxIdx = np.unique(zeroEdgeIdx)
 
     # decide whether or not to flip anisoLaplEvec[:, 1]  (should be inf -> sup)
 
-    # check EV1 for flips; this is done indirectly: we get the locations
-    # of highest and lowest values in 234 (PrSbc); highest values should have a
-    # higher value on the z-axis than lower values; note: could do the same
-    #  (i.e., reverse) for 240 as well
+    # check EV1 for flips; this is done indirectly: we get the locations of
+    # highest and lowest values in 234 (PrSbc) or 236 (Sbc); highest values
+    # should have a higher value on the z-axis than lower values.
 
     if np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] > 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ) > np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] < 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ):
         pass
     elif np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] > 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ) < np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["presubiculum"]))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] < 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ):
         LOGGER.info("Flipping EV1")
@@ -726,29 +756,31 @@ def computeCubeParam(params):
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
 
     if (
-        np.median(anisoLaplEvec[np.where(k4c[hsfList] == params.LUTDICT["presubiculum"])[0], 2]) < 0
-        and np.median(
+        np.median(
             anisoLaplEvec[
                 np.where(
-                    np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"])
-                )[0],
-                2,
-            ]
-        )
-        > 0
-    ):
-        pass
-    elif (
-        np.median(anisoLaplEvec[np.where(k4c[hsfList] == params.LUTDICT["presubiculum"])[0], 2]) > 0
-        and np.median(
-            anisoLaplEvec[
-                np.where(
-                    np.logical_or(k4c[hsfList] == params.LUTDICT["ca3"], k4c[hsfList] == params.LUTDICT["bndca4"])
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    )
                 )[0],
                 2,
             ]
         )
         < 0
+    ):
+        pass
+    elif (
+        np.median(
+            anisoLaplEvec[
+                np.where(
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    )
+                )[0],
+                2,
+            ]
+        )
+        > 0
     ):
         LOGGER.info("Flipping EV2")
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
