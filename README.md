@@ -52,8 +52,8 @@ working directory):
 `git clone https://github.com/Deep-MI/Hipsta.git`
 
 
-Use the following code to install the downloaded files as a Python packge (after
-changing into the 'Hipsta' directory). It will also install all required
+Use the following code to install the downloaded files as a Python package
+(after changing into the 'Hipsta' directory). It will also install all required
 dependencies:
 
 `pip install .`
