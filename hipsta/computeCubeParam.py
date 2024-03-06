@@ -697,21 +697,53 @@ def computeCubeParam(params):
 
     if np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"])))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] > 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ) > np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"])))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] < 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ):
         pass
     elif np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"])))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] > 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ) < np.median(
         v4cBndOpenRm[
-            np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"])))[0], 2
+            np.where(
+                np.logical_and(
+                    anisoLaplEvec[:, 1] < 0,
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    ),
+                )
+            )[0],
+            2,
         ]
     ):
         LOGGER.info("Flipping EV1")
@@ -724,11 +756,31 @@ def computeCubeParam(params):
     # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
 
     if (
-        np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]))[0], 2]) < 0
+        np.median(
+            anisoLaplEvec[
+                np.where(
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    )
+                )[0],
+                2,
+            ]
+        )
+        < 0
     ):
         pass
     elif (
-        np.median(anisoLaplEvec[np.where(np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]))[0], 2]) > 0
+        np.median(
+            anisoLaplEvec[
+                np.where(
+                    np.logical_or(
+                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
+                    )
+                )[0],
+                2,
+            ]
+        )
+        > 0
     ):
         LOGGER.info("Flipping EV2")
         anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
