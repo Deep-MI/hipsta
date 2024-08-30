@@ -11,7 +11,8 @@ import numpy as np
 from lapy import Solver, TetMesh, TriaMesh, io
 from scipy import sparse as sp
 from scipy import stats as st
-from sklearn.decomposition import PCA
+
+# from sklearn.decomposition import PCA
 
 # ==============================================================================
 # LOGGING
@@ -388,7 +389,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             and len(np.intersect1d(numEdgeBnd, numEdgeCross)) == 1
             and len(np.intersect1d(numTriaBnd, numTriaCross)) == 0
         ):
-            # surface edges: 2, surface trias: 0, pos/neg edges: 3, pos/neg trias: 3, pos/neg surface edges: 1, pos/neg surface trias: 0
+            # surface edges: 2, surface trias: 0, pos/neg edges: 3, pos/neg trias: 3,
+            # pos/neg surface edges: 1, pos/neg surface trias: 0
             # should be case 2: two nans in tetra, due to only one single pos/neg surface edge
             # now find which edge is on the surface, and set the other points
             # temporarily to nan
@@ -415,7 +417,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             and len(np.intersect1d(numEdgeBnd, numEdgeCross)) == 2
             and len(np.intersect1d(numTriaBnd, numTriaCross)) == 1
         ):
-            # surface edges: 3, surface trias: 1, pos/neg edges: 3, pos/neg trias: 3, pos/neg surface edges: 2, pos/neg surface trias: 1
+            # surface edges: 3, surface trias: 1, pos/neg edges: 3, pos/neg trias: 3,
+            # pos/neg surface edges: 2, pos/neg surface trias: 1
             # should be case 1: one nan in tetra, due to one single surface tria
             # now find which tria is on the surface, and set the remaining vtx
             # temporarily to nan
@@ -440,7 +443,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             and len(np.intersect1d(numEdgeBnd, numEdgeCross)) == 2
             and len(np.intersect1d(numTriaBnd, numTriaCross)) == 1
         ):
-            # surface edges: 3, surface trias: 1, pos/neg edges: 4, pos/neg trias: 4, pos/neg surface edges: 2, pos/neg surface trias: 1
+            # surface edges: 3, surface trias: 1, pos/neg edges: 4, pos/neg trias: 4,
+            # pos/neg surface edges: 2, pos/neg surface trias: 1
             # should be case 1: one nan in tetra, due to one single surface tria
             # now find which tria is on the surface, and set the remaining vtx
             # temporarily to nan - essentially the same case as above, but kept
@@ -514,7 +518,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             # we can typically have one or two nans in the tetra. we may
             # sometimes have zero nans in the tetra.
             if np.sum(np.isnan(vfuncXEv1[t4c[i]])) == 1:
-                # if there is one nan, we need to make sure that the three vtcs form a surface triangle; alternatively we check if it is at least a surface edge
+                # if there is one nan, we need to make sure that the three vtcs form a surface triangle;
+                # alternatively we check if it is at least a surface edge
                 if np.isin(t4cBndOpen, t4c[i, np.logical_not(np.isnan(vfuncXEv1[t4c[i]]))]).all(axis=1).any():
                     v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase1(
                         v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
@@ -543,7 +548,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     raise RuntimeError("Vtx " + str(i) + " not in triangle or edge, skipping")
 
             elif np.sum(np.isnan(vfuncXEv1[t4c[i]])) == 2:
-                # if there are two nans, we need to make sure that they are linked by a surface edge; this should have happenend already.
+                # if there are two nans, we need to make sure that they are linked by a surface edge;
+                # this should have happened already.
                 tmpEdge = (
                     np.isin(e4cBndOpen, t4c[i, (0, 1)]).all(axis=1).any(),
                     np.isin(e4cBndOpen, t4c[i, (0, 2)]).all(axis=1).any(),
@@ -637,7 +643,7 @@ def computeCubeParam(params):
 
     triaMesh4cBndOpen = TriaMesh.read_vtk(openBndCutTetraMeshFile)
 
-    v4cBndOpen = triaMesh4cBndOpen.v
+    # v4cBndOpen = triaMesh4cBndOpen.v
     t4cBndOpen = triaMesh4cBndOpen.t
 
     # remove free vertices and orient
@@ -649,7 +655,7 @@ def computeCubeParam(params):
     triaMesh4cBndOpenRm.orient_()
 
     v4cBndOpenRm = triaMesh4cBndOpenRm.v
-    t4cBndOpenRm = triaMesh4cBndOpenRm.t
+    # t4cBndOpenRm = triaMesh4cBndOpenRm.t
 
     # --------------------------------------------------------------------------
     # compute anisotropic laplace
@@ -663,7 +669,7 @@ def computeCubeParam(params):
     # --------------------------------------------------------------------------
     # get mapping of open boundary vertices to subfields
 
-    with open(os.path.join(os.path.dirname(openBndCutTetraMeshFile), params.HEMI + ".rm.open.bnd.cut.lst"), "r") as f:
+    with open(os.path.join(os.path.dirname(openBndCutTetraMeshFile), params.HEMI + ".rm.open.bnd.cut.lst")) as f:
         hsfList = f.read().splitlines()
 
     hsfList = np.array(hsfList).astype(int)
@@ -687,7 +693,7 @@ def computeCubeParam(params):
     # get edges that contain zeros, and turn into list of vertices
     e4cBndOpen = np.concatenate((t4cBndOpen[:, (0, 1)], t4cBndOpen[:, (0, 2)], t4cBndOpen[:, (1, 2)]), axis=0)
     e4cBndOpen = np.unique(np.sort(e4cBndOpen, axis=1), axis=1)
-    zeroEdgeIdx = e4cBndOpen[np.where(np.abs(np.sum(np.sign(vfuncXEv1[e4cBndOpen]), axis=1)) == 0)[0]]
+    # zeroEdgeIdx = e4cBndOpen[np.where(np.abs(np.sum(np.sign(vfuncXEv1[e4cBndOpen]), axis=1)) == 0)[0]]
 
     # decide whether or not to flip anisoLaplEvec[:, 1]  (should be inf -> sup)
 
@@ -805,8 +811,8 @@ def computeCubeParam(params):
     # possibly be switched below; note that this replaces EV2-based newVtcsSgn,
     # which we may remove in the future
 
-    pca = PCA(n_components=3)
-    pca_scores = pca.fit_transform(v4c)
+    # pca = PCA(n_components=3)
+    # pca_scores = pca.fit_transform(v4c)
 
     # x: medial -> lateral
 
@@ -915,8 +921,8 @@ def computeCubeParam(params):
 
     v4cRmBndRmKeep, v4cRmBndRmDel = tetMesh4cRmBnd.rm_free_vertices_()
 
-    v4cRmBndRm = tetMesh4cRmBnd.v
-    t4cRmBndRm = tetMesh4cRmBnd.t
+    # v4cRmBndRm = tetMesh4cRmBnd.v
+    # t4cRmBndRm = tetMesh4cRmBnd.t
 
     TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
