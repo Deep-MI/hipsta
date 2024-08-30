@@ -549,7 +549,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 
             elif np.sum(np.isnan(vfuncXEv1[t4c[i]])) == 2:
                 # if there are two nans, we need to make sure that they are linked by a surface edge;
-                # this should have happenend already.
+                # this should have happened already.
                 tmpEdge = (
                     np.isin(e4cBndOpen, t4c[i, (0, 1)]).all(axis=1).any(),
                     np.isin(e4cBndOpen, t4c[i, (0, 2)]).all(axis=1).any(),
