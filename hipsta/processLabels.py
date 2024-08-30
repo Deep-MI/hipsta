@@ -56,22 +56,22 @@ def autoMask(params):
         labelCA1 = params.LUTDICT["ca1"]
         labelCA2 = params.LUTDICT["ca2"]
         labelCA3 = params.LUTDICT["ca3"]
-        if "parahippocampal" in params.LUTDICT.keys():
-            labelPHC = params.LUTDICT["parahippocampal"]
-        else:
-            labelPHC = None
-        if "entorhinal" in params.LUTDICT.keys():
-            labelENT = params.LUTDICT["entorhinal"]
-        else:
-            labelENT = None
-        if "ba35" in params.LUTDICT.keys():
-            labelBA35 = params.LUTDICT["ba35"]
-        else:
-            labelBA35 = None
-        if "ba36" in params.LUTDICT.keys():
-            labelBA36 = params.LUTDICT["ba36"]
-        else:
-            labelBA36 = None
+        # if "parahippocampal" in params.LUTDICT.keys():
+        #     labelPHC = params.LUTDICT["parahippocampal"]
+        # else:
+        #     labelPHC = None
+        # if "entorhinal" in params.LUTDICT.keys():
+        #     labelENT = params.LUTDICT["entorhinal"]
+        # else:
+        #    labelENT = None
+        # if "ba35" in params.LUTDICT.keys():
+        #     labelBA35 = params.LUTDICT["ba35"]
+        # else:
+        #     labelBA35 = None
+        # if "ba36" in params.LUTDICT.keys():
+        #     labelBA36 = params.LUTDICT["ba36"]
+        # else:
+        #    labelBA36 = None
 
         # head
         if params.internal.AUTOMASK_HEAD is True:
@@ -268,20 +268,20 @@ def mergeMolecularLayer(params):
                 # break if iterations are exceeded or if coordinate is below zero or equal / above image dims
                 if (
                     n > 10
-                    or (int((vxML[i, 0] - n)) < 0)
-                    or (int((vxML[i, 0] + n)) > (vx.shape[0] - 1))
-                    or (int((vxML[i, 1] - n)) < 0)
-                    or (int((vxML[i, 1] + n)) > (vx.shape[1] - 1))
-                    or (int((vxML[i, 2] - n)) < 0)
-                    or (int((vxML[i, 2] + n)) > (vx.shape[2] - 1))
+                    or (int(vxML[i, 0] - n) < 0)
+                    or (int(vxML[i, 0] + n) > (vx.shape[0] - 1))
+                    or (int(vxML[i, 1] - n) < 0)
+                    or (int(vxML[i, 1] + n) > (vx.shape[1] - 1))
+                    or (int(vxML[i, 2] - n) < 0)
+                    or (int(vxML[i, 2] + n) > (vx.shape[2] - 1))
                 ):
                     vxML[i, 3] = 0
                     break
                 tmp = vx[
                     np.ix_(
-                        range(int((vxML[i, 0] - n)), int((vxML[i, 0] + n) + 1)),
-                        range(int((vxML[i, 1] - n)), int((vxML[i, 1] + n) + 1)),
-                        range(int((vxML[i, 2] - n)), int((vxML[i, 2] + n) + 1)),
+                        range(int(vxML[i, 0] - n), int((vxML[i, 0] + n) + 1)),
+                        range(int(vxML[i, 1] - n), int((vxML[i, 1] + n) + 1)),
+                        range(int(vxML[i, 2] - n), int((vxML[i, 2] + n) + 1)),
                     )
                 ]
                 tmpML = np.transpose(np.where((tmp != 0) & (tmp != 246) & (tmp != 245) & (tmp != 214)))

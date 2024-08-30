@@ -59,7 +59,7 @@ def removeBoundaryMask(params):
     # support vectors (move a little bit inwards, direction may differ); first,
     # determine if the richtungsvektor is pointing towards the center:
 
-    if np.linalg.norm((np.mean(tetMesh.v, axis=0) - np.mean(vHead, axis=0))) > np.linalg.norm(
+    if np.linalg.norm(np.mean(tetMesh.v, axis=0) - np.mean(vHead, axis=0)) > np.linalg.norm(
         np.mean(tetMesh.v, axis=0) - (np.mean(vHead, axis=0) + vHeadc[:, 2])
     ):  # yes
         sHead = np.mean(vHead, axis=0) + 1.0 * vHeadc[:, 2]
@@ -88,7 +88,7 @@ def removeBoundaryMask(params):
     # support vectors (move a little bit inwards, direction may differ); first,
     # determine if the richtungsvektor is pointing towards the center:
 
-    if np.linalg.norm((np.mean(tetMesh.v, axis=0) - np.mean(vTail, axis=0))) > np.linalg.norm(
+    if np.linalg.norm(np.mean(tetMesh.v, axis=0) - np.mean(vTail, axis=0)) > np.linalg.norm(
         np.mean(tetMesh.v, axis=0) - (np.mean(vTail, axis=0) + vTailc[:, 2])
     ):
         sTail = np.mean(vTail, axis=0) + 1.0 * vTailc[:, 2]  # yes
@@ -116,28 +116,28 @@ def removeBoundaryMask(params):
     # remove triangles that contain 2 or 3 or 4 points
 
     if dirHead & dirTail:
-        tcut = tetMesh.t[
-            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0) | (dHead <= 0))), tetMesh.t.shape), axis=1) < 2,
-            :,
-        ]
+        # tcut = tetMesh.t[
+        #   np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0) | (dHead <= 0))), tetMesh.t.shape), axis=1) < 2,
+        #    :,
+        # ]
         vcutIdxTail = np.where(dTail <= 0)[0]
         vcutIdxHead = np.where(dHead <= 0)[0]
     elif (not (dirHead)) & dirTail:
-        tcut = tetMesh.t[
-            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0) | (dHead > 0))), tetMesh.t.shape), axis=1) < 2, :
-        ]
+        # tcut = tetMesh.t[
+        #   np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail <= 0) | (dHead > 0))), tetMesh.t.shape), axis=1) < 2, :
+        # ]
         vcutIdxTail = np.where(dTail <= 0)[0]
         vcutIdxHead = np.where(dHead > 0)[0]
     elif dirHead & (not (dirTail)):
-        tcut = tetMesh.t[
-            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail > 0) | (dHead <= 0))), tetMesh.t.shape), axis=1) < 2, :
-        ]
+        # tcut = tetMesh.t[
+        #   np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail > 0) | (dHead <= 0))), tetMesh.t.shape), axis=1) < 2, :
+        # ]
         vcutIdxTail = np.where(dTail > 0)[0]
         vcutIdxHead = np.where(dHead <= 0)[0]
     elif (not (dirHead)) & (not (dirTail)):
-        tcut = tetMesh.t[
-            np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail > 0) | (dHead > 0))), tetMesh.t.shape), axis=1) < 2, :
-        ]
+        # tcut = tetMesh.t[
+        #   np.sum(np.reshape(np.in1d(tetMesh.t, np.where((dTail > 0) | (dHead > 0))), tetMesh.t.shape), axis=1) < 2, :
+        # ]
         vcutIdxTail = np.where(dTail > 0)[0]
         vcutIdxHead = np.where(dHead > 0)[0]
 

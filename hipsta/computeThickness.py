@@ -56,7 +56,7 @@ def computeThickness(params):
     tetMeshUVW = TetMesh.read_vtk(IN_FUNC)
 
     p4 = tetMeshUVW.v
-    q4 = tetMeshUVW.t
+    # q4 = tetMeshUVW.t
 
     # determine levels
 
@@ -486,9 +486,9 @@ def computeThickness(params):
 
     #
 
-    cMin = origV4flat[:, 0:3]
+    # cMin = origV4flat[:, 0:3]
     cMid = origV4flat[:, 0:3]
-    cMax = origV4flat[:, 0:3]
+    # cMax = origV4flat[:, 0:3]
 
     triaMin = TriaMesh(vMin, tMin)
     triaMid = TriaMesh(vMid, tMid)

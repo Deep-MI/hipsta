@@ -67,10 +67,6 @@ def _check_environment_and_packages():
     if os.environ.get("FREESURFER_HOME") is None:
         raise RuntimeError("Need to set the FreeSurfer_HOME environment variable")
 
-    # check python version
-    if sys.version_info <= (3, 5):
-        raise RuntimeError("Python version must be 3.5 or greater")
-
     # check for gmsh
     if shutil.which("gmsh") is None:
         raise RuntimeError("Could not find a 'gmsh' executable")
@@ -124,7 +120,8 @@ def _parse_arguments():
 
     # setup parser
     parser = argparse.ArgumentParser(
-        description="This program conducts a thickness analysis of the hippocampus, based on a FreeSurfer, ASHS, or custom hippocampal subfield segmentation.",
+        description="This program conducts a thickness analysis of the hippocampus, based on a FreeSurfer, ASHS, \
+                     or custom hippocampal subfield segmentation.",
         add_help=False,
     )
 
@@ -145,7 +142,8 @@ def _parse_arguments():
     required.add_argument(
         "--lut",
         dest="lut",
-        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', 'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.",
+        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', \
+              'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.",
         default=None,
         metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>",
         required=False,
@@ -165,7 +163,8 @@ def _parse_arguments():
     optional.add_argument(
         "--no-cleanup",
         dest="no_cleanup",
-        help="Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.",
+        help="Do not remove files that may be useful for diagnostic or debugging purposes, \
+              but are not necessary otherwise.",
         default=get_defaults("no_cleanup"),
         action="store_true",
         required=False,
@@ -189,7 +188,8 @@ def _parse_arguments():
     optional.add_argument(
         "--upsample-size",
         dest="upsample_size",
-        help="Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. Default: 0 0 0",
+        help="Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. \
+              Default: 0 0 0",
         default=get_defaults("upsample_size"),
         metavar="<float>",
         nargs=3,
@@ -338,7 +338,9 @@ def _parse_arguments():
     optional.add_argument(
         "--thickness-grid",
         dest="thickness_grid",
-        help="Extent and resolution of the grid used for thickness computation; three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: -0.9 0.9 41 -0.975 0.975 21 -0.9 0.9 11",
+        help="Extent and resolution of the grid used for thickness computation; three lists of three numbers: \
+              negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. \
+              Default: -0.9 0.9 41 -0.975 0.975 21 -0.9 0.9 11",
         default=get_defaults("thickness_grid"),
         metavar="<float>",
         nargs=9,
@@ -366,7 +368,7 @@ def _parse_arguments():
         metavar="<int>",
         required=False,
         type=int,
-    )  # help="Target number of vertices for remeshing operation. If zero, keep original number of vertices. Default: 0",
+    )  # help="Target number of vertices for remeshing. If zero, keep original number of vertices. Default: 0",
     expert.add_argument(
         "--no-check-surface",
         dest="no_check_surface",
@@ -670,7 +672,8 @@ def _check_params(params):
         and not os.path.isfile(params.LUT)
     ):
         raise RuntimeError(
-            "Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', or an existing file, but not "
+            "Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', \
+             or an existing file, but not "
             + params.LUT
         )
 
@@ -863,18 +866,21 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     hemi :
         Hemisphere. Either \'lh\' or \'rh\'.
     lut :
-        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2' and \'ashs-umcutrecht_7t\' are keywords for built-in tables.
-    outputdir
+        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2'
+        and \'ashs-umcutrecht_7t\' are keywords for built-in tables.
+    outputdir :
         Directory where the results will be written.
 
     no_cleanup : optional
-        Keep files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise. Default: False
+        Keep files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.
+        Default: False
     no_crop : optional
         Do not crop image. Default: False.
     upsample : optional
         Upsample to the smallest voxel edge length. Default: False
     upsample_size : optional
-        Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length. Default: [0, 0, 0]
+        Upsampling factors. Should be between 0 and 1. If all zeros, upsample to the smallest voxel edge length.
+        Default: [0, 0, 0]
     no_merge_molecular_layer : optional
         Do not merge molecular layer (only applicable for FreeSurfer segmentations). Default: False
     automask_head : optional
@@ -908,8 +914,9 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     aniso_smooth : optional
         Anisotropy smoothing iterations parameter. Default: 3
     thickness_grid : optional
-        Extent and resolution of the grid used for thickness computation; three lists of three numbers: negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes. Default: [ -0.9, 0.9, 41, -0.975, 0.975, 21, -0.9, 0.9, 11]
-
+        Extent and resolution of the grid used for thickness computation; three lists of three numbers:
+        negative extent of x axis, positive extent of x axis, resolution on x axis. Repeat for the y and z axes.
+        Default: [ -0.9, 0.9, 41, -0.975, 0.975, 21, -0.9, 0.9, 11]
     mcc : optional
         Marching-cube connectivity. Only used for \'mri_mc\' algorithm. Default: 1
     remesh_size : optional
@@ -920,11 +927,10 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
         Do not check boundaries and proceed if there are less / more than two continuous boundary loops. Default: False
     no_qc : optional
         Do not perform QC. Default: False
-    allow_ragged_surfaces
+    allow_ragged_surfaces :
         Allow ragged mid-surfaces. Default: False
-    allow_ragged_trias
+    allow_ragged_trias :
         Allow triangles for ragged mid-surfaces. Default: False
-
     no_orient : optional
         Do not orient surfaces. Default: False
 

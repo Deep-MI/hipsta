@@ -24,24 +24,24 @@ def _createSTL(filename, v, t):
 
     """
 
-    import numpy as np
-
     with open(filename, "w") as f:
         print("solid lap-data", file=f)
 
         for i in range(0, len(t)):
-            v1mv0 = v[t[i, 1], :] - v[t[i, 0], :]
-            v2mv0 = v[t[i, 2], :] - v[t[i, 0], :]
-
-            normal = np.cross(v1mv0, v2mv0) / np.linalg.norm(np.cross(v1mv0, v2mv0))
+            # v1mv0 = v[t[i, 1], :] - v[t[i, 0], :]
+            # v2mv0 = v[t[i, 2], :] - v[t[i, 0], :]
+            # normal = np.cross(v1mv0, v2mv0) / np.linalg.norm(np.cross(v1mv0, v2mv0))
 
             print("  facet normal", file=f)
 
             print("    outer loop", file=f)
 
-            print("      vertex %f %f %f " % (v[t[i, 0], 0], v[t[i, 0], 1], v[t[i, 0], 2]), file=f)
-            print("      vertex %f %f %f " % (v[t[i, 1], 0], v[t[i, 1], 1], v[t[i, 1], 2]), file=f)
-            print("      vertex %f %f %f " % (v[t[i, 2], 0], v[t[i, 2], 1], v[t[i, 2], 2]), file=f)
+            # print("      vertex %f %f %f " % (v[t[i, 0], 0], v[t[i, 0], 1], v[t[i, 0], 2]), file=f)
+            print(f"      vertex {v[t[i, 0], 0]:f} {v[t[i, 0], 1]:f} {v[t[i, 0], 2]:f} ", file=f)
+            # print("      vertex %f %f %f " % (v[t[i, 1], 0], v[t[i, 1], 1], v[t[i, 1], 2]), file=f)
+            print(f"      vertex {v[t[i, 1], 0]:f} {v[t[i, 1], 1]:f} {v[t[i, 1], 2]:f} ", file=f)
+            # print("      vertex %f %f %f " % (v[t[i, 2], 0], v[t[i, 2], 1], v[t[i, 2], 2]), file=f)
+            print(f"      vertex {v[t[i, 2], 0]:f} {v[t[i, 2], 1]:f} {v[t[i, 2], 2]:f} ", file=f)
 
             print("    endloop", file=f)
 

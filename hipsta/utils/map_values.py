@@ -142,7 +142,7 @@ def _parse_arguments():
     h_IN_SUFFIX = "suffix for output files"
     h_writePSOL = "write out PSOL files"
     h_writeMGH = "write out MGH files"
-    h_writeANNOT = "write out ANNOT files"
+    # h_writeANNOT = "write out ANNOT files"
     h_integrate = "write out integrated values (default: none)"
     h_select = "select inegration points (default: all)"
     h_interp = "type of interpolation (cubic or nearest; default: nearest)"
@@ -365,7 +365,7 @@ def mapValues(
 
         writePSOL = params.internal.mapValuesWritePSOL
         writeMGH = params.internal.mapValuesWriteMGH
-        writeANNOT = params.internal.mapValuesWriteANNOT
+        # writeANNOT = params.internal.mapValuesWriteANNOT
         INTEGRATE = params.internal.mapValuesIntegrate
         SELECT = params.internal.mapValuesSelect
         INTERP = params.internal.mapValuesInterp
@@ -434,11 +434,11 @@ def mapValues(
     # get data
     mat = vol.header.get_vox2ras_tkr()
     dat = vol.get_fdata()
-    ind = np.array(np.nonzero(dat)).transpose()
 
     # variant 1: do it in surface RAS space (disadvantage: need to do distance
     # computation for many unnecessary values)
     # from scipy import spatial as sp
+    # ind = np.array(np.nonzero(dat)).transpose()
     # coordXYZ = np.concatenate((ind, np.ones((len(ind), 1))), axis=1)
     # coordSurfRAS = np.matmul(coordXYZ, mat.transpose())[:, 0:3]
     # dst = sp.distance_matrix(surf.v, coordSurfRAS)
@@ -528,9 +528,10 @@ def mapValues(
                 filename=OUT_MGH,
             )
 
-    if writeANNOT is True:
-        OUT_ANNOT = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".annot")
-        # ctab = np.array([(63,63,63,255,0), (255,0,0,255,234), (0,255,0,255,236), (0,0,255,255,238), (255,255,0,255,240), (255,255,0,255,246)])
+    # if writeANNOT is True:
+        # OUT_ANNOT = IN_SURF.replace(".vtk", "." + IN_SUFFIX + ".annot")
+        # ctab = np.array([(63,63,63,255,0), (255,0,0,255,234), (0,255,0,255,236), (0,0,255,255,238), \
+        #                  (255,255,0,255,240), (255,255,0,255,246)])
         # names = ['Void', 'PrSbc', 'Sbc', 'CA1', 'CA2/3', 'ML']
         # labels = np.zeros(len(lookup))
         # labels[lookup==234] = 1
