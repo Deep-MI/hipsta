@@ -61,7 +61,7 @@ def get_atlases(lut):
             "tail",
         ]
 
-        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
+        LUTINDEX = [1, 2, 4, 3, 3, 6, 8, 8, 10, 11, 12, 13, 5, 6]
 
         LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
 
@@ -100,8 +100,7 @@ def get_atlases(lut):
             header=None,
             skipinitialspace=True,
             skip_blank_lines=True,
-            error_bad_lines=False,
-            warn_bad_lines=True,
+            on_bad_lines='warn',
         )
 
         LUTDICT = dict(zip(lut[0], lut[1]))
