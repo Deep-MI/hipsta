@@ -161,6 +161,16 @@ def _parse_arguments():
     optional = parser.add_argument_group("Optional arguments")
 
     optional.add_argument(
+        "--start-with-edited-labels",
+        dest="start_with_edited_labels",
+        help="Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz \
+               file in an existing output directory. Existing files will be overwritten.",
+        default=get_defaults("start_with_edited_labels"),
+        action="store_true",
+        required=False,
+    )
+
+    optional.add_argument(
         "--no-cleanup",
         dest="no_cleanup",
         help="Do not remove files that may be useful for diagnostic or debugging purposes, \
@@ -490,6 +500,10 @@ def _evaluate_args(args):
     class settings:
         pass
 
+    # processing
+
+    settings.START_WITH_EDITED_LABELS = args.start_with_edited_labels
+
     # clean up
 
     settings.CLEANUP = not (args.no_cleanup)
@@ -596,10 +610,14 @@ def _evaluate_args(args):
     class params:
         pass
 
-    params.FILENAME = os.path.abspath(args.filename)
     params.HEMI = args.hemi
     params.LUT = args.lut
     params.OUTDIR = args.outputdir
+
+    if settings.START_WITH_EDITED_LABELS is False:
+        params.FILENAME = os.path.abspath(args.filename)
+    else:
+        params.FILENAME = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
 
     params.LUTDICT = LUTDICT
     params.HSFLIST = HSFLIST
@@ -691,31 +709,33 @@ def _run_analysis(params):
 
     # process image (1)
 
-    LOGGER.info("Starting convertFormat() ...")
-    params = convertFormat(params)
+    if params.internal.START_WITH_EDITED_LABELS is False:
+        LOGGER.info("Starting convertFormat() ...")
+        params = convertFormat(params)
 
-    LOGGER.info("Starting cropImage() ...")
-    params = cropImage(params)
+        LOGGER.info("Starting cropImage() ...")
+        params = cropImage(params)
 
-    LOGGER.info("Starting upsampleImage() ...")
-    params = upsampleImage(params)
+        LOGGER.info("Starting upsampleImage() ...")
+        params = upsampleImage(params)
 
-    LOGGER.info("Starting copy_image_to_main() ...")
-    params = copy_image_to_main(params)
+        LOGGER.info("Starting copy_image_to_main() ...")
+        params = copy_image_to_main(params)
 
     # process labels (2)
 
-    LOGGER.info("Starting autoMask() ...")
-    params = autoMask(params)
+    if params.internal.START_WITH_EDITED_LABELS is False:
+        LOGGER.info("Starting autoMask() ...")
+        params = autoMask(params)
 
-    LOGGER.info("Starting createLabels() ...")
-    params = createLabels(params)
+        LOGGER.info("Starting createLabels() ...")
+        params = createLabels(params)
 
-    LOGGER.info("Starting mergeMolecularLayer() ...")
-    params = mergeMolecularLayer(params)
+        LOGGER.info("Starting mergeMolecularLayer() ...")
+        params = mergeMolecularLayer(params)
 
-    LOGGER.info("Starting copy_labels_to_main() ...")
-    params = copy_labels_to_main(params)
+        LOGGER.info("Starting copy_labels_to_main() ...")
+        params = copy_labels_to_main(params)
 
     # process mask (3)
 

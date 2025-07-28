@@ -37,6 +37,8 @@ Required arguments:
                         Directory where the results will be written.
 
 Optional arguments:
+  --start-with-edited-labels
+                        Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz file in an existing output directory. Existing files will be overwritten.
   --no-cleanup          Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.
   --no-crop             Do not crop image.
   --upsample            Upsample to the smallest voxel edge length.
