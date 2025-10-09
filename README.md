@@ -9,7 +9,7 @@ hippocampal shape and thickness analysis as described in our recent [publication
 
 ## Documentation:
 
-Please see the documentation pages for a general overview, usage information and
+Please see the [documentation pages](https://deep-mi.org/hipsta/dev/index.html) for a general overview, usage information and
 examples, and output description. Brief usage information is also available [here](hipsta/doc/DOCUMENTATION.md).
 Some suggestions for running the script can be found in the [tutorial](TUTORIAL.md).
 
