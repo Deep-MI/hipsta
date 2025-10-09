@@ -1,5 +1,5 @@
 """
-This module provides atlas information for the hippocampal shape and thickness 
+This module provides atlas information for the hippocampal shape and thickness
 analysis package.
 
 """
@@ -103,7 +103,9 @@ def get_atlases(lut):
             on_bad_lines='warn',
         )
 
-        LUTDICT = dict(zip(lut[0], lut[1]))
+        lut = lut[lut[1].str.lower().isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"])]
+
+        LUTDICT = dict(zip(lut[1], lut[0]))
 
         HSFLIST = list(lut[1])
 
