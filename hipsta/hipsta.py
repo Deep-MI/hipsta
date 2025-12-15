@@ -681,7 +681,8 @@ def _check_params(params):
 
     # check HSFLIST
 
-    if not all(np.isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"], list(params.LUTDICT.keys()))):
+    if not all(np.isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"],
+                       list(params.LUTDICT.keys()))):
         LOGGER.error("Look-up table must include presubiculum, subiculum, ca1, ca2, ca3, ca4, head, and tail.")
         raise AssertionError("Look-up table must include presubiculum, subiculum, ca1, ca2, ca3, ca4, head, and tail.")
 
