@@ -39,6 +39,8 @@ Required arguments:
 Optional arguments:
   --start-with-edited-labels
                         Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz file in an existing output directory. Existing files will be overwritten.
+  --start-with-edited-masks
+                        Start with edited masks. Requires an edited lh.masks.mgz or rh.masks.mgz file in an existing output directory. Existing files will be overwritten.
   --no-cleanup          Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.
   --no-crop             Do not crop image.
   --upsample            Upsample to the smallest voxel edge length.
@@ -225,13 +227,13 @@ Also the intermediate volume and surface files can be useful for quality control
 
 ## Supported segmentations:
 
-- A hippocampal subfields segmentation based on FreeSurfer 7.1.1 or later should 
+- A hippocampal subfields segmentation based on FreeSurfer 7.1.1 or later should
   work as-is. Use `--lut freesurfer`.
-- Two ASHS atlases are currently supported, the Penn ABC-3T ASHS Atlas for 
-  T2-weighted MRI and the UMC Utrecht 7T atlas. Use `--lut ashs-penn_abc_3t_t2` 
+- Two ASHS atlases are currently supported, the Penn ABC-3T ASHS Atlas for
+  T2-weighted MRI and the UMC Utrecht 7T atlas. Use `--lut ashs-penn_abc_3t_t2`
   or `--lut ashs-umcutrecht_7t`. If additional labels for the hippocampal head
-  (label value: 20) and tail (label value: 5) labels are missing, use the `--automask-head` 
-  and/or `--automask-tail` arguments. It may also make sense to upsample the 
+  (label value: 20) and tail (label value: 5) labels are missing, use the `--automask-head`
+  and/or `--automask-tail` arguments. It may also make sense to upsample the
   segmentations to isotropic voxel size using `--upsample`.
 - If using a custom look-up table (`--lut <filename>`), the expected format for
   the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are

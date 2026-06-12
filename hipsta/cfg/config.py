@@ -11,6 +11,7 @@ def get_defaults(x):
         # messages as well as the run_hipsta docstring also
         # options
         start_with_edited_labels=False,
+        start_with_edited_masks=False,
         no_cleanup=False,
         no_crop=False,
         upsample=False,

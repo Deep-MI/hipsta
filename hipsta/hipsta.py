@@ -11,6 +11,8 @@ import shutil
 import sys
 import time
 
+import numpy as np
+
 from .cfg.atlases import get_atlases
 from .cfg.config import get_defaults
 from .cfg.logging import setup_logging
@@ -166,6 +168,16 @@ def _parse_arguments():
         help="Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz \
                file in an existing output directory. Existing files will be overwritten.",
         default=get_defaults("start_with_edited_labels"),
+        action="store_true",
+        required=False,
+    )
+
+    optional.add_argument(
+        "--start-with-edited-masks",
+        dest="start_with_edited_masks",
+        help="Start with edited masks. Requires an edited lh.masks.mgz or rh.masks.mgz \
+               file in an existing output directory. Existing files will be overwritten.",
+        default=get_defaults("start_with_edited_masks"),
         action="store_true",
         required=False,
     )
@@ -503,6 +515,7 @@ def _evaluate_args(args):
     # processing
 
     settings.START_WITH_EDITED_LABELS = args.start_with_edited_labels
+    settings.START_WITH_EDITED_MASKS = args.start_with_edited_masks
 
     # clean up
 
@@ -614,10 +627,16 @@ def _evaluate_args(args):
     params.LUT = args.lut
     params.OUTDIR = args.outputdir
 
-    if settings.START_WITH_EDITED_LABELS is False:
+    if settings.START_WITH_EDITED_LABELS is False and settings.START_WITH_EDITED_MASKS is False:
         params.FILENAME = os.path.abspath(args.filename)
-    else:
+    elif settings.START_WITH_EDITED_LABELS is False and settings.START_WITH_EDITED_MASKS is True:
+        params.FILENAME = os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz")
+    elif settings.START_WITH_EDITED_LABELS is True and settings.START_WITH_EDITED_MASKS is False:
         params.FILENAME = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
+    elif settings.START_WITH_EDITED_LABELS is True and settings.START_WITH_EDITED_MASKS is True:
+        raise RuntimeError("Start with edited labels and Start with edited masks cannot both be true.")
+    else:
+        raise RuntimeError("Error parsing input arguments (Start with edited labels / Start with edited masks).")
 
     params.LUTDICT = LUTDICT
     params.HSFLIST = HSFLIST
@@ -695,6 +714,13 @@ def _check_params(params):
             + params.LUT
         )
 
+    # check HSFLIST
+
+    if not all(np.isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"],
+                       list(params.LUTDICT.keys()))):
+        LOGGER.error("Look-up table must include presubiculum, subiculum, ca1, ca2, ca3, ca4, head, and tail.")
+        raise AssertionError("Look-up table must include presubiculum, subiculum, ca1, ca2, ca3, ca4, head, and tail.")
+
     # return
 
     return params
@@ -709,7 +735,7 @@ def _run_analysis(params):
 
     # process image (1)
 
-    if params.internal.START_WITH_EDITED_LABELS is False:
+    if params.internal.START_WITH_EDITED_LABELS is False and params.internal.START_WITH_EDITED_MASKS is False:
         LOGGER.info("Starting convertFormat() ...")
         params = convertFormat(params)
 
@@ -724,7 +750,7 @@ def _run_analysis(params):
 
     # process labels (2)
 
-    if params.internal.START_WITH_EDITED_LABELS is False:
+    if params.internal.START_WITH_EDITED_LABELS is False and params.internal.START_WITH_EDITED_MASKS is False:
         LOGGER.info("Starting autoMask() ...")
         params = autoMask(params)
 
@@ -739,20 +765,21 @@ def _run_analysis(params):
 
     # process mask (3)
 
-    LOGGER.info("Starting binarizeMask() ...")
-    params = binarizeMask(params)
+    if params.internal.START_WITH_EDITED_LABELS is True and params.internal.START_WITH_EDITED_MASKS is False:
+        LOGGER.info("Starting binarizeMask() ...")
+        params = binarizeMask(params)
 
-    LOGGER.info("Starting gaussFilter() ...")
-    params = gaussFilter(params)
+        LOGGER.info("Starting gaussFilter() ...")
+        params = gaussFilter(params)
 
-    LOGGER.info("Starting longFilter() ...")
-    params = longFilter(params)
+        LOGGER.info("Starting longFilter() ...")
+        params = longFilter(params)
 
-    LOGGER.info("Starting closeMask() ...")
-    params = closeMask(params)
+        LOGGER.info("Starting closeMask() ...")
+        params = closeMask(params)
 
-    LOGGER.info("Starting copy_mask_to_main() ...")
-    params = copy_mask_to_main(params)
+        LOGGER.info("Starting copy_mask_to_main() ...")
+        params = copy_mask_to_main(params)
 
     # create surface (4)
 
