@@ -178,11 +178,12 @@ def get_atlases(lut):
             header=None,
             skipinitialspace=True,
             skip_blank_lines=True,
-            error_bad_lines=False,
-            warn_bad_lines=True,
+            on_bad_lines='warn',
         )
 
-        LUTDICT = dict(zip(lut[0], lut[1]))
+        lut = lut[lut[1].str.lower().isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"])]
+
+        LUTDICT = dict(zip(lut[1], lut[0]))
 
         HSFLIST = list(lut[1])
 
