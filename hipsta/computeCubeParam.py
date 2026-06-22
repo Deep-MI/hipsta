@@ -655,8 +655,6 @@ def computeCubeParam(params):
         # highest and lowest values in 234 (PrSbc) or 236 (Sbc); highest values
         # should have a higher value on the z-axis than lower values.
 
-        # TODO: check if we can safely assume consistent orientation for the vertices' z axis (hopfully) and if it's inf -> sup (maybe not)
-
         if np.median(
             v4cBndOpenRm[
                 np.where(
