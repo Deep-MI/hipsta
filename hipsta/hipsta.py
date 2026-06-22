@@ -144,10 +144,11 @@ def _parse_arguments():
     required.add_argument(
         "--lut",
         dest="lut",
-        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', \
-              'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.",
+        help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2', \
+            'ashs-penn_abc_3t_t2_ent', 'ashs-penn_abc_3t_t2_ext', and \'ashs-umcutrecht_7t\' \
+            are keywords for built-in tables.",
         default=None,
-        metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>",
+        metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-penn_abc_3t_t2_ent|ashs-penn_abc_3t_t2_ext|ashs-umcutrecht_7t|filename>",
         required=False,
     )
     required.add_argument(
@@ -705,13 +706,19 @@ def _check_params(params):
     if (
         params.LUT != "freesurfer"
         and params.LUT != "ashs-penn_abc_3t_t2"
+        and params.LUT != "ashs-penn_abc_3t_t2_ent"
+        and params.LUT != "ashs-penn_abc_3t_t2_ext"
         and params.LUT != "ashs-umcutrecht_7t"
         and not os.path.isfile(params.LUT)
     ):
         raise RuntimeError(
-            "Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', \
-             or an existing file, but not "
-            + params.LUT
+            "Look-up table can only be " + \
+                "'freesurfer' " + \
+                "'ashs-penn_abc_3t_t2' " + \
+                "'ashs-penn_abc_3t_t2_ent' " + \
+                "'ashs-penn_abc_3t_t2_ext' " + \
+                "'ashs-umcutrecht_7t' " + \
+                "or an existing file, but not " + params.LUT
         )
 
     # check HSFLIST
@@ -765,7 +772,7 @@ def _run_analysis(params):
 
     # process mask (3)
 
-    if params.internal.START_WITH_EDITED_LABELS is True and params.internal.START_WITH_EDITED_MASKS is False:
+    if params.internal.START_WITH_EDITED_MASKS is False:
         LOGGER.info("Starting binarizeMask() ...")
         params = binarizeMask(params)
 
@@ -913,8 +920,9 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     hemi :
         Hemisphere. Either \'lh\' or \'rh\'.
     lut :
-        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2'
-        and \'ashs-umcutrecht_7t\' are keywords for built-in tables.
+        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\',
+        'ashs-penn_abc_3t_t2', 'ashs-penn_abc_3t_t2_ent', 'ashs-penn_abc_3t_t2_ext', and \'ashs-umcutrecht_7t\'
+        are keywords for built-in tables.
     outputdir :
         Directory where the results will be written.
 

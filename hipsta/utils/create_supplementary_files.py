@@ -86,9 +86,27 @@ def createSupplementaryFiles(params):
 
         lstBnd = [21.5, 22.5, 23.5]
 
+    elif LUT == "ashs-penn_abc_3t_t2_ext":
+        # get labels
+
+        hsfBnd = nb.load(os.path.join(OUT_DIR, HEMI + ".mid-surface.hsf.mgh"))
+        hsfBnd = np.array(hsfBnd.get_fdata()).flatten()
+
+        # recode to consecutive values
+
+        hsfBnd[hsfBnd == 12] = 31
+        hsfBnd[hsfBnd == 10] = 32
+        hsfBnd[hsfBnd == 9] = 33
+        hsfBnd[hsfBnd == 8] = 34
+        hsfBnd[hsfBnd == 1] = 35
+        hsfBnd[hsfBnd == 2] = 36
+        hsfBnd[hsfBnd == 4] = 37
+
+        lstBnd = [31.5, 32.5, 33.5, 34.5, 35.5, 36.5]
+
     else:
         logging.info(
-            "Creation of subfield boundary overlays is only supported for the freesurfer and ashs look-up tables."
+            "Creation of subfield boundary overlays is only supported for the freesurfer and (some) ashs look-up tables."
         )
         raise ValueError()
 

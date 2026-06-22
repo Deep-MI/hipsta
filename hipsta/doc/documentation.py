@@ -1,5 +1,5 @@
 """
-This module provides documentation for the hippocampal shape and 
+This module provides documentation for the hippocampal shape and
 thickness analysis package.
 
 """

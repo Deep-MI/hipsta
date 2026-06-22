@@ -1,5 +1,5 @@
 """
-This module provides atlas information for the hippocampal shape and thickness 
+This module provides atlas information for the hippocampal shape and thickness
 analysis package.
 
 """
@@ -67,6 +67,84 @@ def get_atlases(lut):
 
         HSFLIST = [8, 1, 2, 4]
 
+    elif lut == "ashs-penn_abc_3t_t2_ent":
+        LOGGER.info("Found internal, modified look-up table the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+
+        LUTLABEL = [
+            "ca1",
+            "ca2",
+            "ca3",
+            "ca4",
+            "dg",
+            "tail_orig",
+            "subiculum",
+            "presubiculum",
+            "entorhinal",
+            "ba35",
+            "ba36",
+            "parahippocampal",
+            "head",
+            "tail",
+        ]
+
+        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [9]
+
+    elif lut == "ashs-penn_abc_3t_t2_ent+phc+ba35":
+        LOGGER.info("Found internal, modified look-up table the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+
+        LUTLABEL = [
+            "ca1",
+            "ca2",
+            "ca3",
+            "ca4",
+            "dg",
+            "tail_orig",
+            "subiculum",
+            "presubiculum",
+            "entorhinal",
+            "ba35",
+            "ba36",
+            "parahippocampal",
+            "head",
+            "tail",
+        ]
+
+        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [12, 10, 9]
+
+    elif lut == "ashs-penn_abc_3t_t2_ext":
+        LOGGER.info("Found internal, modified look-up table the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+
+        LUTLABEL = [
+            "ca1",
+            "ca2",
+            "ca3",
+            "ca4",
+            "dg",
+            "tail_orig",
+            "subiculum",
+            "presubiculum",
+            "entorhinal",
+            "ba35",
+            "ba36",
+            "parahippocampal",
+            "head",
+            "tail",
+        ]
+
+        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+
+        HSFLIST = [12, 10, 9, 8, 1, 2, 4]
+
     elif lut == "ashs-umcutrecht_7t":
         LOGGER.info("Found internal, modified look-up table for ASHS UMC Utrecht 7T atlas.")
 
@@ -120,6 +198,7 @@ def get_atlases(lut):
     LUTDICT["bndtail"] = 2260
     LUTDICT["bndhead"] = 2320
     LUTDICT["bndca4"] = 2420
+    LUTDICT["bndba35"] = 100
 
     # return
 
