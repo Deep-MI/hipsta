@@ -239,9 +239,9 @@ argument.
 
 Since no explicit labels for the hippocampal head are present in ASHS 
 segmentations, it will be necessary to use the `--automask-head` flag and 
-optionally also the `--automask-tail-margin` argument. If the identification of 
-the boundary between hippocampal body tail does not work well given the existing 
-labels, using the `--automask-tail` flag and optionally the `--automask-head-margin` 
+optionally also the `--automask-head-margin` argument. If the identification of 
+the boundary between hippocampal body and tail does not work well given the existing 
+labels, using the `--automask-tail` flag and optionally the `--automask-tail-margin` 
 argument may be advised as well.
 
 ### Additional arguments for ASHS and FreeSurfer segmentations
