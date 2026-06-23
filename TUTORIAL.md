@@ -267,7 +267,7 @@ hippocampal thickness values will be stored in csv tables:
 | Filenane                                           | Contents                                                  |
 |----------------------------------------------------|-----------------------------------------------------------|
 | `lh.grid-segments-x.csv`, `rh.grid-segments-x.csv` | Length estimates in the medial-to-lateral dimension       |
-| `lh.grid-segments-y.csv`, `rh.grid-segments-y.csv` | Length estimates in the medial-to-lateral dimension       |
+| `lh.grid-segments-y.csv`, `rh.grid-segments-y.csv` | Length estimates in the posterior-to-anterior dimension   |
 | `lh.grid-segments-z.csv`, `rh.grid-segments-z.csv` | Thickness estimates in the exterior-to-interior dimension |
 
 Here, x corresponds to the medial-->lateral dimension, y to the 
