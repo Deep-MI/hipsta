@@ -645,7 +645,7 @@ def computeCubeParam(params):
     e4cBndOpen = np.concatenate((t4cBndOpen[:, (0, 1)], t4cBndOpen[:, (0, 2)], t4cBndOpen[:, (1, 2)]), axis=0)
     e4cBndOpen = np.unique(np.sort(e4cBndOpen, axis=1), axis=1)
 
-    if params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ext" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT):
+    if params.LUT == "freesurfer" or params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ext" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT):
 
         # if working on the hippocampus:
 
@@ -771,6 +771,14 @@ def computeCubeParam(params):
         else:
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
             raise RuntimeError("Inconsistency detected for EV1, exiting.")
 
         # decide whether or not to flip anisoLaplEvec[:, 2] (should be ... -> BA35)
@@ -783,9 +791,24 @@ def computeCubeParam(params):
         elif len(any_positive_ba35) == 0 and len(any_negative_ba35) > 0:
             LOGGER.info("Flipping EV2")
             anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
+        elif len(any_positive_ba35) > len(any_negative_ba35):
+            logging.warning("Could not determine EV2 orientation, check output.")
+            pass
+        elif len(any_positive_ba35) <= len(any_negative_ba35):
+            LOGGER.info("Flipping EV2")
+            anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
+            logging.warning("Could not determine EV2 orientation, check output.")
         else:
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
             raise RuntimeError("Inconsistency detected for EV2, exiting.")
 
     else:
@@ -814,14 +837,66 @@ def computeCubeParam(params):
         v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec
     )
 
-    # x: medial -> lateral
+    # x:
 
-    vfuncX = np.zeros(np.shape(v4c)[0])
-    srcX = np.zeros(np.shape(v4c)[0])
-    srcX[newVtcs[v4c[newVtcs, 0] < np.mean(v4c[newVtcs, 0])]] = -1
-    snkX = np.zeros(np.shape(v4c)[0])
-    snkX[newVtcs[v4c[newVtcs, 0] >= np.mean(v4c[newVtcs, 0])]] = 1
-    vfuncX = srcX + snkX
+    if params.LUT == "freesurfer-no_ml" or params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ent" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT):
+
+        # if working on the hippocampus without ctx or on the ERC:
+
+        # x: medial -> lateral (will initially run along the first axis of the mesh; may be
+        # flipped during the left / right determination below)
+        # srxX will have -1 for all newVtcs where dim 0 coordinates are lower than their mean
+        # snkX will have +1 for all newVtcs where dim 0 coordinates are higher than their mean
+
+        vfuncX = np.zeros(np.shape(v4c)[0])
+        srcX = np.zeros(np.shape(v4c)[0])
+        srcX[newVtcs[v4c[newVtcs, 0] < np.mean(v4c[newVtcs, 0])]] = -1
+        snkX = np.zeros(np.shape(v4c)[0])
+        snkX[newVtcs[v4c[newVtcs, 0] >= np.mean(v4c[newVtcs, 0])]] = 1
+        vfuncX = srcX + snkX
+
+        # determine left / right; here we map to ras (and don't rely on ras_tkr initially)
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4c, np.ones((v4c.shape[0], 1))), axis=1)
+        ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        if params.HEMI == "lh":
+            # first make sure that ras coords are indeed in left hemi
+            if (ras[:, 0] < 0.0).all():
+                # lateral ras coords (snk, +1) should be more negative than medial ras coords (src, -1), otherwise flip
+                if np.mean(ras[np.where(vfuncX > 0)[0], 0]) > np.mean(ras[np.where(vfuncX < 0)[0], 0]):
+                    vfuncX = -vfuncX
+            else:
+                raise RuntimeError("Ambiguous hemisphere info, exiting.")
+        elif params.HEMI == "rh":
+            # first make sure that ras coords are indeed in right hemi
+            if (ras[:, 0] > 0.0).all():
+                # lateral ras coords (snk, +1) should be more positive than medial ras coords (src, -1), otherwise flip
+                if np.mean(ras[np.where(vfuncX > 0)[0], 0]) < np.mean(ras[np.where(vfuncX < 0)[0], 0]):
+                    vfuncX = -vfuncX
+            else:
+                raise RuntimeError("Ambiguous hemisphere info, exiting.")
+
+    elif params.LUT == "ashs-penn_abc_3t_t2_ext":
+
+        # if working on the hippocampus with ctx:
+
+        # x: inf -> sup (phc -> ca3). cannot use medial -> lateral, because phc may bend below hc
+        # will transform surface coords to ras coords and evaluate dim 2 (3rd dim)
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4c[newVtcs, :], np.ones((v4c[newVtcs, :].shape[0], 1))), axis=1)
+        ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        vfuncX = np.zeros(np.shape(v4c)[0])
+        srcX = np.zeros(np.shape(v4c)[0])
+        srcX[newVtcs[ras[:, 2] < np.mean(ras[:, 2])]] = -1
+        snkX = np.zeros(np.shape(v4c)[0])
+        snkX[newVtcs[ras[:, 2] >= np.mean(ras[:, 2])]] = 1
+        vfuncX = srcX + snkX
 
     # y: Tail (226) -> Head (232) (post --> ant)
 
@@ -837,28 +912,6 @@ def computeCubeParam(params):
     snkZ = np.zeros(np.shape(anisoLaplEvec[:, 1])[0])
     snkZ[anisoLaplEvec[:, 1] > 0] = 1
     vfuncZ[v4cBndOpenKeep] = srcZ + snkZ
-
-    # determine left / right
-
-    img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
-    mat = np.linalg.inv(img.header.get_vox2ras_tkr())
-    pts = np.concatenate((v4c, np.ones((v4c.shape[0], 1))), axis=1)
-    ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
-
-    if params.HEMI == "lh":
-        if (ras[:, 0] < 0.0).all():
-            # lateral (snk, +1) should be more negative than medial (src, -1), otherwise flip
-            if np.mean(ras[np.where(vfuncX > 0)[0], 0]) > np.mean(ras[np.where(vfuncX < 0)[0], 0]):
-                vfuncX = -vfuncX
-        else:
-            raise RuntimeError("Ambiguous hemisphere info, exiting.")
-    elif params.HEMI == "rh":
-        if (ras[:, 0] > 0.0).all():
-            # lateral (snk, +1) should be more positive than medial (src, -1), otherwise flip
-            if np.mean(ras[np.where(vfuncX > 0)[0], 0]) < np.mean(ras[np.where(vfuncX < 0)[0], 0]):
-                vfuncX = -vfuncX
-        else:
-            raise RuntimeError("Ambiguous hemisphere info, exiting.")
 
     # --------------------------------------------------------------------------
     # compute ABtetra and Poisson functions
@@ -918,6 +971,8 @@ def computeCubeParam(params):
     # v4cRmBndRm = tetMesh4cRmBnd.v
     # t4cRmBndRm = tetMesh4cRmBnd.t
 
+    tetMesh4cRmBnd.orient_()
+
     TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
     io.write_vfunc(
@@ -933,6 +988,19 @@ def computeCubeParam(params):
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.rm.bnd.seam.rm.cut.psol"), P0[v4cRmBndRmKeep])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol"), P1[v4cRmBndRmKeep])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson2.rm.bnd.seam.rm.cut.psol"), P2[v4cRmBndRmKeep])
+
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=P0[v4cRmBndRmKeep].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.rm.bnd.seam.rm.cut.mgh"),
+    )
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=P1[v4cRmBndRmKeep].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.mgh"),
+    )
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=P2[v4cRmBndRmKeep].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".poisson2.rm.bnd.seam.rm.cut.mgh"),
+    )
 
     # write out cube
 
