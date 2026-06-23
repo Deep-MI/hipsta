@@ -630,11 +630,13 @@ def computeCubeParam(params):
     # post-process eigenfunction (order, flipping)
 
     # decide whether or not to flip anisoLaplEvec[:, 1] and anisoLaplEvec[:, 2]:
+
     # for the hippocampus:
     # - anisoLaplEvec[:, 1] should be zero at the extrema of 234 and 240.
     # - anisoLaplEvec[:, 2] should have extremal values at 234 and 240.
     # - We therefore check if the zeros of Evec1 are located in 234 or 240/2420
     #   rather than 236 or 238. If not, we change order.
+
     # for the ERC:
     # - ...
 
@@ -649,123 +651,79 @@ def computeCubeParam(params):
 
         # if working on the hippocampus:
 
-        # decide whether or not to flip anisoLaplEvec[:, 1]  (should be inf -> sup)
+        # decide whether or not to flip anisoLaplEvec[:, 1] (should be inf -> sup)
 
         # check EV1 for flips; this is done indirectly: we get the locations of
         # highest and lowest values in 234 (PrSbc) or 236 (Sbc); highest values
         # should have a higher value on the z-axis than lower values.
+        # we now convert from the surface coords to ras coords, because we cannot
+        # assume the surface coord system to be always the same (rightly or not).
+        # we rely on appropriate transformation matrices, though.
 
-        if np.median(
-            v4cBndOpenRm[
-                np.where(
-                    np.logical_and(
-                        anisoLaplEvec[:, 1] > 0,
-                        np.logical_or(
-                            k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                        ),
-                    )
-                )[0],
-                2,
-            ]
-        ) > np.median(
-            v4cBndOpenRm[
-                np.where(
-                    np.logical_and(
-                        anisoLaplEvec[:, 1] < 0,
-                        np.logical_or(
-                            k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                        ),
-                    )
-                )[0],
-                2,
-            ]
-        ):
+        prsbc_or_sbc = np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"])
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4cBndOpenRm, np.ones((v4cBndOpenRm.shape[0], 1))), axis=1)
+        v4cBndOpenRm_ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2]):
             pass
-        elif np.median(
-            v4cBndOpenRm[
-                np.where(
-                    np.logical_and(
-                        anisoLaplEvec[:, 1] > 0,
-                        np.logical_or(
-                            k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                        ),
-                    )
-                )[0],
-                2,
-            ]
-        ) < np.median(
-            v4cBndOpenRm[
-                np.where(
-                    np.logical_and(
-                        anisoLaplEvec[:, 1] < 0,
-                        np.logical_or(
-                            k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                        ),
-                    )
-                )[0],
-                2,
-            ]
-        ):
+        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2,]):
             LOGGER.info("Flipping EV1")
             anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
         else:
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
             raise RuntimeError("Inconsistency detected for EV1, exiting.")
 
         # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
 
-        if (
-            np.median(
-                anisoLaplEvec[
-                    np.where(
-                        np.logical_or(
-                            k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                        )
-                    )[0],
-                    2,
-                ]
-            )
-            < 0
-        ):
+        if (np.median(anisoLaplEvec[np.where(prsbc_or_sbc)[0], 2]) < 0):
             pass
-        elif (
-            np.median(
-                anisoLaplEvec[
-                    np.where(
-                        np.logical_or(
-                            k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                        )
-                    )[0],
-                    2,
-                ]
-            )
-            > 0
-        ):
+        elif (np.median(anisoLaplEvec[np.where(prsbc_or_sbc)[0], 2]) > 0):
             LOGGER.info("Flipping EV2")
             anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
         else:
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
             io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
             raise RuntimeError("Inconsistency detected for EV2, exiting.")
 
     elif params.LUT == "ashs-penn_abc_3t_t2_ent":
 
         # if working on the ERC:
 
-        # decide whether or not to flip anisoLaplEvec[:, 1]  (should be inf -> sup)
+        # decide whether or not to flip anisoLaplEvec[:, 1] (should be inf -> sup).
+        # we now convert from the surface coords to ras coords, because we cannot
+        # assume the surface coord system to be always the same (rightly or not).
+        # we rely on appropriate transformation matrices, though.
 
-        if np.median(
-            v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["entorhinal"]))[0],2]
-            ) > np.median(
-            v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["entorhinal"]))[0],2]
-            ):
+        erc = k4c[hsfList] == params.LUTDICT["entorhinal"]
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4cBndOpenRm, np.ones((v4cBndOpenRm.shape[0], 1))), axis=1)
+        v4cBndOpenRm_ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]):
             pass
-        elif np.median(
-            v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, k4c[hsfList] == params.LUTDICT["entorhinal"]))[0],2]
-            ) < np.median(
-            v4cBndOpenRm[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, k4c[hsfList] == params.LUTDICT["entorhinal"]))[0],2]
-            ):
+        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]):
             LOGGER.info("Flipping EV1")
             anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
         else:
@@ -904,7 +862,7 @@ def computeCubeParam(params):
     vfuncY[np.where(i4c == params.LUTDICT["jointtail"])[0]] = -1
     vfuncY[np.where(i4c == params.LUTDICT["jointhead"])[0]] = 1
 
-    # z: inf->sup
+    # z: inf -> sup
 
     vfuncZ = np.zeros(np.shape(v4c)[0])
     srcZ = np.zeros(np.shape(anisoLaplEvec[:, 1])[0])
