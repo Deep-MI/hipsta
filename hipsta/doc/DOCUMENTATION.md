@@ -8,6 +8,7 @@ thickness analysis. This page provides usage information as well as a technical
 description of processing steps and outputs. An explanative description can be
 found in the tutorial.
 
+
 ## Usage:
 
 ### As a command-line script:
@@ -31,8 +32,8 @@ Required arguments:
   --filename <filename>
                         Filename of a segmentation file.
   --hemi <lh|rh>        Hemisphere. Either 'lh' or 'rh'.
-  --lut <freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>
-                        Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', 'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.
+  --lut <freesurfer|ashs-penn_abc_3t_t2|ashs-penn_abc_3t_t2_ext|ashs-penn_abc_3t_t2_ent|ashs-umcutrecht_7t|filename>
+                        Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-penn_abc_3t_t2_ext', 'ashs-penn_abc_3t_t2_ent', and 'ashs-umcutrecht_7t' are keywords for built-in tables.
   --outputdir <directory>
                         Directory where the results will be written.
 
@@ -133,6 +134,7 @@ This script performs the following major processing steps:
 10. map subfield values (and other volume-based data, optional)
 11. create supplementary files for visualization
 
+
 ## Outputs:
 
 1. Thickness and curvature estimates
@@ -228,12 +230,20 @@ Also the intermediate volume and surface files can be useful for quality control
 
 - A hippocampal subfields segmentation based on FreeSurfer 7.1.1 or later should
   work as-is. Use `--lut freesurfer`.
-- Two ASHS atlases are currently supported, the Penn ABC-3T ASHS Atlas for
+- Two ASHS atlases are currently supported, the Penn ABC-3T ASHS atlas for
   T2-weighted MRI and the UMC Utrecht 7T atlas. Use `--lut ashs-penn_abc_3t_t2`
   or `--lut ashs-umcutrecht_7t`. If additional labels for the hippocampal head
   (label value: 20) and tail (label value: 5) labels are missing, use the `--automask-head`
   and/or `--automask-tail` arguments. It may also make sense to upsample the
   segmentations to isotropic voxel size using `--upsample`.
+- Processing variants of the Penn ABC-3T ASHS atlas can be called with the 
+  `--lut ashs-penn_abc_3t_t2_ext` and `--lut ashs-penn_abc_3t_t2_ent` arguments. 
+  The first one will add (parts of) parahippocampal and entorhinal cortex as 
+  well as BA35 to the analysis, but still restrict the analysis to the 
+  hippocampal body region. The second one will perform a separate analysis of 
+  the entorhinal cortex. Due to more complex or variable anatomy, these approaches
+  should to some extent be considered experimental and may require additional QC
+  or manual edits.
 - If using a custom look-up table (`--lut <filename>`), the expected format for
   the file is: `<numeric ID> <name> <R> <G> <B> <A>`. `R`, `G`, `B`, `A` are
   numerical values for RGB colors and transparency (alpha) and will be ignored.
@@ -259,7 +269,7 @@ Also the intermediate volume and surface files can be useful for quality control
    or the ASHS software. A custom segmentation is also permissible (some restrictions
    and settings apply; see [Supported Segmentations](#supported-segmentations)).
 
-3. Python 3.8 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
+3. Python 3.10 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
    pyacvd libraries. See `requirements.txt` for a full list.
 
 4. The gmsh package (version 2.x; http://gmsh.info) must be installed. Can be
