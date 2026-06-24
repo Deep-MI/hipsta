@@ -68,7 +68,7 @@ def get_atlases(lut):
         HSFLIST = [8, 1, 2, 4]
 
     elif lut == "ashs-penn_abc_3t_t2_ent":
-        LOGGER.info("Found internal, modified look-up table the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+        LOGGER.info("Found internal, modified look-up table for the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
 
         LUTLABEL = [
             "ca1",
@@ -94,7 +94,7 @@ def get_atlases(lut):
         HSFLIST = [9]
 
     elif lut == "ashs-penn_abc_3t_t2_ext":
-        LOGGER.info("Found internal, modified look-up table the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+        LOGGER.info("Found internal, modified look-up table for the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
 
         LUTLABEL = [
             "ca1",

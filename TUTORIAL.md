@@ -264,7 +264,7 @@ The primary output of the hippocampal shape and thickness analysis are surface
 files and associated thickness values in the `thickness` folder. The estimated 
 hippocampal thickness values will be stored in csv tables:
 
-| Filenane                                           | Contents                                                  |
+| Filename                                           | Contents                                                  |
 |----------------------------------------------------|-----------------------------------------------------------|
 | `lh.grid-segments-x.csv`, `rh.grid-segments-x.csv` | Length estimates in the medial-to-lateral dimension       |
 | `lh.grid-segments-y.csv`, `rh.grid-segments-y.csv` | Length estimates in the posterior-to-anterior dimension   |

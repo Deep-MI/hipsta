@@ -39,8 +39,7 @@ Required arguments:
 Optional arguments:
   --start-with-edited-labels
                         Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz file in an existing output directory. Existing files will be overwritten.
-  --start-with-edited-masks
-                        Start with edited masks. Requires an edited lh.masks.mgz or rh.masks.mgz file in an existing output directory. Existing files will be overwritten.
+                        Start with edited masks. Requires an edited lh.mask.mgz or rh.mask.mgz file in an existing output directory. Existing files will be overwritten.
   --no-cleanup          Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.
   --no-crop             Do not crop image.
   --upsample            Upsample to the smallest voxel edge length.

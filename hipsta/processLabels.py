@@ -63,7 +63,7 @@ def autoMask(params):
         if "entorhinal" in params.LUTDICT.keys():
             labelENT = params.LUTDICT["entorhinal"]
         else:
-           labelENT = None
+            labelENT = None
         if "ba35" in params.LUTDICT.keys():
             labelBA35 = params.LUTDICT["ba35"]
         else:
@@ -136,11 +136,11 @@ def autoMask(params):
             if params.LUT == "ashs-penn_abc_3t_t2_ext":
                 if labelPHC is not None and labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
                     # find instance of Sbc/CA1/CA2/CA3 and PHC
-                    idxTail = np.intersect1d(np.argwhere(dat==labelPHC)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
-                        np.intersect1d(np.argwhere(dat==labelCA2)[:,imgDimsAP],
-                        np.argwhere(dat==labelCA3)[:,imgDimsAP]))))
+                    idxTail = np.intersect1d(np.argwhere(dat == labelPHC)[:, imgDimsAP],
+                        np.intersect1d(np.argwhere(dat == labelSbc)[:, imgDimsAP],
+                        np.intersect1d(np.argwhere(dat == labelCA1)[:, imgDimsAP],
+                        np.intersect1d(np.argwhere(dat == labelCA2)[:, imgDimsAP],
+                        np.argwhere(dat == labelCA3)[:, imgDimsAP]))))
                     # # find instance of Sbc/CA1/CA2/CA3
                     # idxTail = np.intersect1d(np.argwhere(dat==labelSbc)[:,imgDimsAP],
                     #     np.intersect1d(np.argwhere(dat==labelCA1)[:,imgDimsAP],
@@ -151,7 +151,7 @@ def autoMask(params):
             elif params.LUT == "ashs-penn_abc_3t_t2_ent":
                 if labelENT is not None:
                     # find instance of ENT
-                    idxTail = np.argwhere(dat==labelENT)[:,imgDimsAP]
+                    idxTail = np.argwhere(dat == labelENT)[:, imgDimsAP]
                 else:
                     raise RuntimeError("Insufficient label information, exiting.")
             else:

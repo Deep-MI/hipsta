@@ -176,7 +176,7 @@ def _parse_arguments():
     optional.add_argument(
         "--start-with-edited-masks",
         dest="start_with_edited_masks",
-        help="Start with edited masks. Requires an edited lh.masks.mgz or rh.masks.mgz \
+        help="Start with edited masks. Requires an edited lh.mask.mgz or rh.mask.mgz \
                file in an existing output directory. Existing files will be overwritten.",
         default=get_defaults("start_with_edited_masks"),
         action="store_true",
