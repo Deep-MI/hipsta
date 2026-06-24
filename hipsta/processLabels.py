@@ -68,10 +68,10 @@ def autoMask(params):
             labelBA35 = params.LUTDICT["ba35"]
         else:
             labelBA35 = None
-        if "ba36" in params.LUTDICT.keys():
-            labelBA36 = params.LUTDICT["ba36"]
-        else:
-            labelBA36 = None
+        # if "ba36" in params.LUTDICT.keys():
+        #     labelBA36 = params.LUTDICT["ba36"]
+        # else:
+        #     labelBA36 = None
 
         # head
         if params.internal.AUTOMASK_HEAD is True:
