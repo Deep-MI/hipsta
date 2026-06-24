@@ -26,7 +26,7 @@ def get_atlases(lut):
 
         LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [234, 236, 238, 240, 246]
 
@@ -37,7 +37,7 @@ def get_atlases(lut):
 
         LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [234, 236, 238, 240]
 
@@ -63,7 +63,7 @@ def get_atlases(lut):
 
         LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [8, 1, 2, 4]
 
@@ -89,7 +89,7 @@ def get_atlases(lut):
 
         LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [9]
 
@@ -115,7 +115,7 @@ def get_atlases(lut):
 
         LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [12, 10, 9, 8, 1, 2, 4]
 
@@ -138,7 +138,7 @@ def get_atlases(lut):
 
         LUTINDEX = [1, 2, 2, 3, 4, 5, 6, 5, 7, 8, 20]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [2, 3, 4, 6]
 
@@ -157,7 +157,7 @@ def get_atlases(lut):
 
         lut = lut[lut[1].str.lower().isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"])]
 
-        LUTDICT = dict(zip(lut[1], lut[0]))
+        LUTDICT = dict(zip(lut[1], lut[0], strict=True))
 
         HSFLIST = list(lut[1])
 
