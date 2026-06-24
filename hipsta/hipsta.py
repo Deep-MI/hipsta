@@ -713,11 +713,11 @@ def _check_params(params):
     ):
         raise RuntimeError(
             "Look-up table can only be " + \
-                "'freesurfer' " + \
-                "'ashs-penn_abc_3t_t2' " + \
-                "'ashs-penn_abc_3t_t2_ent' " + \
-                "'ashs-penn_abc_3t_t2_ext' " + \
-                "'ashs-umcutrecht_7t' " + \
+                "'freesurfer', " + \
+                "'ashs-penn_abc_3t_t2', " + \
+                "'ashs-penn_abc_3t_t2_ent', " + \
+                "'ashs-penn_abc_3t_t2_ext', " + \
+                "'ashs-umcutrecht_7t', " + \
                 "or an existing file, but not " + params.LUT
         )
 
