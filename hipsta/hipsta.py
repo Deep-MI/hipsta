@@ -144,9 +144,9 @@ def _parse_arguments():
     required.add_argument(
         "--lut",
         dest="lut",
-        help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2', \
-            'ashs-penn_abc_3t_t2_ent', 'ashs-penn_abc_3t_t2_ext', and \'ashs-umcutrecht_7t\' \
-            are keywords for built-in tables.",
+        help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', \
+            'ashs-penn_abc_3t_t2', 'ashs-penn_abc_3t_t2_ent', 'ashs-penn_abc_3t_t2_ext', and \
+            'ashs-umcutrecht_7t\' are keywords for built-in tables.",
         default=None,
         metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-penn_abc_3t_t2_ent|ashs-penn_abc_3t_t2_ext|ashs-umcutrecht_7t|filename>",
         required=False,

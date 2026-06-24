@@ -106,10 +106,10 @@ def createSupplementaryFiles(params):
 
     else:
         logging.info(
-            "Creation of subfield boundary overlays is only supported for the freesurfer and (some) ashs look-up tables."
+            "Creation of subfield boundary overlays is only supported for the freesurfer and (some) ashs look-up tables." # noqa: E501
         )
 
-    if LUT == "freesurfer" or LUT == "ashs-penn_abc_3t_t2" or LUT == "ashs-penn_abc_3t_t2_ext" or LUT == "ashs-umcutrecht_7t":
+    if LUT == "freesurfer" or LUT == "ashs-penn_abc_3t_t2" or LUT == "ashs-penn_abc_3t_t2_ext" or LUT == "ashs-umcutrecht_7t": # noqa: E501
 
         # get mid-surface
 

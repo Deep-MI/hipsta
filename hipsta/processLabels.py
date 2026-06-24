@@ -83,7 +83,7 @@ def autoMask(params):
             if params.LUT == "ashs-penn_abc_3t_t2_ext":
                 if labelCA2 is not None and labelCA3 is not None and labelENT is not None and labelBA35 is not None:
                     # # find instance of CA2/CA3 or ENT or BA35
-                    # idxHead = np.argwhere(np.logical_or(dat == labelBA35, np.logical_or(dat == labelENT, np.logical_or(dat == labelCA2, dat == labelCA3))))
+                    # idxHead = np.argwhere(np.logical_or(dat == labelBA35, np.logical_or(dat == labelENT, np.logical_or(dat == labelCA2, dat == labelCA3)))) # noqa: E501
                     # find instance of CA2/CA3
                     idxHead = np.argwhere(np.logical_or(dat == labelCA2, dat == labelCA3))
                 else:
@@ -134,7 +134,7 @@ def autoMask(params):
             dat[dat == labelTail] = 0
             #
             if params.LUT == "ashs-penn_abc_3t_t2_ext":
-                if labelPHC is not None and labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None:
+                if labelPHC is not None and labelSbc is not None and labelCA1 is not None and labelCA2 is not None and labelCA3 is not None: # noqa: E501
                     # find instance of Sbc/CA1/CA2/CA3 and PHC
                     idxTail = np.intersect1d(np.argwhere(dat == labelPHC)[:, imgDimsAP],
                         np.intersect1d(np.argwhere(dat == labelSbc)[:, imgDimsAP],

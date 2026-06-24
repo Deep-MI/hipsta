@@ -647,7 +647,7 @@ def computeCubeParam(params):
     e4cBndOpen = np.concatenate((t4cBndOpen[:, (0, 1)], t4cBndOpen[:, (0, 2)], t4cBndOpen[:, (1, 2)]), axis=0)
     e4cBndOpen = np.unique(np.sort(e4cBndOpen, axis=1), axis=1)
 
-    if params.LUT == "freesurfer" or params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ext" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT):
+    if params.LUT == "freesurfer" or params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ext" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT): # noqa: E501
 
         # if working on the hippocampus:
 
@@ -660,16 +660,16 @@ def computeCubeParam(params):
         # assume the surface coord system to be always the same (rightly or not).
         # we rely on appropriate transformation matrices, though.
 
-        prsbc_or_sbc = np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"])
+        prsbc_or_sbc = np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]) # noqa: E501
 
         img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
         mat = np.linalg.inv(img.header.get_vox2ras_tkr())
         pts = np.concatenate((v4cBndOpenRm, np.ones((v4cBndOpenRm.shape[0], 1))), axis=1)
         v4cBndOpenRm_ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
 
-        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2]):
+        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2]): # noqa: E501
             pass
-        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2,]):
+        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2,]): # noqa: E501
             LOGGER.info("Flipping EV1")
             anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
         else:
@@ -721,9 +721,9 @@ def computeCubeParam(params):
         pts = np.concatenate((v4cBndOpenRm, np.ones((v4cBndOpenRm.shape[0], 1))), axis=1)
         v4cBndOpenRm_ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
 
-        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]):
+        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]): # noqa: E501
             pass
-        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]):
+        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]): # noqa: E501
             LOGGER.info("Flipping EV1")
             anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
         else:
@@ -741,8 +741,8 @@ def computeCubeParam(params):
 
         # decide whether or not to flip anisoLaplEvec[:, 2] (should be ... -> BA35)
 
-        any_positive_ba35 = np.where(np.logical_and(anisoLaplEvec[:, 2] > 0, k4c[hsfList] == params.LUTDICT["bndba35"]))[0]
-        any_negative_ba35 = np.where(np.logical_and(anisoLaplEvec[:, 2] < 0, k4c[hsfList] == params.LUTDICT["bndba35"]))[0]
+        any_positive_ba35 = np.where(np.logical_and(anisoLaplEvec[:, 2] > 0, k4c[hsfList] == params.LUTDICT["bndba35"]))[0] # noqa: E501
+        any_negative_ba35 = np.where(np.logical_and(anisoLaplEvec[:, 2] < 0, k4c[hsfList] == params.LUTDICT["bndba35"]))[0] # noqa: E501
 
         if len(any_negative_ba35) == 0 and len(any_positive_ba35) > 0:
             pass
@@ -770,9 +770,7 @@ def computeCubeParam(params):
             raise RuntimeError("Inconsistency detected for EV2, exiting.")
 
     else:
-        LOGGER.warning(
-            "Warning: could not determine flipping of eigenfunction. As a result, medial/lateral and/or anterior/posterior orientations may be inconsistent. Check your results."
-        )
+        LOGGER.warning("Warning: could not determine flipping of eigenfunction. As a result, medial/lateral and/or anterior/posterior orientations may be inconsistent. Check your results.") # noqa: E501
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
