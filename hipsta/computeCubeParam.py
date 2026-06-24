@@ -797,7 +797,13 @@ def computeCubeParam(params):
 
     # x:
 
-    if params.LUT == "freesurfer-no_ml" or params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ent" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT):
+    if params.LUT in (
+        "freesurfer",
+        "freesurfer-no_ml",
+        "ashs-penn_abc_3t_t2",
+        "ashs-penn_abc_3t_t2_ent",
+        "ashs-umcutrecht_7t",
+    ) or os.path.isfile(params.LUT):
 
         # if working on the hippocampus without ctx or on the ERC:
 
