@@ -123,7 +123,7 @@ def createTetraLabels(params):
 
         subprocess.run(cmd.split(), capture_output=True)
 
-    if params.LUTDICT["entorhinal"] in params.HSFLIST:
+    if params.LUT == "ashs-penn_abc_3t_t2_ent":
         _createBoundaryMask(
             hbtFile=HBTFILE,
             mskFile=MSKFILE,
