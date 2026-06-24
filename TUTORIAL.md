@@ -322,7 +322,7 @@ subiculum and presubiculum into the cortex.
 
 ![](images/scaled/ctx-01.png)
 
-A potential issue that might arise in this analyis could be due to large shifts 
+A potential issue that might arise in this analysis could be due to large shifts 
 between segmentations in successive slices, especially for anisotropic voxel 
 sizes, leading to holes in the surface mesh. Another potential issue is too close 
 proximity of the subiculum / CA1 and cortical regions so that the surface mesh 
