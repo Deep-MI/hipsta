@@ -20,7 +20,8 @@ The hipsta scripts can be run from the command line as follows:
 Hippocampal shape and thickness analysis
 ----------------------------------------
 
-usage: run_hipsta [--filename <filename>] [--hemi <lh|rh>] [--lut <freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>] [--outputdir <directory>] [--no-cleanup] [--no-crop] [--upsample] [--upsample-size <float> <float> <float>]
+usage: run_hipsta [--filename <filename>] [--hemi <lh|rh>] [--lut <freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>] [--outputdir <directory>]
+                  [--start-with-edited-labels] [--start-with-edited-masks] [--no-cleanup] [--no-crop] [--upsample] [--upsample-size <float> <float> <float>]
                   [--no-merge-molecular-layer] [--automask-head] [--automask-tail] [--automask-head-margin <int>] [--automask-tail-margin <int>] [--no-gauss-filter]
                   [--gauss-filter-size <float> <float>] [--long-filter] [--long-filter-size <int>] [--no-close-mask] [--mca <mri_mc|skimage>] [--remesh] [--smooth <int>] [--cut-range <float> <float>]
                   [--aniso-alpha <float> [<float> ...]] [--aniso-smooth <int>] [--thickness-grid <float> <float> <float> <float> <float> <float> <float> <float> <float>] [--help] [--more-help]
@@ -40,6 +41,7 @@ Required arguments:
 Optional arguments:
   --start-with-edited-labels
                         Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz file in an existing output directory. Existing files will be overwritten.
+  --start-with-edited-masks
                         Start with edited masks. Requires an edited lh.mask.mgz or rh.mask.mgz file in an existing output directory. Existing files will be overwritten.
   --no-cleanup          Do not remove files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.
   --no-crop             Do not crop image.
