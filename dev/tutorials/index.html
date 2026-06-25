@@ -239,8 +239,7 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <p>=======</p>
-<section id="tutorial">
+          <section id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading">¶</a></h1>
 <p>This documenent complements the <a class="reference internal" href="#hipsta/doc/DOCUMENTATION.md"><span class="xref myst">technical documentation</span></a>
 of the hippocampal shape and thickness analysis scripts by providing a more
@@ -452,9 +451,9 @@ smallest voxel edge length. This can be refined more using the <code class="docu
 argument.</p>
 <p>Since no explicit labels for the hippocampal head are present in ASHS
 segmentations, it will be necessary to use the <code class="docutils literal notranslate"><span class="pre">--automask-head</span></code> flag and
-optionally also the <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code> argument. If the identification of
-the boundary between hippocampal body tail does not work well given the existing
-labels, using the <code class="docutils literal notranslate"><span class="pre">--automask-tail</span></code> flag and optionally the <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code>
+optionally also the <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code> argument. If the identification of
+the boundary between hippocampal body and tail does not work well given the existing
+labels, using the <code class="docutils literal notranslate"><span class="pre">--automask-tail</span></code> flag and optionally the <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code>
 argument may be advised as well.</p>
 </section>
 <section id="additional-arguments-for-ashs-and-freesurfer-segmentations">
@@ -479,7 +478,7 @@ hippocampal thickness values will be stored in csv tables:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Filenane</p></th>
+<tr class="row-odd"><th class="head"><p>Filename</p></th>
 <th class="head"><p>Contents</p></th>
 </tr>
 </thead>
@@ -488,7 +487,7 @@ hippocampal thickness values will be stored in csv tables:</p>
 <td><p>Length estimates in the medial-to-lateral dimension</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lh.grid-segments-y.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">rh.grid-segments-y.csv</span></code></p></td>
-<td><p>Length estimates in the medial-to-lateral dimension</p></td>
+<td><p>Length estimates in the posterior-to-anterior dimension</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lh.grid-segments-z.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">rh.grid-segments-z.csv</span></code></p></td>
 <td><p>Thickness estimates in the exterior-to-interior dimension</p></td>
@@ -551,6 +550,48 @@ provided for interior, mid, and exterior surfaces:</p>
 </tbody>
 </table>
 </div>
+</section>
+<section id="extensions-to-parahippocampal-and-entorhinal-cortex">
+<h2>Extensions to parahippocampal and entorhinal cortex<a class="headerlink" href="#extensions-to-parahippocampal-and-entorhinal-cortex" title="Link to this heading">¶</a></h2>
+<p>The Penn ABC-3T ASHS atlas includes several labels beyond the hippocampus,
+including parahippocampal, entorhinal, BA35, and BA36 regions. The analysis can
+extended to parts of these regions as well. The corresponding processing
+variants can be called with the <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ext</span></code> and <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ent</span></code>
+arguments. The former will add (parts of) parahippocampal and entorhinal cortex
+as well as BA35 to the analysis, but still restrict the analysis to the
+hippocampal body region along the longitudinal axis.
+The latter will perform a separate analysis of the entorhinal cortex. Due to
+more complex or variable anatomy, these approaches should to some extent be
+considered experimental and may require additional QC or manual edits.</p>
+<p>The expected output when using <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ext</span></code> is shown in the
+following figure; it is simply an extension of the analysis beyond the
+subiculum and presubiculum into the cortex.</p>
+<p><img alt="" src="../_images/ctx-01.png" /></p>
+<p>A potential issue that might arise in this analysis could be due to large shifts
+between segmentations in successive slices, especially for anisotropic voxel
+sizes, leading to holes in the surface mesh. Another potential issue is too close
+proximity of the subiculum / CA1 and cortical regions so that the surface mesh
+will incorrectly create a connection. Manual edits or changing the
+spatial filter settings may help resolving these issues (see the following
+section on Troubleshooting for details).</p>
+<p><img alt="" src="../_images/ctx-03a.png" />
+<img alt="" src="../_images/ctx-03b.png" />
+<img alt="" src="../_images/ctx-03c.png" />
+<img alt="" src="../_images/ctx-02.png" /></p>
+<p>The expected output when using <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ent</span></code> is shown below.
+Here, we leave out the hippocampal labels and restrict the analysis the
+complete entorhinal cortex segmentation.</p>
+<p><img alt="" src="../_images/erc-01a.png" />
+<img alt="" src="../_images/erc-01b.png" />
+<img alt="" src="../_images/erc-01c.png" /></p>
+<p>Care should be taken that the entorhinal cortex is cut across its full extent
+at its anterior and posterior ends. The left figure shows to conservative
+cutting, the middle and right figure more appropriate cuts. Cutting can be
+adjusted using the <code class="docutils literal notranslate"><span class="pre">--cut-range</span></code> and <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code> / <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code>
+arguments (see the following section on Troubleshooting for details).</p>
+<p><img alt="" src="../_images/erc-02a.png" />
+<img alt="" src="../_images/erc-02b.png" />
+<img alt="" src="../_images/erc-02c.png" /></p>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
@@ -730,6 +771,7 @@ may be obtained with lower absolute values.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#evaluating-the-output">Evaluating the output</a></li>
+<li><a class="reference internal" href="#extensions-to-parahippocampal-and-entorhinal-cortex">Extensions to parahippocampal and entorhinal cortex</a></li>
 <li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
 <li><a class="reference internal" href="#logfiles">Logfiles</a></li>
 <li><a class="reference internal" href="#qc">QC</a><ul>
