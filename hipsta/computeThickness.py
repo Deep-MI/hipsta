@@ -275,10 +275,10 @@ def computeThickness(params):
 
     dfx = pd.DataFrame(llxLgth)
 
-    dz = zip(range(0, dfx.shape[1]), ["z" + str(z) for z in range(0, dfx.shape[1])])
+    dz = zip(range(0, dfx.shape[1]), ["z" + str(z) for z in range(0, dfx.shape[1])], strict=True)
     dfx = dfx.rename(columns=dict(dz))
 
-    dy = zip(range(0, dfx.shape[0]), ["y" + str(z) for z in range(0, dfx.shape[0])])
+    dy = zip(range(0, dfx.shape[0]), ["y" + str(z) for z in range(0, dfx.shape[0])], strict=True)
     dfx = dfx.rename(index=dict(dy))
 
     dfx.to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-segments-x.csv"))
@@ -321,10 +321,10 @@ def computeThickness(params):
 
     dfy = pd.DataFrame(llyLgth)
 
-    dz = zip(range(0, dfy.shape[1]), ["z" + str(z) for z in range(0, dfy.shape[1])])
+    dz = zip(range(0, dfy.shape[1]), ["z" + str(z) for z in range(0, dfy.shape[1])], strict=True)
     dfy = dfy.rename(columns=dict(dz))
 
-    dx = zip(range(0, dfy.shape[0]), ["x" + str(z) for z in range(0, dfy.shape[0])])
+    dx = zip(range(0, dfy.shape[0]), ["x" + str(z) for z in range(0, dfy.shape[0])], strict=True)
     dfy = dfy.rename(index=dict(dx))
 
     dfy.to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-segments-y.csv"))
@@ -367,10 +367,10 @@ def computeThickness(params):
 
     dfz = pd.DataFrame(llzLgth)
 
-    dy = zip(range(0, dfz.shape[1]), ["y" + str(z) for z in range(0, dfz.shape[1])])
+    dy = zip(range(0, dfz.shape[1]), ["y" + str(z) for z in range(0, dfz.shape[1])], strict=True)
     dfz = dfz.rename(columns=dict(dy))
 
-    dx = zip(range(0, dfz.shape[0]), ["x" + str(z) for z in range(0, dfz.shape[0])])
+    dx = zip(range(0, dfz.shape[0]), ["x" + str(z) for z in range(0, dfz.shape[0])], strict=True)
     dfz = dfz.rename(index=dict(dx))
 
     dfz.to_csv(os.path.join(OUT_DIR, params.HEMI + ".grid-segments-z.csv"))

@@ -346,7 +346,7 @@ def cutTetra(params):
     )
     A = sp.eye(np.shape(v4c)[0])
     A = A + sp.coo_matrix(
-        (np.ones((np.shape(idx)[0])), (idx[:, 0], idx[:, 1])), shape=(np.shape(v4c)[0], np.shape(v4c)[0])
+        (np.ones(np.shape(idx)[0]), (idx[:, 0], idx[:, 1])), shape=(np.shape(v4c)[0], np.shape(v4c)[0])
     )
     A = A + A.transpose()
     A[A > 0] = 1

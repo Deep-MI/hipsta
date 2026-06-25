@@ -144,10 +144,11 @@ def _parse_arguments():
     required.add_argument(
         "--lut",
         dest="lut",
-        help="Look-up table: a text file with numeric and verbal segmentation labels. 'freesurfer', \
-              'ashs-penn_abc_3t_t2', and 'ashs-umcutrecht_7t' are keywords for built-in tables.",
+        help="Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', \
+            'ashs-penn_abc_3t_t2', 'ashs-penn_abc_3t_t2_ent', 'ashs-penn_abc_3t_t2_ext', and \
+            'ashs-umcutrecht_7t\' are keywords for built-in tables.",
         default=None,
-        metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-umcutrecht_7t|filename>",
+        metavar="<freesurfer|ashs-penn_abc_3t_t2|ashs-penn_abc_3t_t2_ent|ashs-penn_abc_3t_t2_ext|ashs-umcutrecht_7t|filename>",
         required=False,
     )
     required.add_argument(
@@ -161,6 +162,26 @@ def _parse_arguments():
 
     # optional arguments
     optional = parser.add_argument_group("Optional arguments")
+
+    optional.add_argument(
+        "--start-with-edited-labels",
+        dest="start_with_edited_labels",
+        help="Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz \
+               file in an existing output directory. Existing files will be overwritten.",
+        default=get_defaults("start_with_edited_labels"),
+        action="store_true",
+        required=False,
+    )
+
+    optional.add_argument(
+        "--start-with-edited-masks",
+        dest="start_with_edited_masks",
+        help="Start with edited masks. Requires an edited lh.mask.mgz or rh.mask.mgz \
+               file in an existing output directory. Existing files will be overwritten.",
+        default=get_defaults("start_with_edited_masks"),
+        action="store_true",
+        required=False,
+    )
 
     optional.add_argument(
         "--no-cleanup",
@@ -492,6 +513,11 @@ def _evaluate_args(args):
     class settings:
         pass
 
+    # processing
+
+    settings.START_WITH_EDITED_LABELS = args.start_with_edited_labels
+    settings.START_WITH_EDITED_MASKS = args.start_with_edited_masks
+
     # clean up
 
     settings.CLEANUP = not (args.no_cleanup)
@@ -598,10 +624,20 @@ def _evaluate_args(args):
     class params:
         pass
 
-    params.FILENAME = os.path.abspath(args.filename)
     params.HEMI = args.hemi
     params.LUT = args.lut
     params.OUTDIR = args.outputdir
+
+    if settings.START_WITH_EDITED_LABELS is False and settings.START_WITH_EDITED_MASKS is False:
+        params.FILENAME = os.path.abspath(args.filename)
+    elif settings.START_WITH_EDITED_LABELS is False and settings.START_WITH_EDITED_MASKS is True:
+        params.FILENAME = os.path.join(params.OUTDIR, params.HEMI + ".mask.mgz")
+    elif settings.START_WITH_EDITED_LABELS is True and settings.START_WITH_EDITED_MASKS is False:
+        params.FILENAME = os.path.join(params.OUTDIR, params.HEMI + ".labels.mgz")
+    elif settings.START_WITH_EDITED_LABELS is True and settings.START_WITH_EDITED_MASKS is True:
+        raise RuntimeError("Start with edited labels and Start with edited masks cannot both be true.")
+    else:
+        raise RuntimeError("Error parsing input arguments (Start with edited labels / Start with edited masks).")
 
     params.LUTDICT = LUTDICT
     params.HSFLIST = HSFLIST
@@ -670,13 +706,19 @@ def _check_params(params):
     if (
         params.LUT != "freesurfer"
         and params.LUT != "ashs-penn_abc_3t_t2"
+        and params.LUT != "ashs-penn_abc_3t_t2_ent"
+        and params.LUT != "ashs-penn_abc_3t_t2_ext"
         and params.LUT != "ashs-umcutrecht_7t"
         and not os.path.isfile(params.LUT)
     ):
         raise RuntimeError(
-            "Look-up table can only be 'freesurfer', 'ashs-penn_abc_3t_t2', 'ashs-umcutrecht_7t', \
-             or an existing file, but not "
-            + params.LUT
+            "Look-up table can only be " + \
+                "'freesurfer', " + \
+                "'ashs-penn_abc_3t_t2', " + \
+                "'ashs-penn_abc_3t_t2_ent', " + \
+                "'ashs-penn_abc_3t_t2_ext', " + \
+                "'ashs-umcutrecht_7t', " + \
+                "or an existing file, but not " + params.LUT
         )
 
     # check HSFLIST
@@ -700,48 +742,51 @@ def _run_analysis(params):
 
     # process image (1)
 
-    LOGGER.info("Starting convertFormat() ...")
-    params = convertFormat(params)
+    if params.internal.START_WITH_EDITED_LABELS is False and params.internal.START_WITH_EDITED_MASKS is False:
+        LOGGER.info("Starting convertFormat() ...")
+        params = convertFormat(params)
 
-    LOGGER.info("Starting cropImage() ...")
-    params = cropImage(params)
+        LOGGER.info("Starting cropImage() ...")
+        params = cropImage(params)
 
-    LOGGER.info("Starting upsampleImage() ...")
-    params = upsampleImage(params)
+        LOGGER.info("Starting upsampleImage() ...")
+        params = upsampleImage(params)
 
-    LOGGER.info("Starting copy_image_to_main() ...")
-    params = copy_image_to_main(params)
+        LOGGER.info("Starting copy_image_to_main() ...")
+        params = copy_image_to_main(params)
 
     # process labels (2)
 
-    LOGGER.info("Starting autoMask() ...")
-    params = autoMask(params)
+    if params.internal.START_WITH_EDITED_LABELS is False and params.internal.START_WITH_EDITED_MASKS is False:
+        LOGGER.info("Starting autoMask() ...")
+        params = autoMask(params)
 
-    LOGGER.info("Starting createLabels() ...")
-    params = createLabels(params)
+        LOGGER.info("Starting createLabels() ...")
+        params = createLabels(params)
 
-    LOGGER.info("Starting mergeMolecularLayer() ...")
-    params = mergeMolecularLayer(params)
+        LOGGER.info("Starting mergeMolecularLayer() ...")
+        params = mergeMolecularLayer(params)
 
-    LOGGER.info("Starting copy_labels_to_main() ...")
-    params = copy_labels_to_main(params)
+        LOGGER.info("Starting copy_labels_to_main() ...")
+        params = copy_labels_to_main(params)
 
     # process mask (3)
 
-    LOGGER.info("Starting binarizeMask() ...")
-    params = binarizeMask(params)
+    if params.internal.START_WITH_EDITED_MASKS is False:
+        LOGGER.info("Starting binarizeMask() ...")
+        params = binarizeMask(params)
 
-    LOGGER.info("Starting gaussFilter() ...")
-    params = gaussFilter(params)
+        LOGGER.info("Starting gaussFilter() ...")
+        params = gaussFilter(params)
 
-    LOGGER.info("Starting longFilter() ...")
-    params = longFilter(params)
+        LOGGER.info("Starting longFilter() ...")
+        params = longFilter(params)
 
-    LOGGER.info("Starting closeMask() ...")
-    params = closeMask(params)
+        LOGGER.info("Starting closeMask() ...")
+        params = closeMask(params)
 
-    LOGGER.info("Starting copy_mask_to_main() ...")
-    params = copy_mask_to_main(params)
+        LOGGER.info("Starting copy_mask_to_main() ...")
+        params = copy_mask_to_main(params)
 
     # create surface (4)
 
@@ -875,8 +920,9 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     hemi :
         Hemisphere. Either \'lh\' or \'rh\'.
     lut :
-        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\', 'ashs-penn_abc_3t_t2'
-        and \'ashs-umcutrecht_7t\' are keywords for built-in tables.
+        Look-up table: a text file with numeric and verbal segmentation labels. \'freesurfer\',
+        'ashs-penn_abc_3t_t2', 'ashs-penn_abc_3t_t2_ent', 'ashs-penn_abc_3t_t2_ext', and \'ashs-umcutrecht_7t\'
+        are keywords for built-in tables.
     outputdir :
         Directory where the results will be written.
 

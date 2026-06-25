@@ -5,6 +5,7 @@ This module provides a function to remove boundary tetras from tetrahedral meshe
 
 import os
 
+import nibabel as nb
 import numpy as np
 from lapy import TetMesh, io
 
@@ -161,6 +162,13 @@ def removeBoundaryMask(params):
     tetMeshBnd.write_vtk(filename=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd.tetra.vtk"))
 
     io.write_vfunc(os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd.tetra.psol"), vIdx)
+
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(
+            dataobj=vIdx[vRmBndKeep].astype("float32"), affine=None
+        ),
+        filename=os.path.join(params.OUTDIR, "tetra-cut", params.HEMI + ".rm.bnd.tetra.mgh"),
+    )
 
     # -------------------------------------------------------------------------
     # return

@@ -11,7 +11,7 @@ hippocampal shape and thickness analysis as described in our recent [publication
 
 Please see the [documentation pages](https://deep-mi.org/hipsta/dev/index.html) for a general overview, usage information and
 examples, and output description. Brief usage information is also available [here](hipsta/doc/DOCUMENTATION.md).
-Some suggestions for running the script can be found in the [tutorial](TUTORIAL.md).
+Some suggestions for running the script can be found in the [tutorial](https://deep-mi.org/hipsta/dev/tutorials/index.html).
 
 
 ## Current status:
@@ -75,7 +75,7 @@ exist as an environment variable and point to a valid FreeSurfer installation.
 or the ASHS software. A custom segmentation is also permissible (some restrictions
 and settings apply; see [Supported Segmentations](https://github.com/Deep-MI/Hipsta#supported-segmentations)).
 
-3. Python 3.8 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
+3. Python 3.10 or higher including the lapy, numpy, scipy, nibabel, pyvista, and
 pyacvd libraries, among others. See `requirements.txt` for a full list, and use
 `pip install -r requirements.txt` to install.
 

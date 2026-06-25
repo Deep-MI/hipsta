@@ -96,31 +96,58 @@ def createTetraLabels(params):
         label=[params.LUTDICT["tail"], params.LUTDICT["head"]],
         bndlabel=[params.LUTDICT["bndtail"], params.LUTDICT["bndhead"]],
     )
-    _createBoundaryMask(
-        hbtFile=HBTFILE,
-        mskFile=MSKFILE,
-        outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz"),
-        label=[params.LUTDICT["ca4"]],
-        bndlabel=[params.LUTDICT["bndca4"]],
-    )
 
-    # merge bnd and ca4 masks (add ca4 to bnd)
+    if params.LUTDICT["ca4"] in params.HSFLIST:
+        _createBoundaryMask(
+            hbtFile=HBTFILE,
+            mskFile=MSKFILE,
+            outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz"),
+            label=[params.LUTDICT["ca4"]],
+            bndlabel=[params.LUTDICT["bndca4"]],
+        )
 
-    cmd = (
-        os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mris_calc")
-        + " "
-        + "--output "
-        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz")
-        + " "
-        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz")
-        + " "
-        + "lowerlimit "
-        + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz")
-    )
+        # merge bnd and ca4 masks (add ca4 to bnd)
+        cmd = (
+            os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mris_calc")
+            + " "
+            + "--output "
+            + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz")
+            + " "
+            + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz")
+            + " "
+            + "lowerlimit "
+            + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ca4.mgz")
+        )
 
-    print(cmd)
+        print(cmd)
 
-    subprocess.run(cmd.split(), capture_output=True)
+        subprocess.run(cmd.split(), capture_output=True)
+
+    if params.LUT == "ashs-penn_abc_3t_t2_ent":
+        _createBoundaryMask(
+            hbtFile=HBTFILE,
+            mskFile=MSKFILE,
+            outFile=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ba35.mgz"),
+            label=[params.LUTDICT["ba35"]],
+            bndlabel=[params.LUTDICT["bndba35"]],
+        )
+
+        # merge bnd and ba35 masks (add ba35 to bnd)
+        cmd = (
+            os.path.join(os.environ.get("FREESURFER_HOME"), "bin", "mris_calc")
+            + " "
+            + "--output "
+            + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz")
+            + " "
+            + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-bnd.mgz")
+            + " "
+            + "lowerlimit "
+            + os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + "." + "labels-ba35.mgz")
+        )
+
+        print(cmd)
+
+        subprocess.run(cmd.split(), capture_output=True)
 
     # load bnd image
 
@@ -163,7 +190,7 @@ def createTetraLabels(params):
         nb.freesurfer.MGHImage(
             dataobj=np.array([float(x) for x in vtxLabels])[vRmBndKeep].astype("float32"), affine=None
         ),
-        filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.label.mgh"),
+        filename=os.path.join(params.OUTDIR, "tetra-labels", params.HEMI + ".rm.bnd.tetra.mgh"),
     )
 
     # return

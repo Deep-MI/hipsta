@@ -26,7 +26,7 @@ def get_atlases(lut):
 
         LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244, 246]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [234, 236, 238, 240, 246]
 
@@ -37,7 +37,7 @@ def get_atlases(lut):
 
         LUTINDEX = [226, [233, 235, 237, 239, 245], 234, 236, 238, 240, 240, 242, 244]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [234, 236, 238, 240]
 
@@ -63,9 +63,61 @@ def get_atlases(lut):
 
         LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [8, 1, 2, 4]
+
+    elif lut == "ashs-penn_abc_3t_t2_ent":
+        LOGGER.info("Found internal, modified look-up table for the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+
+        LUTLABEL = [
+            "ca1",
+            "ca2",
+            "ca3",
+            "ca4",
+            "dg",
+            "tail_orig",
+            "subiculum",
+            "presubiculum",
+            "entorhinal",
+            "ba35",
+            "ba36",
+            "parahippocampal",
+            "head",
+            "tail",
+        ]
+
+        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
+
+        HSFLIST = [9]
+
+    elif lut == "ashs-penn_abc_3t_t2_ext":
+        LOGGER.info("Found internal, modified look-up table for the Penn ABC-3T ASHS Atlas for T2-weighted MRI.")
+
+        LUTLABEL = [
+            "ca1",
+            "ca2",
+            "ca3",
+            "ca4",
+            "dg",
+            "tail_orig",
+            "subiculum",
+            "presubiculum",
+            "entorhinal",
+            "ba35",
+            "ba36",
+            "parahippocampal",
+            "head",
+            "tail",
+        ]
+
+        LUTINDEX = [1, 2, 4, 3, 3, 5, 8, 8, 9, 10, 11, 12, 20, 5]
+
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
+
+        HSFLIST = [12, 10, 9, 8, 1, 2, 4]
 
     elif lut == "ashs-umcutrecht_7t":
         LOGGER.info("Found internal, modified look-up table for ASHS UMC Utrecht 7T atlas.")
@@ -86,7 +138,7 @@ def get_atlases(lut):
 
         LUTINDEX = [1, 2, 2, 3, 4, 5, 6, 5, 7, 8, 20]
 
-        LUTDICT = dict(zip(LUTLABEL, LUTINDEX))
+        LUTDICT = dict(zip(LUTLABEL, LUTINDEX, strict=True))
 
         HSFLIST = [2, 3, 4, 6]
 
@@ -105,7 +157,7 @@ def get_atlases(lut):
 
         lut = lut[lut[1].str.lower().isin(["presubiculum", "subiculum", "head", "tail", "ca1", "ca2", "ca3", "ca4"])]
 
-        LUTDICT = dict(zip(lut[1], lut[0]))
+        LUTDICT = dict(zip(lut[1], lut[0], strict=True))
 
         HSFLIST = list(lut[1])
 
@@ -121,6 +173,7 @@ def get_atlases(lut):
     LUTDICT["bndtail"] = 2260
     LUTDICT["bndhead"] = 2320
     LUTDICT["bndca4"] = 2420
+    LUTDICT["bndba35"] = 100
 
     # return
 

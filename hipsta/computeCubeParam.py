@@ -12,8 +12,6 @@ from lapy import Solver, TetMesh, TriaMesh, io
 from scipy import sparse as sp
 from scipy import stats as st
 
-# from sklearn.decomposition import PCA
-
 # ==============================================================================
 # LOGGING
 
@@ -39,7 +37,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     # getSeam subfunction #1
 
     # case 1: one nan in the tetra
-    def getSeamCase1(v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i):
+    def getSeamCase1(v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i):
         # do we have one or two neg values?
         # case 1a: one neg value
         if np.sum(vfuncXEv1[t4c[i, :]] < 0) == 1:
@@ -88,16 +86,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 # also append i4c and k4c
                 i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
                 k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
-                # let's remember the new indices, and whether or not it's a
-                # 'positive' or 'negative' tetra (in terms of the 2nd
-                # eigenfunction)
                 newVtcs = np.concatenate((newVtcs, [idxPt1]))
-                tmpSgn = np.unique(vfuncXEv2[t4c[i, :]][np.logical_not(np.isnan(vfuncXEv2[t4c[i, :]]))])
-                if len(tmpSgn) == 1:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
-                else:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    raise RuntimeError("Inconsistency while creating seam 1, exiting.")
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -113,16 +102,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 # also append i4c and k4c
                 i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
                 k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
-                # let's remember the new indices, and whether or not it's a
-                # 'positive' or 'negative' tetra (in terms of the 2nd
-                # eigenfunction)
                 newVtcs = np.concatenate((newVtcs, [idxPt2]))
-                tmpSgn = np.unique(vfuncXEv2[t4c[i, :]][np.logical_not(np.isnan(vfuncXEv2[t4c[i, :]]))])
-                if len(tmpSgn) == 1:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
-                else:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    raise RuntimeError("Inconsistency while creating seam 2, exiting.")
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos2], t4c[i, idxNeg1]]
 
@@ -184,16 +164,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 # also append i4c and k4c
                 i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
                 k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
-                # let's remember the new indices, and whether or not it's a
-                # 'positive' or 'negative' tetra (in terms of the 2nd
-                # eigenfunction)
                 newVtcs = np.concatenate((newVtcs, [idxPt1]))
-                tmpSgn = np.unique(vfuncXEv2[t4c[i, :]][np.logical_not(np.isnan(vfuncXEv2[t4c[i, :]]))])
-                if len(tmpSgn) == 1:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
-                else:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    raise RuntimeError("Inconsistency while creating seam 3, exiting.")
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -209,16 +180,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 # also append i4c and k4c
                 i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
                 k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
-                # let's remember the new indices, and whether or not it's a
-                # 'positive' or 'negative' tetra (in terms of the 2nd
-                # eigenfunction)
                 newVtcs = np.concatenate((newVtcs, [idxPt2]))
-                tmpSgn = np.unique(vfuncXEv2[t4c[i, :]][np.logical_not(np.isnan(vfuncXEv2[t4c[i, :]]))])
-                if len(tmpSgn) == 1:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
-                else:
-                    newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                    raise RuntimeError("Inconsistency while creating seam 4, exiting.")
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg2]]
 
@@ -237,13 +199,13 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             raise RuntimeError("Inconsistency while creating seam (incorrect number of negative values), exiting.")
 
         # return
-        return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn
+        return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj
 
     # --------------------------------------------------------------------------
     # getSeam subfunction #2
 
     # case 2: two nans in tetra
-    def getSeamCase2(v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i):
+    def getSeamCase2(v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i):
         # get indices
         idxPos1 = np.where(vfuncXEv1[t4c[i, :]] > 0)[0][0]
         idxNeg1 = np.where(vfuncXEv1[t4c[i, :]] < 0)[0][0]
@@ -279,16 +241,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             # also append i4c and k4c
             i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
             k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
-            # let's remember the new indices, and whether or not it's a
-            # 'positive' or 'negative' tetra (in terms of the 2nd
-            # eigenfunction)
             newVtcs = np.concatenate((newVtcs, [idxPt1]))
-            tmpSgn = np.unique(vfuncXEv2[t4c[i, :]][np.logical_not(np.isnan(vfuncXEv2[t4c[i, :]]))])
-            if len(tmpSgn) == 1:
-                newVtcsSgn = np.concatenate((newVtcsSgn, tmpSgn))
-            else:
-                newVtcsSgn = np.concatenate((newVtcsSgn, np.array([0])))
-                raise RuntimeError("Inconsistency while creating seam 5, exiting.")
         else:
             idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
 
@@ -303,14 +256,14 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
         )
 
         # return
-        return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn
+        return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj
 
     # --------------------------------------------------------------------------
     # getSeam subfunction #3
 
     # case 3: zero nans in the tetra (could happen for boundary tetras
     # towards two sides)
-    def getSeamCase3(v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i):
+    def getSeamCase3(v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i):
         # determine which edges of the current tetra belong to the
         # boundary surface
         numEdgeBnd = np.where(
@@ -406,8 +359,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     ),
                 ]
             ] = np.nan
-            v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
-                v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+            v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase2(
+                v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
             )
         elif (
             len(numEdgeBnd) == 3
@@ -432,8 +385,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     ),
                 ]
             ] = np.nan
-            v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase1(
-                v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+            v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase1(
+                v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
             )
         elif (
             len(numEdgeBnd) == 3
@@ -459,14 +412,14 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     ),
                 ]
             ] = np.nan
-            v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase1(
-                v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+            v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase1(
+                v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
             )
         else:
             raise RuntimeError("Unknown getSeam() case, exiting.")
 
         # return
-        return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn
+        return v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj
 
     # --------------------------------------------------------------------------
     # main part of function
@@ -474,17 +427,12 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
 
     # initialize
     newVtcs = np.empty(shape=(0), dtype=int)
-    newVtcsSgn = np.empty(shape=(0), dtype=int)
     newVtcsAdj = sp.lil_matrix((len(v4c), len(v4c)), dtype=int)
     newTetra = np.empty(shape=(0, 4), dtype=int)
 
     # assign first eigenfunction
     vfuncXEv1 = np.zeros(np.shape(v4c)[0]) * np.nan
     vfuncXEv1[v4cBndOpenKeep] = anisoLaplEvec[:, 1]
-
-    # assign second eigenfunction
-    vfuncXEv2 = np.zeros(np.shape(v4c)[0]) * np.nan
-    vfuncXEv2[v4cBndOpenKeep] = np.sign(anisoLaplEvec[:, 2])
 
     # find tetra with zeros: first, transform boundary trias to edges; here,
     # the important trick is to start working with the boundary trias from
@@ -521,8 +469,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 # if there is one nan, we need to make sure that the three vtcs form a surface triangle;
                 # alternatively we check if it is at least a surface edge
                 if np.isin(t4cBndOpen, t4c[i, np.logical_not(np.isnan(vfuncXEv1[t4c[i]]))]).all(axis=1).any():
-                    v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase1(
-                        v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+                    v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase1(
+                        v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
                     )
                 elif np.isin(e4cBndOpen, t4c[i, np.logical_not(np.isnan(vfuncXEv1[t4c[i]]))]).all(axis=1).any():
                     # need to temporarily set one vtx to nan
@@ -541,8 +489,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                     )
                     tmpvfuncXEv1 = vfuncXEv1.copy()
                     tmpvfuncXEv1[t4c[i, tmpEdgeNot]] = np.nan
-                    v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
-                        v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+                    v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase2(
+                        v4c, t4c, i4c, k4c, tmpvfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
                     )
                 else:
                     raise RuntimeError("Vtx " + str(i) + " not in triangle or edge, skipping")
@@ -560,14 +508,14 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 )
                 if len(np.where(tmpEdge)) > 1:
                     raise RuntimeError("Found " + str(len(np.where(tmpEdge))) + " edges, exiting.")
-                v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase2(
-                    v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+                v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase2(
+                    v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
                 )
 
             elif np.sum(np.isnan(vfuncXEv1[t4c[i]])) == 0:
                 # if there are no nans, the checking is done within the getSeamCase3 function
-                v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn = getSeamCase3(
-                    v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, newVtcsSgn, i
+                v4c, t4c, i4c, k4c, e4cBndOpen, newTetra, newVtcs, newVtcsAdj = getSeamCase3(
+                    v4c, t4c, i4c, k4c, vfuncXEv1, e4cBndOpen, newTetra, newVtcs, newVtcsAdj, i
                 )
 
             else:
@@ -581,7 +529,7 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
     t4c = np.concatenate((t4c, newTetra))
 
     # return
-    return v4c, t4c, i4c, k4c, newVtcs, newVtcsSgn, newTetra
+    return v4c, t4c, i4c, k4c, newVtcs, newTetra
 
 
 # ------------------------------------------------------------------------------
@@ -682,10 +630,15 @@ def computeCubeParam(params):
     # post-process eigenfunction (order, flipping)
 
     # decide whether or not to flip anisoLaplEvec[:, 1] and anisoLaplEvec[:, 2]:
+
+    # for the hippocampus:
     # - anisoLaplEvec[:, 1] should be zero at the extrema of 234 and 240.
     # - anisoLaplEvec[:, 2] should have extremal values at 234 and 240.
-    # We therefore check if the zeros of Evec1 are located in 234 or 240/2420
-    # rather than 236 or 238. If not, we change order.
+    # - We therefore check if the zeros of Evec1 are located in 234 or 240/2420
+    #   rather than 236 or 238. If not, we change order.
+
+    # for the ERC:
+    # - ...
 
     # assign first eigenfunction
     vfuncXEv1 = np.zeros(np.shape(v4c)[0]) * np.nan
@@ -693,141 +646,219 @@ def computeCubeParam(params):
     # get edges that contain zeros, and turn into list of vertices
     e4cBndOpen = np.concatenate((t4cBndOpen[:, (0, 1)], t4cBndOpen[:, (0, 2)], t4cBndOpen[:, (1, 2)]), axis=0)
     e4cBndOpen = np.unique(np.sort(e4cBndOpen, axis=1), axis=1)
-    # zeroEdgeIdx = e4cBndOpen[np.where(np.abs(np.sum(np.sign(vfuncXEv1[e4cBndOpen]), axis=1)) == 0)[0]]
 
-    # decide whether or not to flip anisoLaplEvec[:, 1]  (should be inf -> sup)
+    if params.LUT == "freesurfer" or params.LUT == "freesurfer-no_ml" or params.LUT == "ashs-penn_abc_3t_t2" or params.LUT == "ashs-penn_abc_3t_t2_ext" or params.LUT == "ashs-umcutrecht_7t" or os.path.isfile(params.LUT): # noqa: E501
 
-    # check EV1 for flips; this is done indirectly: we get the locations of
-    # highest and lowest values in 234 (PrSbc) or 236 (Sbc); highest values
-    # should have a higher value on the z-axis than lower values.
+        # if working on the hippocampus:
 
-    if np.median(
-        v4cBndOpenRm[
-            np.where(
-                np.logical_and(
-                    anisoLaplEvec[:, 1] > 0,
-                    np.logical_or(
-                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                    ),
-                )
-            )[0],
-            2,
-        ]
-    ) > np.median(
-        v4cBndOpenRm[
-            np.where(
-                np.logical_and(
-                    anisoLaplEvec[:, 1] < 0,
-                    np.logical_or(
-                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                    ),
-                )
-            )[0],
-            2,
-        ]
-    ):
-        pass
-    elif np.median(
-        v4cBndOpenRm[
-            np.where(
-                np.logical_and(
-                    anisoLaplEvec[:, 1] > 0,
-                    np.logical_or(
-                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                    ),
-                )
-            )[0],
-            2,
-        ]
-    ) < np.median(
-        v4cBndOpenRm[
-            np.where(
-                np.logical_and(
-                    anisoLaplEvec[:, 1] < 0,
-                    np.logical_or(
-                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                    ),
-                )
-            )[0],
-            2,
-        ]
-    ):
-        LOGGER.info("Flipping EV1")
-        anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
+        # decide whether or not to flip anisoLaplEvec[:, 1] (should be inf -> sup)
+
+        # check EV1 for flips; this is done indirectly: we get the locations of
+        # highest and lowest values in 234 (PrSbc) or 236 (Sbc); highest values
+        # should have a higher value on the z-axis than lower values.
+        # we now convert from the surface coords to ras coords, because we cannot
+        # assume the surface coord system to be always the same (rightly or not).
+        # we rely on appropriate transformation matrices, though.
+
+        prsbc_or_sbc = np.logical_or(k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]) # noqa: E501
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4cBndOpenRm, np.ones((v4cBndOpenRm.shape[0], 1))), axis=1)
+        v4cBndOpenRm_ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2]): # noqa: E501
+            pass
+        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, prsbc_or_sbc))[0], 2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, prsbc_or_sbc))[0], 2,]): # noqa: E501
+            LOGGER.info("Flipping EV1")
+            anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
+        else:
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
+            raise RuntimeError("Inconsistency detected for EV1, exiting.")
+
+        # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
+
+        if (np.median(anisoLaplEvec[np.where(prsbc_or_sbc)[0], 2]) < 0):
+            pass
+        elif (np.median(anisoLaplEvec[np.where(prsbc_or_sbc)[0], 2]) > 0):
+            LOGGER.info("Flipping EV2")
+            anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
+        else:
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
+            raise RuntimeError("Inconsistency detected for EV2, exiting.")
+
+    elif params.LUT == "ashs-penn_abc_3t_t2_ent":
+
+        # if working on the ERC:
+
+        # decide whether or not to flip anisoLaplEvec[:, 1] (should be inf -> sup).
+        # we now convert from the surface coords to ras coords, because we cannot
+        # assume the surface coord system to be always the same (rightly or not).
+        # we rely on appropriate transformation matrices, though.
+
+        erc = k4c[hsfList] == params.LUTDICT["entorhinal"]
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4cBndOpenRm, np.ones((v4cBndOpenRm.shape[0], 1))), axis=1)
+        v4cBndOpenRm_ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        if np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) > np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]): # noqa: E501
+            pass
+        elif np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] > 0, erc))[0],2]) < np.median(v4cBndOpenRm_ras[np.where(np.logical_and(anisoLaplEvec[:, 1] < 0, erc))[0],2]): # noqa: E501
+            LOGGER.info("Flipping EV1")
+            anisoLaplEvec[:, 1] = -anisoLaplEvec[:, 1]
+        else:
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
+            raise RuntimeError("Inconsistency detected for EV1, exiting.")
+
+        # decide whether or not to flip anisoLaplEvec[:, 2] (should be ... -> BA35)
+
+        any_positive_ba35 = np.where(np.logical_and(anisoLaplEvec[:, 2] > 0, k4c[hsfList] == params.LUTDICT["bndba35"]))[0] # noqa: E501
+        any_negative_ba35 = np.where(np.logical_and(anisoLaplEvec[:, 2] < 0, k4c[hsfList] == params.LUTDICT["bndba35"]))[0] # noqa: E501
+
+        if len(any_negative_ba35) == 0 and len(any_positive_ba35) > 0:
+            pass
+        elif len(any_positive_ba35) == 0 and len(any_negative_ba35) > 0:
+            LOGGER.info("Flipping EV2")
+            anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
+        elif len(any_positive_ba35) > len(any_negative_ba35):
+            logging.warning("Could not determine EV2 orientation, check output.")
+            pass
+        elif len(any_positive_ba35) <= len(any_negative_ba35):
+            LOGGER.info("Flipping EV2")
+            anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
+            logging.warning("Could not determine EV2 orientation, check output.")
+        else:
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
+            io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+            )
+            nb.freesurfer.save(
+                nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+                filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+            )
+            raise RuntimeError("Inconsistency detected for EV2, exiting.")
+
     else:
-        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
-        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
-        raise RuntimeError("Inconsistency detected for EV1, exiting.")
-
-    # decide whether or not to flip anisoLaplEvec[:, 2] (should be 234 -> 240)
-
-    if (
-        np.median(
-            anisoLaplEvec[
-                np.where(
-                    np.logical_or(
-                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                    )
-                )[0],
-                2,
-            ]
-        )
-        < 0
-    ):
-        pass
-    elif (
-        np.median(
-            anisoLaplEvec[
-                np.where(
-                    np.logical_or(
-                        k4c[hsfList] == params.LUTDICT["presubiculum"], k4c[hsfList] == params.LUTDICT["subiculum"]
-                    )
-                )[0],
-                2,
-            ]
-        )
-        > 0
-    ):
-        LOGGER.info("Flipping EV2")
-        anisoLaplEvec[:, 2] = -anisoLaplEvec[:, 2]
-    else:
-        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
-        io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
-        raise RuntimeError("Inconsistency detected for EV2, exiting.")
+        LOGGER.warning("Warning: could not determine flipping of eigenfunction. As a result, medial/lateral and/or anterior/posterior orientations may be inconsistent. Check your results.") # noqa: E501
 
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.psol"), anisoLaplEvec[:, 1])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.psol"), anisoLaplEvec[:, 2])
+
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 1].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV1.mgh"),
+    )
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=anisoLaplEvec[:, 2].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".lapy.aLBO.EV2.mgh"),
+    )
 
     # --------------------------------------------------------------------------
     # define boundary conditions (note that we changed dimensions and directions!)
 
     # get seam
 
-    v4c, t4c, i4c, k4c, newVtcs, newVtcsSgn, newTetra = getSeam(
+    v4c, t4c, i4c, k4c, newVtcs, newTetra = getSeam(
         v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec
     )
 
-    # get 2nd principal axis, note that direction may be arbitrary, will
-    # possibly be switched below; note that this replaces EV2-based newVtcsSgn,
-    # which we may remove in the future
+    # x:
 
-    # pca = PCA(n_components=3)
-    # pca_scores = pca.fit_transform(v4c)
+    if params.LUT in (
+        "freesurfer",
+        "freesurfer-no_ml",
+        "ashs-penn_abc_3t_t2",
+        "ashs-penn_abc_3t_t2_ent",
+        "ashs-umcutrecht_7t",
+    ) or os.path.isfile(params.LUT):
 
-    # x: medial -> lateral
+        # if working on the hippocampus without ctx or on the ERC:
 
-    vfuncX = np.zeros(np.shape(v4c)[0])
-    srcX = np.zeros(np.shape(v4c)[0])
-    srcX[newVtcs[v4c[newVtcs, 0] < np.mean(v4c[newVtcs, 0])]] = -1
-    ###srcX[newVtcs[pca_scores[newVtcs,1]<0]] = -1
-    ###srcX[newVtcs[v4c[newVtcs,0]>0]] = 1
-    ###srcX[newVtcs[newVtcsSgn>0]] = 1
-    snkX = np.zeros(np.shape(v4c)[0])
-    snkX[newVtcs[v4c[newVtcs, 0] >= np.mean(v4c[newVtcs, 0])]] = 1
-    ###snkX[newVtcs[pca_scores[newVtcs,1]>0]] = 1
-    ###snkX[newVtcs[v4c[newVtcs,0]<0]] = -1
-    ###snkX[newVtcs[newVtcsSgn<0]] = -1
-    vfuncX = srcX + snkX
+        # x: medial -> lateral (will initially run along the first axis of the mesh; may be
+        # flipped during the left / right determination below)
+        # srxX will have -1 for all newVtcs where dim 0 coordinates are lower than their mean
+        # snkX will have +1 for all newVtcs where dim 0 coordinates are higher than their mean
+
+        vfuncX = np.zeros(np.shape(v4c)[0])
+        srcX = np.zeros(np.shape(v4c)[0])
+        srcX[newVtcs[v4c[newVtcs, 0] < np.mean(v4c[newVtcs, 0])]] = -1
+        snkX = np.zeros(np.shape(v4c)[0])
+        snkX[newVtcs[v4c[newVtcs, 0] >= np.mean(v4c[newVtcs, 0])]] = 1
+        vfuncX = srcX + snkX
+
+        # determine left / right; here we map to ras (and don't rely on ras_tkr initially)
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4c, np.ones((v4c.shape[0], 1))), axis=1)
+        ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        if params.HEMI == "lh":
+            # first make sure that ras coords are indeed in left hemi
+            if (ras[:, 0] < 0.0).all():
+                # lateral ras coords (snk, +1) should be more negative than medial ras coords (src, -1), otherwise flip
+                if np.mean(ras[np.where(vfuncX > 0)[0], 0]) > np.mean(ras[np.where(vfuncX < 0)[0], 0]):
+                    vfuncX = -vfuncX
+            else:
+                raise RuntimeError("Ambiguous hemisphere info, exiting.")
+        elif params.HEMI == "rh":
+            # first make sure that ras coords are indeed in right hemi
+            if (ras[:, 0] > 0.0).all():
+                # lateral ras coords (snk, +1) should be more positive than medial ras coords (src, -1), otherwise flip
+                if np.mean(ras[np.where(vfuncX > 0)[0], 0]) < np.mean(ras[np.where(vfuncX < 0)[0], 0]):
+                    vfuncX = -vfuncX
+            else:
+                raise RuntimeError("Ambiguous hemisphere info, exiting.")
+
+    elif params.LUT == "ashs-penn_abc_3t_t2_ext":
+
+        # if working on the hippocampus with ctx:
+
+        # x: inf -> sup (phc -> ca3). cannot use medial -> lateral, because phc may bend below hc
+        # will transform surface coords to ras coords and evaluate dim 2 (3rd dim)
+
+        img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
+        mat = np.linalg.inv(img.header.get_vox2ras_tkr())
+        pts = np.concatenate((v4c[newVtcs, :], np.ones((v4c[newVtcs, :].shape[0], 1))), axis=1)
+        ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
+
+        vfuncX = np.zeros(np.shape(v4c)[0])
+        srcX = np.zeros(np.shape(v4c)[0])
+        srcX[newVtcs[ras[:, 2] < np.mean(ras[:, 2])]] = -1
+        snkX = np.zeros(np.shape(v4c)[0])
+        snkX[newVtcs[ras[:, 2] >= np.mean(ras[:, 2])]] = 1
+        vfuncX = srcX + snkX
 
     # y: Tail (226) -> Head (232) (post --> ant)
 
@@ -835,7 +866,7 @@ def computeCubeParam(params):
     vfuncY[np.where(i4c == params.LUTDICT["jointtail"])[0]] = -1
     vfuncY[np.where(i4c == params.LUTDICT["jointhead"])[0]] = 1
 
-    # z: inf->sup
+    # z: inf -> sup
 
     vfuncZ = np.zeros(np.shape(v4c)[0])
     srcZ = np.zeros(np.shape(anisoLaplEvec[:, 1])[0])
@@ -843,28 +874,6 @@ def computeCubeParam(params):
     snkZ = np.zeros(np.shape(anisoLaplEvec[:, 1])[0])
     snkZ[anisoLaplEvec[:, 1] > 0] = 1
     vfuncZ[v4cBndOpenKeep] = srcZ + snkZ
-
-    # determine left / right
-
-    img = nb.load(os.path.join(params.OUTDIR, params.HEMI + ".image.mgz"))
-    mat = np.linalg.inv(img.header.get_vox2ras_tkr())
-    pts = np.concatenate((v4c, np.ones((v4c.shape[0], 1))), axis=1)
-    ras = np.matmul(np.matmul(pts, mat.transpose()), img.header.get_vox2ras().transpose())
-
-    if params.HEMI == "lh":
-        if (ras[:, 0] < 0.0).all():
-            # lateral (snk, +1) should be more negative than medial (src, -1), otherwise flip
-            if np.mean(ras[np.where(vfuncX > 0)[0], 0]) > np.mean(ras[np.where(vfuncX < 0)[0], 0]):
-                vfuncX = -vfuncX
-        else:
-            raise RuntimeError("Ambiguous hemisphere info, exiting.")
-    elif params.HEMI == "rh":
-        if (ras[:, 0] > 0.0).all():
-            # lateral (snk, +1) should be more positive than medial (src, -1), otherwise flip
-            if np.mean(ras[np.where(vfuncX > 0)[0], 0]) < np.mean(ras[np.where(vfuncX < 0)[0], 0]):
-                vfuncX = -vfuncX
-        else:
-            raise RuntimeError("Ambiguous hemisphere info, exiting.")
 
     # --------------------------------------------------------------------------
     # compute ABtetra and Poisson functions
@@ -924,6 +933,8 @@ def computeCubeParam(params):
     # v4cRmBndRm = tetMesh4cRmBnd.v
     # t4cRmBndRm = tetMesh4cRmBnd.t
 
+    tetMesh4cRmBnd.orient_()
+
     TriaMesh.write_vtk(tetMesh4cRmBnd, filename=os.path.join(cutTetraMeshDir, params.HEMI + ".rm.bnd.seam.rm.cut.vtk"))
 
     io.write_vfunc(
@@ -939,6 +950,19 @@ def computeCubeParam(params):
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.rm.bnd.seam.rm.cut.psol"), P0[v4cRmBndRmKeep])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.psol"), P1[v4cRmBndRmKeep])
     io.write_vfunc(os.path.join(cutTetraMeshDir, params.HEMI + ".poisson2.rm.bnd.seam.rm.cut.psol"), P2[v4cRmBndRmKeep])
+
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=P0[v4cRmBndRmKeep].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".poisson0.rm.bnd.seam.rm.cut.mgh"),
+    )
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=P1[v4cRmBndRmKeep].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".poisson1.rm.bnd.seam.rm.cut.mgh"),
+    )
+    nb.freesurfer.save(
+        nb.freesurfer.MGHImage(dataobj=P2[v4cRmBndRmKeep].astype("float32"), affine=None),
+        filename=os.path.join(cutTetraMeshDir, params.HEMI + ".poisson2.rm.bnd.seam.rm.cut.mgh"),
+    )
 
     # write out cube
 

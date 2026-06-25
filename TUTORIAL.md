@@ -239,9 +239,9 @@ argument.
 
 Since no explicit labels for the hippocampal head are present in ASHS 
 segmentations, it will be necessary to use the `--automask-head` flag and 
-optionally also the `--automask-tail-margin` argument. If the identification of 
-the boundary between hippocampal body tail does not work well given the existing 
-labels, using the `--automask-tail` flag and optionally the `--automask-head-margin` 
+optionally also the `--automask-head-margin` argument. If the identification of 
+the boundary between hippocampal body and tail does not work well given the existing 
+labels, using the `--automask-tail` flag and optionally the `--automask-tail-margin` 
 argument may be advised as well.
 
 ### Additional arguments for ASHS and FreeSurfer segmentations
@@ -264,10 +264,10 @@ The primary output of the hippocampal shape and thickness analysis are surface
 files and associated thickness values in the `thickness` folder. The estimated 
 hippocampal thickness values will be stored in csv tables:
 
-| Filenane                                           | Contents                                                  |
+| Filename                                           | Contents                                                  |
 |----------------------------------------------------|-----------------------------------------------------------|
 | `lh.grid-segments-x.csv`, `rh.grid-segments-x.csv` | Length estimates in the medial-to-lateral dimension       |
-| `lh.grid-segments-y.csv`, `rh.grid-segments-y.csv` | Length estimates in the medial-to-lateral dimension       |
+| `lh.grid-segments-y.csv`, `rh.grid-segments-y.csv` | Length estimates in the posterior-to-anterior dimension   |
 | `lh.grid-segments-z.csv`, `rh.grid-segments-z.csv` | Thickness estimates in the exterior-to-interior dimension |
 
 Here, x corresponds to the medial-->lateral dimension, y to the 
@@ -302,6 +302,57 @@ provided for interior, mid, and exterior surfaces:
 | `<lh\|rh>.<int\|mid\|ext>-surface.<mean\|gauss>-curv.csv` | Tables of mean and gaussian curvature estimtes for corresponding surfaces   | 
 | `<lh\|rh>.<int\|mid\|ext>-surface.<mean\|gauss>-curv.mgh` | Overlays of mean and gaussian curvature estimtes for corresponding surfaces | 
 
+
+## Extensions to parahippocampal and entorhinal cortex
+
+The Penn ABC-3T ASHS atlas includes several labels beyond the hippocampus, 
+including parahippocampal, entorhinal, BA35, and BA36 regions. The analysis can 
+extended to parts of these regions as well. The corresponding processing 
+variants can be called with the `--lut ashs-penn_abc_3t_t2_ext` and `--lut ashs-penn_abc_3t_t2_ent` 
+arguments. The former will add (parts of) parahippocampal and entorhinal cortex 
+as well as BA35 to the analysis, but still restrict the analysis to the 
+hippocampal body region along the longitudinal axis.
+The latter will perform a separate analysis of the entorhinal cortex. Due to 
+more complex or variable anatomy, these approaches should to some extent be 
+considered experimental and may require additional QC or manual edits.
+
+The expected output when using `--lut ashs-penn_abc_3t_t2_ext` is shown in the 
+following figure; it is simply an extension of the analysis beyond the 
+subiculum and presubiculum into the cortex. 
+
+![](images/scaled/ctx-01.png)
+
+A potential issue that might arise in this analysis could be due to large shifts 
+between segmentations in successive slices, especially for anisotropic voxel 
+sizes, leading to holes in the surface mesh. Another potential issue is too close 
+proximity of the subiculum / CA1 and cortical regions so that the surface mesh 
+will incorrectly create a connection. Manual edits or changing the 
+spatial filter settings may help resolving these issues (see the following 
+section on Troubleshooting for details).
+
+![](images/scaled/ctx-03a.png)
+![](images/scaled/ctx-03b.png)
+![](images/scaled/ctx-03c.png)
+![](images/scaled/ctx-02.png)
+
+The expected output when using `--lut ashs-penn_abc_3t_t2_ent` is shown below. 
+Here, we leave out the hippocampal labels and restrict the analysis the 
+complete entorhinal cortex segmentation.
+  
+![](images/scaled/erc-01a.png)
+![](images/scaled/erc-01b.png)
+![](images/scaled/erc-01c.png)
+
+Care should be taken that the entorhinal cortex is cut across its full extent 
+at its anterior and posterior ends. The left figure shows to conservative 
+cutting, the middle and right figure more appropriate cuts. Cutting can be 
+adjusted using the `--cut-range` and `--automask-head-margin` / `--automask-tail-margin` 
+arguments (see the following section on Troubleshooting for details).
+  
+![](images/scaled/erc-02a.png)
+![](images/scaled/erc-02b.png)
+![](images/scaled/erc-02c.png)
+  
 
 ## Troubleshooting
 
