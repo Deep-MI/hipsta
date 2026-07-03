@@ -84,8 +84,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]] = idxPt1
                 newVtcsAdj[t4c[i, idxNeg1], t4c[i, idxPos1]] = idxPt1
                 # also append i4c and k4c
-                i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
-                k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
+                i4c = np.concatenate((i4c, np.array(st.mode(i4c[t4c[i, :]])[0], ndmin=1)))
+                k4c = np.concatenate((k4c, np.array(st.mode(k4c[t4c[i, :]])[0], ndmin=1)))
                 newVtcs = np.concatenate((newVtcs, [idxPt1]))
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
@@ -100,8 +100,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 newVtcsAdj[t4c[i, idxPos2], t4c[i, idxNeg1]] = idxPt2
                 newVtcsAdj[t4c[i, idxNeg1], t4c[i, idxPos2]] = idxPt2
                 # also append i4c and k4c
-                i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
-                k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
+                i4c = np.concatenate((i4c, np.array(st.mode(i4c[t4c[i, :]])[0], ndmin=1)))
+                k4c = np.concatenate((k4c, np.array(st.mode(k4c[t4c[i, :]])[0], ndmin=1)))
                 newVtcs = np.concatenate((newVtcs, [idxPt2]))
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos2], t4c[i, idxNeg1]]
@@ -162,8 +162,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]] = idxPt1
                 newVtcsAdj[t4c[i, idxNeg1], t4c[i, idxPos1]] = idxPt1
                 # also append i4c and k4c
-                i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
-                k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
+                i4c = np.concatenate((i4c, np.array(st.mode(i4c[t4c[i, :]])[0], ndmin=1)))
+                k4c = np.concatenate((k4c, np.array(st.mode(k4c[t4c[i, :]])[0], ndmin=1)))
                 newVtcs = np.concatenate((newVtcs, [idxPt1]))
             else:
                 idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
@@ -178,8 +178,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
                 newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg2]] = idxPt2
                 newVtcsAdj[t4c[i, idxNeg2], t4c[i, idxPos1]] = idxPt2
                 # also append i4c and k4c
-                i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
-                k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
+                i4c = np.concatenate((i4c, np.array(st.mode(i4c[t4c[i, :]])[0], ndmin=1)))
+                k4c = np.concatenate((k4c, np.array(st.mode(k4c[t4c[i, :]])[0], ndmin=1)))
                 newVtcs = np.concatenate((newVtcs, [idxPt2]))
             else:
                 idxPt2 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg2]]
@@ -239,8 +239,8 @@ def getSeam(v4c, t4c, i4c, k4c, v4cBndOpenKeep, t4cBndOpen, anisoLaplEvec):
             newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]] = idxPt1
             newVtcsAdj[t4c[i, idxNeg1], t4c[i, idxPos1]] = idxPt1
             # also append i4c and k4c
-            i4c = np.concatenate((i4c, st.mode(i4c[t4c[i, :]])[0]))
-            k4c = np.concatenate((k4c, st.mode(k4c[t4c[i, :]])[0]))
+            i4c = np.concatenate((i4c, np.array(st.mode(i4c[t4c[i, :]])[0], ndmin=1)))
+            k4c = np.concatenate((k4c, np.array(st.mode(k4c[t4c[i, :]])[0], ndmin=1)))
             newVtcs = np.concatenate((newVtcs, [idxPt1]))
         else:
             idxPt1 = newVtcsAdj[t4c[i, idxPos1], t4c[i, idxNeg1]]
