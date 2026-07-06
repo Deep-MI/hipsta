@@ -307,7 +307,7 @@ provided for interior, mid, and exterior surfaces:
 
 The Penn ABC-3T ASHS atlas includes several labels beyond the hippocampus, 
 including parahippocampal, entorhinal, BA35, and BA36 regions. The analysis can 
-extended to parts of these regions as well. The corresponding processing 
+be extended to parts of these regions as well. The corresponding processing 
 variants can be called with the `--lut ashs-penn_abc_3t_t2_ext` and `--lut ashs-penn_abc_3t_t2_ent` 
 arguments. The former will add (parts of) parahippocampal and entorhinal cortex 
 as well as BA35 to the analysis, but still restrict the analysis to the 
@@ -336,7 +336,7 @@ section on Troubleshooting for details).
 ![](images/scaled/ctx-02.png)
 
 The expected output when using `--lut ashs-penn_abc_3t_t2_ent` is shown below. 
-Here, we leave out the hippocampal labels and restrict the analysis the 
+Here, we leave out the hippocampal labels and restrict the analysis to the 
 complete entorhinal cortex segmentation.
   
 ![](images/scaled/erc-01a.png)
@@ -344,7 +344,7 @@ complete entorhinal cortex segmentation.
 ![](images/scaled/erc-01c.png)
 
 Care should be taken that the entorhinal cortex is cut across its full extent 
-at its anterior and posterior ends. The left figure shows to conservative 
+at its anterior and posterior ends. The left figure shows too conservative 
 cutting, the middle and right figure more appropriate cuts. Cutting can be 
 adjusted using the `--cut-range` and `--automask-head-margin` / `--automask-tail-margin` 
 arguments (see the following section on Troubleshooting for details).

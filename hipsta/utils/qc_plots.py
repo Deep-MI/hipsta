@@ -297,7 +297,7 @@ def qcPlots(params, stage=None):
         fig.write_image(os.path.join(params.OUTDIR, "qc", params.HEMI + ".profile.png"))
 
     # hull
-    if stage == "hull":
+    if params.internal.no_qc is False and stage == "hull":
         triaMesh = TriaMesh.read_vtk(os.path.join(params.OUTDIR, "thickness", params.HEMI + ".hull.vtk"))
 
         camera = dict(
