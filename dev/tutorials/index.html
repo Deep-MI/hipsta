@@ -555,7 +555,7 @@ provided for interior, mid, and exterior surfaces:</p>
 <h2>Extensions to parahippocampal and entorhinal cortex<a class="headerlink" href="#extensions-to-parahippocampal-and-entorhinal-cortex" title="Link to this heading">¶</a></h2>
 <p>The Penn ABC-3T ASHS atlas includes several labels beyond the hippocampus,
 including parahippocampal, entorhinal, BA35, and BA36 regions. The analysis can
-extended to parts of these regions as well. The corresponding processing
+be extended to parts of these regions as well. The corresponding processing
 variants can be called with the <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ext</span></code> and <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ent</span></code>
 arguments. The former will add (parts of) parahippocampal and entorhinal cortex
 as well as BA35 to the analysis, but still restrict the analysis to the
@@ -579,13 +579,13 @@ section on Troubleshooting for details).</p>
 <img alt="" src="../_images/ctx-03c.png" />
 <img alt="" src="../_images/ctx-02.png" /></p>
 <p>The expected output when using <code class="docutils literal notranslate"><span class="pre">--lut</span> <span class="pre">ashs-penn_abc_3t_t2_ent</span></code> is shown below.
-Here, we leave out the hippocampal labels and restrict the analysis the
+Here, we leave out the hippocampal labels and restrict the analysis to the
 complete entorhinal cortex segmentation.</p>
 <p><img alt="" src="../_images/erc-01a.png" />
 <img alt="" src="../_images/erc-01b.png" />
 <img alt="" src="../_images/erc-01c.png" /></p>
 <p>Care should be taken that the entorhinal cortex is cut across its full extent
-at its anterior and posterior ends. The left figure shows to conservative
+at its anterior and posterior ends. The left figure shows too conservative
 cutting, the middle and right figure more appropriate cuts. Cutting can be
 adjusted using the <code class="docutils literal notranslate"><span class="pre">--cut-range</span></code> and <code class="docutils literal notranslate"><span class="pre">--automask-head-margin</span></code> / <code class="docutils literal notranslate"><span class="pre">--automask-tail-margin</span></code>
 arguments (see the following section on Troubleshooting for details).</p>
