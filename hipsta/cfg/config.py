@@ -44,6 +44,10 @@ def get_defaults(x):
         # deprecated options
         no_orient=False,
         # internal options (not set during parsing or class definition, but during args evaluation)
+        # voxel edge length (in mm) above which a warning about the input
+        # resolution will be issued; the method is designed for segmentations
+        # at around 0.33 mm, so this is set slightly above that value
+        voxel_size_threshold=0.4,
         map_values_integrate="none",
         map_values_select=None,
         map_values_interp="nearest",

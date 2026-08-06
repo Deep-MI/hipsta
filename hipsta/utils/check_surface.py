@@ -8,6 +8,8 @@ import os
 
 from lapy import TriaMesh
 
+from ..cfg.config import get_defaults
+
 # ==============================================================================
 # LOGGING
 
@@ -36,6 +38,18 @@ def checkSurface(params, stage=None):
 
         if euler != 2:
             LOGGER.info("Surface contains holes. Please edit the corresponding hippocampal segmentation and re-run.")
+
+            voxel_size = getattr(params.internal, "VOXEL_SIZE", None)
+
+            if voxel_size is not None and max(voxel_size) > get_defaults("voxel_size_threshold"):
+                LOGGER.info(
+                    "Note that the input image has a voxel size of %s mm, which is coarse for this method. "
+                    "Holes are common at this resolution even for an otherwise correct segmentation, so "
+                    "please check whether a higher-resolution version of the segmentation is available "
+                    "before editing it.",
+                    " x ".join(format(x, ".3f") for x in voxel_size),
+                )
+
             continue_program = False
 
         else:

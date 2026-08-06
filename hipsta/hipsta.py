@@ -11,6 +11,7 @@ import shutil
 import sys
 import time
 
+import nibabel as nb
 import numpy as np
 
 from .cfg.atlases import get_atlases
@@ -666,6 +667,26 @@ def _check_params(params):
         LOGGER.info("Found " + params.FILENAME)
     else:
         raise RuntimeError("Could not find " + params.FILENAME)
+
+    # check voxel size; this is stored on params so that later stages (e.g.
+    # checkSurface) can refer to it without re-reading the input image
+
+    params.internal.VOXEL_SIZE = tuple(float(x) for x in nb.load(params.FILENAME).header.get_zooms()[0:3])
+
+    if max(params.internal.VOXEL_SIZE) > get_defaults("voxel_size_threshold"):
+        LOGGER.warning(
+            "The input image has a voxel size of %s mm. This method is designed for segmentations with a "
+            "voxel edge length of about 0.33 mm; with substantially coarser images, the surface check will "
+            "frequently report holes even though the segmentation itself is fine.",
+            " x ".join(format(x, ".3f") for x in params.internal.VOXEL_SIZE),
+        )
+
+        if params.LUT == "freesurfer":
+            LOGGER.warning(
+                "For FreeSurfer input, please make sure to use the native-resolution segmentation "
+                "(<lh|rh>.hippoAmygLabels*.mgz) rather than the version that was resampled to the conformed "
+                "space (<lh|rh>.hippoAmygLabels*.FSvoxelSpace.mgz)."
+            )
 
     # check hemisphere
 

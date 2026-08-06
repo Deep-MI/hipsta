@@ -9,6 +9,7 @@ import shutil
 import subprocess
 
 import nibabel as nb
+import numpy as np
 from nilearn import image as nli
 
 # ==============================================================================
@@ -130,6 +131,17 @@ def upsampleImage(params):
             target_affn[0:4, 0] *= min(vxsz) / vxsz[0]
             target_affn[0:4, 1] *= min(vxsz) / vxsz[1]
             target_affn[0:4, 2] *= min(vxsz) / vxsz[2]
+
+            # upsampling to the smallest voxel edge length has no effect if the
+            # image already has isotropic voxels; report this, as it is not
+            # otherwise apparent from the output
+            if np.allclose(target_affn, affn):
+                LOGGER.warning(
+                    "The image already has isotropic voxels of %s mm, so upsampling to the smallest voxel "
+                    "edge length leaves it unchanged. An explicit target size can be requested with the "
+                    "--upsample-size argument.",
+                    format(float(min(vxsz)), ".3f"),
+                )
 
             # resample
             img_int = nli.resample_img(img, target_affine=target_affn, interpolation="nearest")
