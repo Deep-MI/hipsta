@@ -191,15 +191,18 @@ def qcPlots(params, stage=None):
             center=dict(x=0, y=0, z=0),
             eye=eye,
         )
-        lpp.plot_tria_mesh(
-            triaMesh,
-            tcolor=[25, 25, 25],
-            background_color="white",
-            camera=camera,
-            export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".mesh.png"),
-            no_display=True,
-            scale_png=0.5,
-        )
+        try:
+            lpp.plot_tria_mesh(
+                triaMesh,
+                tcolor=[25, 25, 25],
+                background_color="white",
+                camera=camera,
+                export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".mesh.png"),
+                no_display=True,
+                scale_png=0.5,
+            )
+        except Exception as e:
+            LOGGER.warning("Could not create QC plot for mesh stage: %s", e)
 
     # profile
     if params.internal.no_qc is False and stage == "profile":
@@ -294,7 +297,10 @@ def qcPlots(params, stage=None):
 
         fig.update_layout(showlegend=False)
 
-        fig.write_image(os.path.join(params.OUTDIR, "qc", params.HEMI + ".profile.png"))
+        try:
+            fig.write_image(os.path.join(params.OUTDIR, "qc", params.HEMI + ".profile.png"))
+        except Exception as e:
+            LOGGER.warning("Could not create QC plot for profile stage: %s", e)
 
     # hull
     if params.internal.no_qc is False and stage == "hull":
@@ -305,15 +311,18 @@ def qcPlots(params, stage=None):
             center=dict(x=0, y=0, z=0),
             eye=eye,
         )
-        lpp.plot_tria_mesh(
-            triaMesh,
-            tcolor=[25, 25, 25],
-            background_color="white",
-            camera=camera,
-            export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".hull.png"),
-            no_display=True,
-            scale_png=0.5,
-        )
+        try:
+            lpp.plot_tria_mesh(
+                triaMesh,
+                tcolor=[25, 25, 25],
+                background_color="white",
+                camera=camera,
+                export_png=os.path.join(params.OUTDIR, "qc", params.HEMI + ".hull.png"),
+                no_display=True,
+                scale_png=0.5,
+            )
+        except Exception as e:
+            LOGGER.warning("Could not create QC plot for hull stage: %s", e)
 
     # return
     return params
