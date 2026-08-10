@@ -673,11 +673,16 @@ def _check_params(params):
 
     params.internal.VOXEL_SIZE = tuple(float(x) for x in nb.load(params.FILENAME).header.get_zooms()[0:3])
 
-    if max(params.internal.VOXEL_SIZE) > get_defaults("voxel_size_threshold"):
+    voxel_size_threshold = get_defaults("voxel_size_threshold")
+    is_coarse = min(params.internal.VOXEL_SIZE) > voxel_size_threshold
+    is_anisotropic = max(params.internal.VOXEL_SIZE) - min(params.internal.VOXEL_SIZE) > 1e-6
+
+    if is_coarse:
         LOGGER.warning(
-            "The input image has a voxel size of %s mm. This method is designed for segmentations with a "
-            "voxel edge length of about 0.33 mm; with substantially coarser images, the surface check will "
-            "frequently report holes even though the segmentation itself is fine.",
+            "The input image has a voxel size of %s mm, which is coarse for this method. This method is "
+            "designed for segmentations with a voxel edge length of about 0.33 mm; holes are common at this "
+            "resolution even for an otherwise correct segmentation, so please check whether a higher-resolution "
+            "version of the segmentation is available.",
             " x ".join(format(x, ".3f") for x in params.internal.VOXEL_SIZE),
         )
 
@@ -687,6 +692,13 @@ def _check_params(params):
                 "(<lh|rh>.hippoAmygLabels*.mgz) rather than the version that was resampled to the conformed "
                 "space (<lh|rh>.hippoAmygLabels*.FSvoxelSpace.mgz)."
             )
+
+    if is_anisotropic:
+        LOGGER.warning(
+            "The input image has anisotropic voxels of %s mm. Consider using --upsample to resample to "
+            "isotropic voxels at the finest edge length, which can reduce spurious holes in the surface check.",
+            " x ".join(format(x, ".3f") for x in params.internal.VOXEL_SIZE),
+        )
 
     # check hemisphere
 

@@ -41,7 +41,7 @@ def checkSurface(params, stage=None):
 
             voxel_size = getattr(params.internal, "VOXEL_SIZE", None)
 
-            if voxel_size is not None and max(voxel_size) > get_defaults("voxel_size_threshold"):
+            if voxel_size is not None and min(voxel_size) > get_defaults("voxel_size_threshold"):
                 LOGGER.info(
                     "Note that the input image has a voxel size of %s mm, which is coarse for this method. "
                     "Holes are common at this resolution even for an otherwise correct segmentation, so "
