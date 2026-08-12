@@ -12,6 +12,7 @@ RUN apt-get install -y --no-install-recommends \
     tcsh \
     git \
     libglu1-mesa-dev \
+    libosmesa6 \
     libxrender-dev \
     libxcursor-dev \
     libxft-dev \
@@ -19,21 +20,7 @@ RUN apt-get install -y --no-install-recommends \
     libgomp1 \
     libsm-dev \
     python3 \
-    python3-pip \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpango-1.0-0 \
-    libcairo2
+    python3-pip
 
 # download FreeSurfer
 #RUN wget -qO- https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-ubuntu22_x86_64-7.4.1.tar.gz | tar zxv --no-same-owner -C /opt \
@@ -65,17 +52,6 @@ RUN wget -qO- https://gmsh.info/bin/Linux/gmsh-2.16.0-Linux64.tgz | tar zxv --no
 #
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install git+https://github.com/Deep-MI/Hipsta.git
-
-# Install Chrome for Kaleido/plotly QC image rendering. Installed to a
-# fixed, world-readable location (rather than the default $HOME) and
-# pointed to via BROWSER_PATH, since the image is intended to be run
-# with an arbitrary --user; HOME is also set to a writable default for
-# the same reason (Chrome needs a writable profile/user-data directory).
-RUN mkdir -p /opt/chrome-for-testing \
-    && plotly_get_chrome -y --path /opt/chrome-for-testing \
-    && chmod -R a+rX /opt/chrome-for-testing
-ENV BROWSER_PATH=/opt/chrome-for-testing/chrome-linux64/chrome
-ENV HOME=/tmp
 
 # Add FreeSurfer environment variables (.license file needed, alternatively export FS_LICENSE=path/to/license)
 ENV FREESURFER_HOME=/opt/freesurfer

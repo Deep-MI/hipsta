@@ -881,6 +881,9 @@ def _run_analysis(params):
     params = computeThickness(params)
 
     LOGGER.info("Starting qcPlots() ...")
+    params = qcPlots(params, stage="mid-surface")
+
+    LOGGER.info("Starting qcPlots() ...")
     params = qcPlots(params, stage="hull")
 
     # map subfield mapValues (10)
