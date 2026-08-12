@@ -231,7 +231,11 @@ Also the intermediate volume and surface files can be useful for quality control
 ## Supported segmentations:
 
 - A hippocampal subfields segmentation based on FreeSurfer 7.1.1 or later should
-  work as-is. Use `--lut freesurfer`.
+  work as-is. Use `--lut freesurfer`. Use the native-resolution segmentation
+  (about 0.33 mm), not the one that was resampled to the conformed space, which
+  has `FSvoxelSpace` in its filename: the latter is too coarse for this method
+  and will frequently fail the surface check with holes even when the
+  segmentation itself is fine.
 - Two ASHS atlases are currently supported, the Penn ABC-3T ASHS atlas for
   T2-weighted MRI and the UMC Utrecht 7T atlas. Use `--lut ashs-penn_abc_3t_t2`
   or `--lut ashs-umcutrecht_7t`. If additional labels for the hippocampal head
