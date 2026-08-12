@@ -12,6 +12,7 @@ RUN apt-get install -y --no-install-recommends \
     tcsh \
     git \
     libglu1-mesa-dev \
+    libosmesa6 \
     libxrender-dev \
     libxcursor-dev \
     libxft-dev \
