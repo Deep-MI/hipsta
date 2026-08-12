@@ -441,6 +441,16 @@ hemisphere in a FreeSurfer segmentation):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">run_hipsta</span> <span class="o">--</span><span class="n">filename</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">my</span><span class="o">/</span><span class="n">segmentation</span><span class="o">/</span><span class="n">image</span> <span class="o">--</span><span class="n">hemi</span> <span class="n">lh</span>  <span class="o">--</span><span class="n">lut</span> <span class="n">freesurfer</span> <span class="o">--</span><span class="n">outputdir</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">my</span><span class="o">/</span><span class="n">output</span><span class="o">/</span><span class="n">directory</span>
 </pre></div>
 </div>
+<p>Note that the FreeSurfer subfield module writes two copies of every
+segmentation: one at its native resolution of about 0.33 mm
+(e.g. <code class="docutils literal notranslate"><span class="pre">lh.hippoAmygLabels.mgz</span></code>), and one that has been resampled to the
+conformed space of about 1 mm (e.g. <code class="docutils literal notranslate"><span class="pre">lh.hippoAmygLabels.FSvoxelSpace.mgz</span></code>).
+Use the native-resolution file, i.e. the one <strong>without</strong> <code class="docutils literal notranslate"><span class="pre">FSvoxelSpace</span></code> in its
+name. The resampled file is too coarse for this method and will frequently fail
+the surface check with <a class="reference internal" href="#holes-in-the-surface"><span class="std std-ref">holes in the surface</span></a>, even when
+the underlying segmentation is perfectly fine. Hipsta will issue a warning at
+startup if the voxel size of the input image is substantially larger than
+0.33 mm.</p>
 </section>
 <section id="additional-arguments-for-ashs-segmentations">
 <h3>Additional arguments for ASHS segmentations<a class="headerlink" href="#additional-arguments-for-ashs-segmentations" title="Link to this heading">¶</a></h3>
@@ -639,7 +649,20 @@ We outline two strategies to mitigate these issues below.</p>
 <section id="holes-in-the-surface">
 <h4>Holes in the surface<a class="headerlink" href="#holes-in-the-surface" title="Link to this heading">¶</a></h4>
 <p>Holes in the surfaces can be the result of less than optimal image
-preprocessing. We recommend to try adjusting the width and threshold for the
+preprocessing.</p>
+<p>Before adjusting any processing parameters, check the voxel size of the input
+image. The mask filtering operations are parametrised in voxels rather than in
+mm, so their physical strength scales with the voxel size of the input. At
+around 1 mm the hippocampal ribbon is only about two voxels thick, and the
+default filtering can erode through it, which produces holes even for an
+otherwise correct segmentation. If you are working with FreeSurfer
+segmentations, make sure you are using the native-resolution file rather than
+the <code class="docutils literal notranslate"><span class="pre">FSvoxelSpace</span></code> one (see <a class="reference internal" href="#mandatory-arguments"><span class="std std-ref">above</span></a>). Note that
+resampling a coarse segmentation to a smaller voxel size after the fact does
+not recover the lost detail, because nearest-neighbour interpolation preserves
+the original staircase pattern.</p>
+<p>If the input resolution is appropriate, we recommend to try adjusting the width
+and threshold for the
 gaussian filter using the <code class="docutils literal notranslate"><span class="pre">--gauss-filter-size</span></code> argument, and optionally to
 employ additional smoothing along the longitudinal axis using the <code class="docutils literal notranslate"><span class="pre">--long-filter</span></code>
 flag (which can be fine-tuned using the <code class="docutils literal notranslate"><span class="pre">--long-filter-size</span></code> argument). It may
