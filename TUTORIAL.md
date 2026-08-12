@@ -228,6 +228,17 @@ hemisphere in a FreeSurfer segmentation):
 run_hipsta --filename /path/to/my/segmentation/image --hemi lh  --lut freesurfer --outputdir /path/to/my/output/directory
 ```
 
+Note that the FreeSurfer subfield module writes two copies of every 
+segmentation: one at its native resolution of about 0.33 mm 
+(e.g. `lh.hippoAmygLabels.mgz`), and one that has been resampled to the 
+conformed space of about 1 mm (e.g. `lh.hippoAmygLabels.FSvoxelSpace.mgz`). 
+Use the native-resolution file, i.e. the one **without** `FSvoxelSpace` in its 
+name. The resampled file is too coarse for this method and will frequently fail 
+the surface check with [holes in the surface](#holes-in-the-surface), even when 
+the underlying segmentation is perfectly fine. Hipsta will issue a warning at 
+startup if the voxel size of the input image is substantially larger than 
+0.33 mm.
+
 ### Additional arguments for ASHS segmentations
 
 Segmentation images that are produced by the ASHS require a set of additional
@@ -403,7 +414,22 @@ We outline two strategies to mitigate these issues below.
 #### Holes in the surface
 
 Holes in the surfaces can be the result of less than optimal image 
-preprocessing. We recommend to try adjusting the width and threshold for the 
+preprocessing. 
+
+Before adjusting any processing parameters, check the voxel size of the input 
+image. The mask filtering operations are parametrised in voxels rather than in 
+mm, so their physical strength scales with the voxel size of the input. At 
+around 1 mm the hippocampal ribbon is only about two voxels thick, and the 
+default filtering can erode through it, which produces holes even for an 
+otherwise correct segmentation. If you are working with FreeSurfer 
+segmentations, make sure you are using the native-resolution file rather than 
+the `FSvoxelSpace` one (see [above](#mandatory-arguments)). Note that 
+resampling a coarse segmentation to a smaller voxel size after the fact does 
+not recover the lost detail, because nearest-neighbour interpolation preserves 
+the original staircase pattern.
+
+If the input resolution is appropriate, we recommend to try adjusting the width 
+and threshold for the 
 gaussian filter using the `--gauss-filter-size` argument, and optionally to 
 employ additional smoothing along the longitudinal axis using the `--long-filter` 
 flag (which can be fine-tuned using the `--long-filter-size` argument). It may 
