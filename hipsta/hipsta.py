@@ -962,6 +962,12 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     outputdir :
         Directory where the results will be written.
 
+    start_with_edited_labels : optional
+        Start with edited labels. Requires an edited lh.labels.mgz or rh.labels.mgz file in an existing output
+        directory. Existing files will be overwritten. Default: False
+    start_with_edited_masks : optional
+        Start with edited masks. Requires an edited lh.mask.mgz or rh.mask.mgz file in an existing output directory.
+        Existing files will be overwritten. Default: False
     no_cleanup : optional
         Keep files that may be useful for diagnostic or debugging purposes, but are not necessary otherwise.
         Default: False
@@ -1036,6 +1042,9 @@ def run_hipsta(filename, hemi, lut, outputdir, **kwargs):
     class Args:
         def __init__(self, dct=None):
             # get defaults
+
+            self.start_with_edited_labels = get_defaults("start_with_edited_labels")
+            self.start_with_edited_masks = get_defaults("start_with_edited_masks")
             self.no_cleanup = get_defaults("no_cleanup")
             self.no_crop = get_defaults("no_crop")
             self.upsample = get_defaults("upsample")
